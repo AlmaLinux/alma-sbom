@@ -76,10 +76,9 @@ rpmChecksum = sbom.Checksum(
 )
 print('rpmChecksum: ', rpmChecksum)
 
-rpmComponent = sbom.RPMComponent(
+rpmComponent = sbom.PackageComponent(
     type='library',
     name='bash',
-    author=str(author),
     version='4.4.20-4.el8_6',
     publisher='AlmaLinux',
     hashes=[rpmChecksum],

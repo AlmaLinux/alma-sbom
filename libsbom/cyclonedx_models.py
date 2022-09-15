@@ -25,12 +25,14 @@ class ComponentProperty(BaseModel):
     name: str
     value: str
 
-
-class Component(BaseModel):
+class BaseComponent(BaseModel):
     type: str
     name: str
-    author: str
     properties: typing.List[ComponentProperty]
+
+
+class Component(BaseComponent):
+    author: str
 
 
 class Metadata(BaseModel):
@@ -44,7 +46,7 @@ class Checksum(BaseModel):
     content: str
 
 
-class RPMComponent(Component):
+class PackageComponent(BaseComponent):
     version: str
     publisher: str
     hashes: typing.List[Checksum]
@@ -58,4 +60,4 @@ class BuildRecord(BaseModel):
     serialNumber: str
     version: int
     metadata: Metadata
-    components: typing.List[RPMComponent]
+    components: typing.List[PackageComponent]
