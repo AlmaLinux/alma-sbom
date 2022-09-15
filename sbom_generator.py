@@ -14,7 +14,6 @@ import logging
 import sys
 from plumbum import local
 
-
 ALBS_URL = 'https://build.almalinux.org'
 SIGNER_ID = 'cloud-infra@almalinux.org'
 SBOM_TYPES = [
@@ -103,6 +102,18 @@ def _get_specific_info_about_package(
     return source_rpm, package_nevra
 
 
+def _generate_cpe(package_nevra: PackageNevra) -> str:
+    # https://github.com/AlmaLinux/build-system-rfes/commit/e4e6e655ecd09796e539fc6bc4665a55b047e49d
+    cpe_version = '2.3'
+
+    cpe_epoch_part = f'{package_nevra.epoch if package_nevra.epoch else ""}'
+    cpe_epoch_part += '\\:' if cpe_epoch_part else ""
+    cpe = f'cpe:{cpe_version}:a:almalinux:' \
+          f'{package_nevra.name}:{cpe_epoch_part}' \
+          f'{package_nevra.version}-{package_nevra.release}:*:*:*:*:*:*:*'
+    return cpe
+
+
 def get_info_about_package(cas_hash: str, signer_id: str, albs_url: str):
     result = {}
     cas_info_about_package = _extract_cas_info_about_package(
@@ -127,7 +138,7 @@ def get_info_about_package(cas_hash: str, signer_id: str, albs_url: str):
                 'content': cas_hash,
             }
         ],
-        'cpe': 'TBD',
+        'cpe': _generate_cpe(package_nevra=package_nevra),
         'purl': 'TBD',
         'properties': [
             {
@@ -228,7 +239,7 @@ def get_info_about_build(build_id: int, signer_id: str, albs_url: str):
             component = {
                 'name': package_nevra.name,
                 'version': package_nevra.version,
-                'cpe': 'TBD',
+                'cpe': _generate_cpe(package_nevra=package_nevra),
                 'purl': 'TBD',
                 'hashes': [
                     {
