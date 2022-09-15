@@ -17,7 +17,6 @@ from plumbum import local
 
 ALBS_URL = 'https://build.almalinux.org'
 SIGNER_ID = 'cloud-infra@almalinux.org'
-ALBS_BUILDS_ENDPOINT = f'{ALBS_URL}/api/v1/builds'
 FORMAT_TYPES = [
     'cyclonedx',
     'spdx',
@@ -104,7 +103,7 @@ def _get_specific_info_about_package(
     return source_rpm, package_nevra
 
 
-def get_info_about_package(cas_hash: str, signer_id: str):
+def get_info_about_package(cas_hash: str, signer_id: str, albs_url: str):
     result = {}
     cas_info_about_package = _extract_cas_info_about_package(
         cas_hash=cas_hash,
@@ -173,7 +172,7 @@ def get_info_about_package(cas_hash: str, signer_id: str):
             },
             {
                 'name': 'almalinux:albs:build:URL',
-                'value': f'{ALBS_URL}/build/{cas_metadata["build_id"]}',
+                'value': f'{albs_url}/build/{cas_metadata["build_id"]}',
             },
             {
                 'name': 'almalinux:albs:build:author',
@@ -185,16 +184,17 @@ def get_info_about_package(cas_hash: str, signer_id: str):
     return result
 
 
-def get_info_about_build(build_id: int, signer_id: str):
+def get_info_about_build(build_id: int, signer_id: str, albs_url: str):
     result = {}
+    albs_builds_endpoint = f'{albs_url}/api/v1/builds'
     response = requests.get(
-        url=f'{ALBS_BUILDS_ENDPOINT}/{build_id}',
+        url=f'{albs_builds_endpoint}/{build_id}',
     )
     response.raise_for_status()
     json_data = response.json()
     result['version'] = generate_sbom_version(json_data)
     owner = json_data['owner']
-    build_url = f'{ALBS_URL}/build/{build_id}'
+    build_url = f'{albs_url}/build/{build_id}'
     build_metadata = {
         'timestamp': json_data['created_at'],
         'name': f'build-{build_id}',
@@ -333,6 +333,11 @@ def create_parser():
         type=str,
         help='Override signerID',
     )
+    parser.add_argument(
+        '--albs-url',
+        type=str,
+        help='Override ALBS url',
+    )
 
     return parser
 
@@ -347,15 +352,18 @@ def cli_main():
         logging.error('The utility doesn\'t support that format mode yet')
         sys.exit(1)
     signer_id = args.signer_id or SIGNER_ID
+    albs_url = args.albs_url or ALBS_URL
     if args.build_id:
         sbom = get_info_about_build(
             args.build_id,
             signer_id=signer_id,
+            albs_url=albs_url,
         )
     else:
         sbom = get_info_about_package(
             args.rpm_package_hash,
             signer_id=signer_id,
+            albs_url=albs_url,
         )
     # TODO: insert here formatter of SBOM and pass to it:
     #       sbom
