@@ -19,18 +19,18 @@ ALBS_URL = 'https://build.almalinux.org'
 SIGNER_ID = 'cloud-infra@almalinux.org'
 ALBS_BUILDS_ENDPOINT = f'{ALBS_URL}/api/v1/builds'
 FORMAT_TYPES = [
-    'cyclon-dx',
+    'cyclonedx',
     'spdx',
 ]
 SUPPORTED_TYPES = [
-    'cyclon-dx',
+    'cyclonedx',
 ]
 FORMAT_MODES = [
     'json',
     'xml',
 ]
 SUPPORTED_MODES = defaultdict(list, **{
-    'cyclon-dx': [
+    'cyclonedx': [
         'json',
         'xml',
     ]
@@ -360,7 +360,7 @@ def cli_main():
     # TODO: insert here formatter of SBOM and pass to it:
     #       sbom
     #       args.output_file
-    #       args.format_type (Cyclon-DX or SPDX)
+    #       args.format_type (CyclonDX or SPDX)
     #       args.format_mode (JSON or XML)
     #
     # TODO: remove it as debug line
