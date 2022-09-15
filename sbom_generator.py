@@ -114,6 +114,22 @@ def _generate_cpe(package_nevra: PackageNevra) -> str:
     return cpe
 
 
+def _generate_purl(package_nevra: PackageNevra, source_rpm: str):
+    # https://github.com/AlmaLinux/build-system-rfes/commit/a132ececa1d7901fe42348022ce954d475578920
+    if package_nevra.epoch:
+        purl_epoch_part = f'&epoch={package_nevra.epoch}'
+    else:
+        purl_epoch_part = ''
+    if source_rpm:
+        purl_upstream_part = f'&upstream={source_rpm}'
+    else:
+        purl_upstream_part = ''
+    purl = f'pkg:rpm/almalinux/{package_nevra.name}@{package_nevra.version}-' \
+           f'{package_nevra.release}?arch={package_nevra.arch}' \
+           f'{purl_epoch_part}{purl_upstream_part}'
+    return purl
+
+
 def get_info_about_package(cas_hash: str, signer_id: str, albs_url: str):
     result = {}
     cas_info_about_package = _extract_cas_info_about_package(
@@ -139,7 +155,10 @@ def get_info_about_package(cas_hash: str, signer_id: str, albs_url: str):
             }
         ],
         'cpe': _generate_cpe(package_nevra=package_nevra),
-        'purl': 'TBD',
+        'purl': _generate_purl(
+            package_nevra=package_nevra,
+            source_rpm=source_rpm,
+        ),
         'properties': [
             {
                 'name': 'almalinux:package:epoch',
@@ -240,7 +259,10 @@ def get_info_about_build(build_id: int, signer_id: str, albs_url: str):
                 'name': package_nevra.name,
                 'version': package_nevra.version,
                 'cpe': _generate_cpe(package_nevra=package_nevra),
-                'purl': 'TBD',
+                'purl': _generate_purl(
+                    package_nevra=package_nevra,
+                    source_rpm=source_rpm,
+                ),
                 'hashes': [
                     {
                         'alg': 'SHA-256',
