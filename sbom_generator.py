@@ -360,7 +360,7 @@ def cli_main():
     # TODO: insert here formatter of SBOM and pass to it:
     #       sbom
     #       args.output_file
-    #       args.format_type (CyclonDX or SPDX)
+    #       args.format_type (CycloneDX or SPDX)
     #       args.format_mode (JSON or XML)
     #
     # TODO: remove it as debug line
