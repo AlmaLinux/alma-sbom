@@ -331,7 +331,7 @@ def create_parser():
     parser.add_argument(
         '--signer-id',
         type=str,
-        help='Override singerID',
+        help='Override signerID',
     )
 
     return parser
@@ -346,16 +346,16 @@ def cli_main():
     if args.format_mode not in SUPPORTED_MODES[args.format_type]:
         logging.error('The utility doesn\'t support that format mode yet')
         sys.exit(1)
-    singer_id = args.signer_id or SIGNER_ID
+    signer_id = args.signer_id or SIGNER_ID
     if args.build_id:
         sbom = get_info_about_build(
             args.build_id,
-            signer_id=singer_id,
+            signer_id=signer_id,
         )
     else:
         sbom = get_info_about_package(
             args.rpm_package_hash,
-            signer_id=singer_id,
+            signer_id=signer_id,
         )
     # TODO: insert here formatter of SBOM and pass to it:
     #       sbom
