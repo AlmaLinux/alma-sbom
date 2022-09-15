@@ -17,18 +17,18 @@ from plumbum import local
 
 ALBS_URL = 'https://build.almalinux.org'
 SIGNER_ID = 'cloud-infra@almalinux.org'
-FORMAT_TYPES = [
+SBOM_TYPES = [
     'cyclonedx',
     'spdx',
 ]
-SUPPORTED_TYPES = [
+SUPPORTED_SBOM_TYPES = [
     'cyclonedx',
 ]
-FORMAT_MODES = [
+FILE_FORMATS = [
     'json',
     'xml',
 ]
-SUPPORTED_MODES = defaultdict(list, **{
+SUPPORTED_FILE_FORMATS = defaultdict(list, **{
     'cyclonedx': [
         'json',
         'xml',
@@ -302,19 +302,19 @@ def create_parser():
         required=True,
     )
     parser.add_argument(
-        '--format-type',
-        default=FORMAT_TYPES[0],
-        const=FORMAT_TYPES[0],
+        '--sbom-type',
+        default=SBOM_TYPES[0],
+        const=SBOM_TYPES[0],
         nargs='?',
-        choices=FORMAT_TYPES,
+        choices=SBOM_TYPES,
         help='Generate SBOM in one of format type (default: "%(default)s")',
     )
     parser.add_argument(
-        '--format-mode',
-        default=FORMAT_MODES[0],
-        const=FORMAT_MODES[0],
+        '--file-format',
+        default=FILE_FORMATS[0],
+        const=FILE_FORMATS[0],
         nargs='?',
-        choices=FORMAT_MODES,
+        choices=FILE_FORMATS,
         help='Generate SBOM in one of format mode (default: "%(default)s")',
     )
     object_id_group = parser.add_mutually_exclusive_group(required=True)
@@ -345,10 +345,10 @@ def create_parser():
 def cli_main():
 
     args = create_parser().parse_args()
-    if args.format_type not in SUPPORTED_TYPES:
+    if args.sbom_type not in SUPPORTED_SBOM_TYPES:
         logging.error('The utility doesn\'t support that format type yet')
         sys.exit(1)
-    if args.format_mode not in SUPPORTED_MODES[args.format_type]:
+    if args.file_format not in SUPPORTED_FILE_FORMATS[args.sbom_type]:
         logging.error('The utility doesn\'t support that format mode yet')
         sys.exit(1)
     signer_id = args.signer_id or SIGNER_ID
