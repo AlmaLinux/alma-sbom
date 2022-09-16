@@ -23,6 +23,8 @@ setup(
         'plumbum>=1.7.2',
         'requests>=2.20.0',
         'dataclasses>=0.8',
+        'cyclonedx-python-lib==2.7.1',
+        'packageurl-python==0.10.3'
     ],
     python_requires=">=3.6",
 )

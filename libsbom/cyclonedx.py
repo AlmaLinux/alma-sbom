@@ -1,100 +1,130 @@
+import json
+
 from cyclonedx.model import Property, HashType, HashAlgorithm
 from cyclonedx.model.bom import Bom, Tool
 from cyclonedx.model.component import Component, ComponentType
-from cyclonedx.output import BaseOutput, OutputFormat, get_instance
+from cyclonedx.output import OutputFormat, get_instance
 
-ALMA_SBOM_VENDOR='AlmaLinux OS Foundation'
-ALMA_SBOM_NAME='alma-sbom'
-ALMA_SBOM_VERSION='0.1'
+from packageurl import PackageURL
+from version import __version__
 
-class NoComponents(Exception):
-    pass
+ALMAOS_VENDOR = 'AlmaLinux OS Foundation'
 
-class NoMetadata(Exception):
-    pass
+TOOLS = [
+    {
+        "vendor": ALMAOS_VENDOR,
+        "name": "AlmaLinux Build System",
+        "version": "0.1"  # Shall we start versioning ALBS?
+    },
+    {
+        "vendor": ALMAOS_VENDOR,
+        "name": "alma-sbom",
+        "version": __version__
+    },
+    {
+        "vendor": "Codenotary Inc",
+        "name": "Community Attestation Service (CAS)",
+        "version": "1.0.0" # TODO: Get CAS version
+    }
+]
+
 
 class SBOM:
-    def __init__(self, sbom_data):
-        self.input_data = sbom_data
+    def __init__(self, data, sbom_type, output_format, output_file):
+        self.input_data = data
+        self.sbom_type = sbom_type
+        self.output_format = OutputFormat(output_format.capitalize())
+        self.output_file = output_file
         self._bom = Bom()
 
-        if 'metadata' not in self.input_data:
-            raise NoMetadata('No metadata provided in input dictionary')
-        if 'components' not in self.input_data:
-            raise NoComponents('No components provided in input dictionary')
+    def run(self):
+        if self.sbom_type == 'build':
+            self.generate_build_sbom()
+        else:
+            self.generate_package_sbom()
 
-    def generate_sbom(self):
-        metadata = self.input_data['metadata']
-        # By default, cyclonedx-python-lib is added into tools
-        # Keep/remove/move to deps?
-        for tool in metadata['tools']:
-            t = Tool(
+        output = get_instance(
+            bom=self._bom,
+            output_format=self.output_format)
+
+        # TODO: Shall we overwrite by default?
+        output.output_to_file(self.output_file, allow_overwrite=True)
+
+
+    def __generate_tool(self, tool):
+        return Tool(
                 vendor=tool['vendor'],
                 name=tool['name'],
                 version=tool['version'])
 
-            self._bom.metadata.tools.add(t)
+    def __generate_prop(self, prop):
+        return Property(
+                name=prop['name'],
+                value=prop['value'])
 
-        alma_sbom_tool = Tool(
-            vendor=ALMA_SBOM_VENDOR,
-            name=ALMA_SBOM_NAME,
-            version=ALMA_SBOM_VERSION)
-        self._bom.metadata.tools.add(alma_sbom_tool)
-
-        if 'component' in metadata:
-            c_input = metadata['component']
-
-            props = []
-            for prop in c_input['properties']:
-                props.append(Property(
-                    name=prop['name'],
-                    value=prop['value']))
-
-            component = Component(
-                component_type=ComponentType(c_input['type']),
-                name=c_input['name'],
-                author=c_input['author'],
-                properties=props)
-
-            self._bom.metadata.component = component
-
-        cs_input = self.input_data['components']
-        # Considering we receive packages as described in:
-        # https://github.com/AlmaLinux/build-system-rfes/blob/sbom_draft/SBOM/SBOM.md#build-system-build-sbom-data-record
-        for comp in cs_input:
-            props = []
-            for prop in comp['properties']:
-                props.append(Property(
-                    name=prop['name'],
-                    value=prop['value']))
-
-            hashes = []
-            for h in comp['hashes']:
-                hashes.append(HashType(
-                    algorithm=HashAlgorithm(h['alg']),
-                    hash_value=h['content']))
-
-            self._bom.components.add(Component(
-                component_type=ComponentType(comp['type']),
-                name=comp['name'],
-                version=comp['version'],
-                publisher=comp['publisher'],
-                hashes=hashes,
-                cpe=comp['cpe'],
-                # Commented purl since xml output is failing
-                #comp['purl'], # we should use packageurl.PackageURL
-                properties=props))
+    def __generate_hash(self, hash_):
+        return HashType(
+            algorithm=HashAlgorithm(hash_['alg']),
+            hash_value=hash_['content'])
 
 
-    def validate(self):
-        self._bom.validate()
+    def __generate_package_component(self, comp):
+        return Component(
+            component_type=ComponentType('library'),
+            name=comp['name'],
+            version=comp['version'],
+            publisher='AlmaLinux',
+            hashes=[
+                self.__generate_hash(h)
+                for h in comp['hashes']
+            ],
+            cpe=comp['cpe'],
+            purl=PackageURL.from_string(comp['purl']),
+            properties=[
+                self.__generate_prop(prop)
+                for prop in comp['properties']])
 
 
-    def to_json_string(self):
-        output = get_instance(bom=self._bom, output_format=OutputFormat.JSON)
-        return output.output_as_string()
+    def generate_build_sbom(self):
+        input_metadata = self.input_data['metadata']
+        input_components = self.input_data['components']
 
+        # TODO: Figure out how to set the SBOM version, because
+        # self._bom.version = self.input_data['version'] resutls
+        # in adding 'ersion: 1' to the final SBOM
+        self._bom.metadata.timestamp = input_metadata['timestamp'],
 
-    def to_xml_string(self):
-        output = get_instance(bom=self._bom, output_format=OutputFormat.XML)
-        return output.output_as_string()
+        # We do this way to keep cyclonedx-python-lib as a tool
+        for tool in TOOLS:
+            self._bom.metadata.tools.add(self.__generate_tool(tool))
+
+        properties = [
+            self.__generate_prop(prop)
+            for prop in input_metadata['properties']
+        ]
+
+        component = Component(
+            component_type=ComponentType('library'),
+            name=input_metadata['name'],
+            author=input_metadata['author'],
+            properties = properties
+        )
+        self._bom.metadata.component = component
+
+        # We do this way because Bom.components is not just a list
+        for component in input_components:
+            comp = self.__generate_package_component(component)
+            self._bom.components.add(comp)
+
+    def generate_package_sbom(self):
+        # TODO: Figure out how to set the SBOM version, because
+        # self._bom.version = self.input_data['version'] resutls
+        # in adding 'ersion: 1' to the final SBOM
+        self._bom.metadata.timestamp = self.input_data['timestamp']
+
+        # We do this way to keep cyclonedx-python-lib as a tool
+        for tool in TOOLS:
+            self._bom.metadata.tools.add(self.__generate_tool(tool))
+
+        self._bom.metadata.component = self.__generate_package_component(
+            self.input_data['component'])

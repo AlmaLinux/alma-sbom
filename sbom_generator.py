@@ -14,6 +14,8 @@ import logging
 import sys
 from plumbum import local
 
+from libsbom import cyclonedx as alma_cyclonedx
+
 ALBS_URL = 'https://build.almalinux.org'
 SIGNER_ID = 'cloud-infra@almalinux.org'
 SBOM_TYPES = [
@@ -392,20 +394,26 @@ def cli_main():
             signer_id=signer_id,
             albs_url=albs_url,
         )
+        sbom_type = 'build'
     else:
         sbom = get_info_about_package(
             args.rpm_package_hash,
             signer_id=signer_id,
             albs_url=albs_url,
         )
-    # TODO: insert here formatter of SBOM and pass to it:
-    #       sbom
-    #       args.output_file
-    #       args.format_type (CycloneDX or SPDX)
-    #       args.format_mode (JSON or XML)
-    #
+        sbom_type = 'package'
+
     # TODO: remove it as debug line
-    logging.info(json.dumps(sbom, indent=4))
+    # logging.info(json.dumps(sbom, indent=4))
+    # TODO: For now we only support CycloneDX
+    # We should revisit this when adding SPDX
+    sbom_generator = alma_cyclonedx.SBOM(
+        data=sbom,
+        sbom_type=sbom_type,
+        output_format=args.file_format,
+        output_file=args.output_file)
+
+    sbom_generator.run()
 
 
 if __name__ == '__main__':
