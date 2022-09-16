@@ -237,6 +237,10 @@ def get_info_about_build(build_id: int, signer_id: str, albs_url: str):
             {
                 'name': 'almalinux:albs:build:URL',
                 'value': build_url,
+            },
+            {
+                'name': 'almalinux:albs:build:timestamp',
+                'value': json_data['created_at'],
             }
         ]
     }
