@@ -1,3 +1,0 @@
-pydantic==1.10.2
-plumbum==1.7.2
-cyclonedx-python-lib==2.7.1
