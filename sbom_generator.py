@@ -146,7 +146,8 @@ def get_info_about_package(cas_hash: str, signer_id: str, albs_url: str):
     result['timestamp'] = cas_info_about_package['timestamp']
     result['component'] = {
         'name': package_nevra.name,
-        'version': f'{package_nevra.epoch}{":" if package_nevra.epoch else ""}'
+        'version': f'{package_nevra.epoch if package_nevra.epoch else ""}'
+                   f'{":" if package_nevra.epoch else ""}'
                    f'{package_nevra.version}-{package_nevra.release}',
         'hashes': [
             {
@@ -237,6 +238,10 @@ def get_info_about_build(build_id: int, signer_id: str, albs_url: str):
             {
                 'name': 'almalinux:albs:build:URL',
                 'value': build_url,
+            },
+            {
+                'name': 'almalinux:albs:build:timestamp',
+                'value': json_data['created_at'],
             }
         ]
     }
