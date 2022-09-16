@@ -47,7 +47,12 @@ class SBOM:
             bom=self._bom,
             output_format=self.output_format)
 
-        # TODO: Shall we overwrite by default?
+        # [Potential] TODOs:
+        # - Shall we overwrite by default?
+        # - Shall we check and/or include extension .json|.xml
+        # - Shall we output to a particular folder
+        # - Shall we save the files manually so we can add
+        # a pretty formatting to them?
         output.output_to_file(self.output_file, allow_overwrite=True)
 
 
@@ -92,7 +97,6 @@ class SBOM:
         # TODO: Figure out how to set the SBOM version, because
         # self._bom.version = self.input_data['version'] resutls
         # in adding 'ersion: 1' to the final SBOM
-        self._bom.metadata.timestamp = input_metadata['timestamp'],
 
         # We do this way to keep cyclonedx-python-lib as a tool
         for tool in TOOLS:
