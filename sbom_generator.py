@@ -71,6 +71,7 @@ def generate_sbom_version(json_data: Dict) -> int:
 
 
 def _extract_cas_info_about_package(cas_hash: str, signer_id: str):
+    # TODO: Use cas_wrapper instead of dealing directly with cas
     command = local['cas'][
         'authenticate',
         '--signerID',
