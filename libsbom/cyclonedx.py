@@ -1,5 +1,6 @@
 import json
 
+from cas_wrapper import CasWrapper
 from cyclonedx.model import Property, HashType, HashAlgorithm
 from cyclonedx.model.bom import Bom, Tool
 from cyclonedx.model.component import Component, ComponentType
@@ -24,7 +25,7 @@ TOOLS = [
     {
         "vendor": "Codenotary Inc",
         "name": "Community Attestation Service (CAS)",
-        "version": "1.0.0" # TODO: Get CAS version
+        "version": CasWrapper.get_version()
     }
 ]
 
@@ -95,7 +96,7 @@ class SBOM:
         input_components = self.input_data['components']
 
         # TODO: Figure out how to set the SBOM version, because
-        # self._bom.version = self.input_data['version'] resutls
+        # self._bom.version = self.input_data['version'] results
         # in adding 'ersion: 1' to the final SBOM
 
         # We do this way to keep cyclonedx-python-lib as a tool
@@ -122,7 +123,7 @@ class SBOM:
 
     def generate_package_sbom(self):
         # TODO: Figure out how to set the SBOM version, because
-        # self._bom.version = self.input_data['version'] resutls
+        # self._bom.version = self.input_data['version'] results
         # in adding 'ersion: 1' to the final SBOM
         self._bom.metadata.timestamp = self.input_data['timestamp']
 
