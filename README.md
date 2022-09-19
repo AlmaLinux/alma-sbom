@@ -24,7 +24,7 @@ It comes with an easy-to-use CLI that allows you to create SBOM records for Buil
 
 The AlmaLinux OS SBOM CLI accepts the following arguments:
 
-* __output-file__: The file you want to save the generated SBOM to
+* __output-file__: The file you want to save the generated SBOM to. If not provided, the resulting SBOM is printed to stdout
 * __sbom-type__: The SBOM type you want to generate. Either CycloneDX or SPDX, although right now we only support the CycloneDX format
 * __sbom-format__: The output format you want to use, either JSON or XML
 * __build-id__: The Build id you want to generate the SBOM for
@@ -34,13 +34,13 @@ The AlmaLinux OS SBOM CLI accepts the following arguments:
 
 Note that you have to either provide a _build-id_ or an _rpm-package-hash_
 
-### Creating an SBOM of a Build
+### Creating an SBOM of a Build in JSON format
 
-`python sbom_generator.py --output-file sbom_build.json --sbom-type cyclonedx --file-format json --build-id 149`
+`python alma_sbom.py --sbom-type cyclonedx --file-format json --build-id 4372`
 
-### Creating an SBOM of a package
+### Creating an SBOM of a package in XML format
 
-`python sbom_generator.py --output-file sbom_package.json --sbom-type cyclonedx --file-format json --rpm-package-hash 0843129730468c4c4a17f050be3edf1449ffddc4c6be9459f54fc544d45cc257`
+`python alma_sbom.py --sbom-type cyclonedx --file-format xml --rpm-package-hash b00d871e204ca8cbcae72c37c53ab984fdadc3846c91fb35c315335adfe0699b`
 
 ## Contributing to Alma SBOM
 

@@ -423,13 +423,13 @@ def cli_main():
 
     # TODO: For now we only support CycloneDX
     # We should revisit this when adding SPDX
-    sbom_generator = alma_cyclonedx.SBOM(
+    sbom_formatter = alma_cyclonedx.SBOM(
         data=sbom,
         sbom_type=sbom_type,
         output_format=args.file_format,
         output_file=args.output_file)
 
-    sbom_generator.run()
+    sbom_formatter.run()
 
 if __name__ == '__main__':
     cli_main()

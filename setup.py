@@ -18,7 +18,7 @@ setup(
         "Operating System :: OS Independent",
     ],
     py_modules=['alma_sbom'],
-    scripts=['sbom_generator.py'],
+    scripts=['alma_sbom.py'],
     install_requires=[
         'plumbum>=1.7.2',
         'requests>=2.20.0',
