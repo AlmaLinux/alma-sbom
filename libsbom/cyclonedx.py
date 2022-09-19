@@ -127,7 +127,6 @@ class SBOM:
         # TODO: Figure out how to set the SBOM version, because
         # self._bom.version = self.input_data['version'] results
         # in adding 'ersion: 1' to the final SBOM
-        self._bom.metadata.timestamp = self.input_data['timestamp']
 
         # We do this way to keep cyclonedx-python-lib as a tool
         for tool in TOOLS:

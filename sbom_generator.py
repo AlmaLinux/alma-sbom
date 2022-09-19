@@ -155,7 +155,6 @@ def get_info_about_package(cas_hash: str, signer_id: str, albs_url: str):
     result['version'] = 1
     if 'unsigned_hash' in cas_metadata:
         result['version'] += 1
-    result['timestamp'] = cas_info_about_package['timestamp']
     result['component'] = {
         'name': package_nevra.name,
         'version': f'{package_nevra.epoch if package_nevra.epoch else ""}'
@@ -196,6 +195,10 @@ def get_info_about_package(cas_hash: str, signer_id: str, albs_url: str):
             {
                 'name': 'almalinux:package:buildhost',
                 'value': cas_metadata['build_host'],
+            },
+            {
+                'name': 'almalinux:package:timestamp',
+                'value': cas_info_about_package['timestamp'],
             },
             {
                 'name': 'almalinux:albs:build:targetArch',
@@ -239,7 +242,6 @@ def get_info_about_build(build_id: int, signer_id: str, albs_url: str):
     owner = json_data['owner']
     build_url = f'{albs_url}/build/{build_id}'
     build_metadata = {
-        'timestamp': json_data['created_at'],
         'name': f'build-{build_id}',
         'author': f"{owner['username']} <{owner['email']}>",
         'properties': [
