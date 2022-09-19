@@ -64,9 +64,11 @@ class SBOM:
                 version=tool['version'])
 
     def __generate_prop(self, prop):
+        # See Property spec:
+        # https://cyclonedx.org/docs/1.4/json/#components_items_properties_items_value
         return Property(
                 name=prop['name'],
-                value=prop['value'])
+                value=str(prop['value']))
 
     def __generate_hash(self, hash_):
         return HashType(
