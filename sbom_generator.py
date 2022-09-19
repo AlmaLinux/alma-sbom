@@ -431,13 +431,5 @@ def cli_main():
 
     sbom_generator.run()
 
-    # TODO: Generator will return the formatted string
-    # if args.output_file is None:
-    #     logging.info(json.dumps(sbom, indent=4))
-    # else:
-    #     with open(args.output_file, 'w') as fd:
-    #         json.dump(sbom, fd, indent=4)
-
-
 if __name__ == '__main__':
     cli_main()

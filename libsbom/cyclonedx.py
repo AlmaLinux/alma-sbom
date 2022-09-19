@@ -1,4 +1,6 @@
 import json
+import logging
+import xml.dom.minidom
 
 from cas_wrapper import CasWrapper
 from cyclonedx.model import Property, HashType, HashAlgorithm
@@ -54,8 +56,18 @@ class SBOM:
         # - Shall we output to a particular folder
         # - Shall we save the files manually so we can add
         # a pretty formatting to them?
-        output.output_to_file(self.output_file, allow_overwrite=True)
+        output_str = output.output_as_string()
+        if self.output_format == OutputFormat.XML:
+            pretty_output=xml.dom.minidom.parseString(output_str).toprettyxml()
+        else:
+            pretty_output=json.dumps(json.loads(output_str), indent=4)
 
+        if self.output_file:
+            with open(self.output_file, 'w') as fd:
+                fd.write(pretty_output)
+            logging.info('Wrote SBOM to: %s', self.output_file)
+        else:
+            print(pretty_output)
 
     def __generate_tool(self, tool):
         return Tool(
