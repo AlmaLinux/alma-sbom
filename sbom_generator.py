@@ -69,6 +69,14 @@ def generate_sbom_version(json_data: Dict) -> int:
 
 
 def _extract_cas_info_about_package(cas_hash: str, signer_id: str):
+    def _convert_none_string_to_none(obj: Dict):
+        for key, value in obj.items():
+            if isinstance(value, dict):
+                obj[key] = _convert_none_string_to_none(obj=value)
+            if value == 'None':
+                obj[key] = None
+        return obj
+
     command = local['cas'][
         'authenticate',
         '--signerID',
@@ -79,7 +87,8 @@ def _extract_cas_info_about_package(cas_hash: str, signer_id: str):
         cas_hash,
     ]
     logging.info(command)
-    return json.loads(command())
+    result = json.loads(command())
+    return _convert_none_string_to_none(result)
 
 
 def _get_specific_info_about_package(
@@ -337,7 +346,8 @@ def create_parser():
         '--output-file',
         type=str,
         help='Full path to an output file with SBOM',
-        required=True,
+        required=False,
+        default=None,
     )
     parser.add_argument(
         '--sbom-type',
@@ -410,7 +420,11 @@ def cli_main():
     #       args.format_mode (JSON or XML)
     #
     # TODO: remove it as debug line
-    logging.info(json.dumps(sbom, indent=4))
+    if args.output_file is None:
+        logging.info(json.dumps(sbom, indent=4))
+    else:
+        with open(args.output_file, 'w') as fd:
+            json.dump(sbom, fd, indent=4)
 
 
 if __name__ == '__main__':
