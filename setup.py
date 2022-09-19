@@ -30,5 +30,5 @@ setup(
     dependency_links=[
         'git+https://git.almalinux.org/almalinux/cas_wrapper.git@0.0.5#egg=cas_wrapper'
     ],
-    python_requires=">=3.6",
+    python_requires=">=3.9",
 )
