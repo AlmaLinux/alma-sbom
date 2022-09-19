@@ -346,7 +346,8 @@ def create_parser():
         '--output-file',
         type=str,
         help='Full path to an output file with SBOM',
-        required=True,
+        required=False,
+        default=None,
     )
     parser.add_argument(
         '--sbom-type',
@@ -419,7 +420,11 @@ def cli_main():
     #       args.format_mode (JSON or XML)
     #
     # TODO: remove it as debug line
-    logging.info(json.dumps(sbom, indent=4))
+    if args.output_file is None:
+        logging.info(json.dumps(sbom, indent=4))
+    else:
+        with open(args.output_file, 'w') as fd:
+            json.dump(sbom, fd, indent=4)
 
 
 if __name__ == '__main__':
