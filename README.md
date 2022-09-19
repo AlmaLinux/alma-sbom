@@ -2,7 +2,7 @@
 
 The AlmaLinux OS SBOM data management utility allows to create SBOM records for artifacts created with the [AlmaLinux Build System](https://github.com/AlmaLinux/build-system).
 
-It comes with an easy-to-use CLI that allows you to create SBOM records for Builds and RPM Packages.
+It comes with an easy-to-use CLI that allows you to create SBOM records for Builds and Packages.
 
 ## Requirements
 
@@ -38,7 +38,7 @@ Note that you have to either provide a _build-id_ or an _rpm-package-hash_
 
 `python sbom_generator.py --output-file sbom_build.json --sbom-type cyclonedx --file-format json --build-id 149`
 
-### Creating an SBOM of an RPM package
+### Creating an SBOM of a package
 
 `python sbom_generator.py --output-file sbom_package.json --sbom-type cyclonedx --file-format json --rpm-package-hash 0843129730468c4c4a17f050be3edf1449ffddc4c6be9459f54fc544d45cc257`
 
