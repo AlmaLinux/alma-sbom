@@ -52,10 +52,8 @@ class SBOM:
 
         # [Potential] TODOs:
         # - Shall we overwrite by default?
-        # - Shall we check and/or include extension .json|.xml
-        # - Shall we output to a particular folder
-        # - Shall we save the files manually so we can add
-        # a pretty formatting to them?
+        # - Shall we check and/or include extension .json|.xml?
+        # - Shall we output to a particular folder?
         output_str = output.output_as_string()
         if self.output_format == OutputFormat.XML:
             pretty_output=xml.dom.minidom.parseString(output_str).toprettyxml()
@@ -65,7 +63,7 @@ class SBOM:
         if self.output_file:
             with open(self.output_file, 'w') as fd:
                 fd.write(pretty_output)
-            logging.info('Wrote SBOM to: %s', self.output_file)
+            logging.info('Wrote generated SBOM to %s', self.output_file)
         else:
             print(pretty_output)
 
