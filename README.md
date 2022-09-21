@@ -12,7 +12,7 @@ It comes with an easy-to-use CLI that allows you to create SBOM records for Buil
 * dataclasses >= 0.8
 * cyclonedx-python-lib >= 2.7.1
 * packageurl-python >= 0.10.3
-* cas_wrapper >= 0.5
+* cas_wrapper >= 0.0.5
 
 ## Getting started
 
