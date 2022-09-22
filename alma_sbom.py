@@ -14,6 +14,8 @@ import logging
 import sys
 from plumbum import local
 
+from libsbom import cyclonedx as alma_cyclonedx
+
 ALBS_URL = 'https://build.almalinux.org'
 SIGNER_ID = 'cloud-infra@almalinux.org'
 SBOM_TYPES = [
@@ -77,6 +79,7 @@ def _extract_cas_info_about_package(cas_hash: str, signer_id: str):
                 obj[key] = None
         return obj
 
+    # TODO: Use cas_wrapper instead of dealing directly with cas
     command = local['cas'][
         'authenticate',
         '--signerID',
@@ -152,7 +155,6 @@ def get_info_about_package(cas_hash: str, signer_id: str, albs_url: str):
     result['version'] = 1
     if 'unsigned_hash' in cas_metadata:
         result['version'] += 1
-    result['timestamp'] = cas_info_about_package['timestamp']
     result['component'] = {
         'name': package_nevra.name,
         'version': f'{package_nevra.epoch if package_nevra.epoch else ""}'
@@ -193,6 +195,10 @@ def get_info_about_package(cas_hash: str, signer_id: str, albs_url: str):
             {
                 'name': 'almalinux:package:buildhost',
                 'value': cas_metadata['build_host'],
+            },
+            {
+                'name': 'almalinux:package:timestamp',
+                'value': cas_info_about_package['timestamp'],
             },
             {
                 'name': 'almalinux:albs:build:targetArch',
@@ -236,7 +242,6 @@ def get_info_about_build(build_id: int, signer_id: str, albs_url: str):
     owner = json_data['owner']
     build_url = f'{albs_url}/build/{build_id}'
     build_metadata = {
-        'timestamp': json_data['created_at'],
         'name': f'build-{build_id}',
         'author': f"{owner['username']} <{owner['email']}>",
         'properties': [
@@ -407,25 +412,24 @@ def cli_main():
             signer_id=signer_id,
             albs_url=albs_url,
         )
+        sbom_type = 'build'
     else:
         sbom = get_info_about_package(
             args.rpm_package_hash,
             signer_id=signer_id,
             albs_url=albs_url,
         )
-    # TODO: insert here formatter of SBOM and pass to it:
-    #       sbom
-    #       args.output_file
-    #       args.format_type (CycloneDX or SPDX)
-    #       args.format_mode (JSON or XML)
-    #
-    # TODO: remove it as debug line
-    if args.output_file is None:
-        logging.info(json.dumps(sbom, indent=4))
-    else:
-        with open(args.output_file, 'w') as fd:
-            json.dump(sbom, fd, indent=4)
+        sbom_type = 'package'
 
+    # TODO: For now we only support CycloneDX
+    # We should revisit this when adding SPDX
+    sbom_formatter = alma_cyclonedx.SBOM(
+        data=sbom,
+        sbom_type=sbom_type,
+        output_format=args.file_format,
+        output_file=args.output_file)
+
+    sbom_formatter.run()
 
 if __name__ == '__main__':
     cli_main()
