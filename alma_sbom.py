@@ -337,6 +337,10 @@ def get_info_about_build(build_id: int, signer_id: str, albs_url: str):
                         'name': 'almalinux:albs:build:author',
                         'value': cas_metadata['built_by'],
                     },
+                ]
+            }
+            if cas_metadata['source_type'] == 'git':
+                component['properties'].extend([
                     {
                         'name': 'almalinux:albs:build:source:gitURL',
                         'value': cas_metadata['git_url'],
@@ -356,9 +360,27 @@ def get_info_about_build(build_id: int, signer_id: str, albs_url: str):
                     {
                         'name': 'almalinux:albs:build:source:gitCommitCasHash',
                         'value': cas_metadata['alma_commit_sbom_hash'],
+                    }
+                ])
+            elif cas_metadata['source_type'] == 'srpm':
+                component['properties'].extend([
+                    {
+                        'name': 'almalinux:albs:build:source:srpmURL',
+                        'value': cas_metadata['srpm_url'],
                     },
-                ]
-            }
+                    {
+                        'name': 'almalinux:albs:build:source:type',
+                        'value': 'srpm',
+                    },
+                    {
+                        'name': 'almalinux:albs:build:source:srpmChecksum',
+                        'value': cas_metadata['srpm_sha256'],
+                    },
+                    {
+                        'name': 'almalinux:albs:build:source:srpmNEVRA',
+                        'value': cas_metadata['srpm_nevra'],
+                    },
+                ])
             components.append(component)
     result['components'] = components
     return result
