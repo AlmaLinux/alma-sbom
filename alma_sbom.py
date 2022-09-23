@@ -337,6 +337,26 @@ def get_info_about_build(build_id: int, signer_id: str, albs_url: str):
                         'name': 'almalinux:albs:build:author',
                         'value': cas_metadata['built_by'],
                     },
+                    {
+                        'name': 'almalinux:albs:build:source:gitURL',
+                        'value': cas_metadata['git_url'],
+                    },
+                    {
+                        'name': 'almalinux:albs:build:source:type',
+                        'value': 'git',
+                    },
+                    {
+                        'name': 'almalinux:albs:build:source:gitCommit',
+                        'value': cas_metadata['git_commit'],
+                    },
+                    {
+                        'name': 'almalinux:albs:build:source:gitRef',
+                        'value': cas_metadata['git_ref'],
+                    },
+                    {
+                        'name': 'almalinux:albs:build:source:gitCommitCasHash',
+                        'value': cas_metadata['alma_commit_sbom_hash'],
+                    },
                 ]
             }
             components.append(component)
