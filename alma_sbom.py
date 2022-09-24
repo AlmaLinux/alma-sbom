@@ -32,6 +32,14 @@ class PackageNevra:
     release: str = None
     arch: str = None
 
+    def __repr__(self):
+        if self.epoch is not None:
+            return f'{self.epoch}:{self.name}-' \
+                   f'{self.version}-{self.release}.{self.arch}'
+        else:
+            return f'{self.name}-{self.version}-' \
+                   f'{self.release}.{self.arch}'
+
 
 class UnsupportedFileFormatException:
     pass
