@@ -4,7 +4,7 @@
 
 import argparse
 import json
-from typing import Dict, Tuple, Optional
+from typing import Dict, Tuple, Optional, Literal
 
 import dataclasses
 from collections import defaultdict
@@ -18,23 +18,6 @@ from libsbom import cyclonedx as alma_cyclonedx
 
 ALBS_URL = 'https://build.almalinux.org'
 SIGNER_ID = 'cloud-infra@almalinux.org'
-SBOM_TYPES = [
-    'cyclonedx',
-    'spdx',
-]
-SUPPORTED_SBOM_TYPES = [
-    'cyclonedx',
-]
-FILE_FORMATS = [
-    'json',
-    'xml',
-]
-SUPPORTED_FILE_FORMATS = defaultdict(list, **{
-    'cyclonedx': [
-        'json',
-        'xml',
-    ]
-})
 IS_SIGNED = 3
 
 
@@ -48,6 +31,55 @@ class PackageNevra:
     version: str = None
     release: str = None
     arch: str = None
+
+
+class UnsupportedFileFormatException:
+    pass
+
+
+@dataclasses.dataclass
+class FileFormat:
+    sbom_record_type: Literal[
+        'cyclonedx',
+        'spdx',
+    ] = 'cyclonedx'
+    file_format: Literal[
+        'json',
+        'xml'
+    ] = 'json'
+
+    def __repr__(self):
+        return f'"{self.sbom_record_type},{self.file_format}"'
+
+
+class FileFormatType(object):
+
+    supported_file_formats = defaultdict(list, **{
+        'cyclonedx': [
+            'json',
+            'xml',
+        ]
+    })
+
+    def __call__(self, sbom_type_file_format: str) -> FileFormat:
+        sbom_record_type, file_format = sbom_type_file_format.split(',')
+        if sbom_record_type not in self.supported_file_formats:
+            logging.error('The utility doesn\'t support that SBOT type yet')
+            sys.exit(1)
+        if file_format not in self.supported_file_formats[sbom_record_type]:
+            logging.error('The utility doesn\'t support that file format yet')
+            sys.exit(1)
+        return FileFormat(
+            sbom_record_type=sbom_record_type,
+            file_format=file_format,
+        )
+
+    @classmethod
+    def choices(cls) -> list[FileFormat]:
+        return [FileFormat(sbom_record_type, file_format) for
+                sbom_record_type in
+                cls.supported_file_formats for file_format in
+                cls.supported_file_formats[sbom_record_type]]
 
 
 def split_name_of_package_by_nevra(package_name: str) -> PackageNevra:
@@ -355,20 +387,13 @@ def create_parser():
         default=None,
     )
     parser.add_argument(
-        '--sbom-type',
-        default=SBOM_TYPES[0],
-        const=SBOM_TYPES[0],
-        nargs='?',
-        choices=SBOM_TYPES,
-        help='Generate SBOM in one of format type (default: "%(default)s")',
-    )
-    parser.add_argument(
         '--file-format',
-        default=FILE_FORMATS[0],
-        const=FILE_FORMATS[0],
+        default=FileFormat(),
+        const=FileFormat(),
         nargs='?',
-        choices=FILE_FORMATS,
-        help='Generate SBOM in one of format mode (default: "%(default)s")',
+        choices=FileFormatType.choices(),
+        type=FileFormatType(),
+        help='Generate SBOM in one of format mode (default: %(default)s)',
     )
     object_id_group = parser.add_mutually_exclusive_group(required=True)
     object_id_group.add_argument(
@@ -398,12 +423,6 @@ def create_parser():
 def cli_main():
 
     args = create_parser().parse_args()
-    if args.sbom_type not in SUPPORTED_SBOM_TYPES:
-        logging.error('The utility doesn\'t support that format type yet')
-        sys.exit(1)
-    if args.file_format not in SUPPORTED_FILE_FORMATS[args.sbom_type]:
-        logging.error('The utility doesn\'t support that format mode yet')
-        sys.exit(1)
     signer_id = args.signer_id or SIGNER_ID
     albs_url = args.albs_url or ALBS_URL
     if args.build_id:
@@ -412,24 +431,26 @@ def cli_main():
             signer_id=signer_id,
             albs_url=albs_url,
         )
-        sbom_type = 'build'
+        sbom_object_type = 'build'
     else:
         sbom = get_info_about_package(
             args.rpm_package_hash,
             signer_id=signer_id,
             albs_url=albs_url,
         )
-        sbom_type = 'package'
+        sbom_object_type = 'package'
 
     # TODO: For now we only support CycloneDX
     # We should revisit this when adding SPDX
     sbom_formatter = alma_cyclonedx.SBOM(
         data=sbom,
-        sbom_type=sbom_type,
-        output_format=args.file_format,
-        output_file=args.output_file)
+        sbom_object_type=sbom_object_type,
+        output_format=args.file_format.file_format,
+        output_file=args.output_file,
+    )
 
     sbom_formatter.run()
+
 
 if __name__ == '__main__':
     cli_main()
