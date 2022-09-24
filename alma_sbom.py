@@ -142,6 +142,52 @@ def _generate_purl(package_nevra: PackageNevra, source_rpm: str):
     return purl
 
 
+def add_package_source_info(cas_metadata: Dict, component: Dict):
+    if cas_metadata['source_type'] == 'git':
+        component['properties'].extend([
+            {
+                'name': 'almalinux:albs:build:source:gitURL',
+                'value': cas_metadata['git_url'],
+            },
+            {
+                'name': 'almalinux:albs:build:source:type',
+                'value': 'git',
+            },
+            {
+                'name': 'almalinux:albs:build:source:gitCommit',
+                'value': cas_metadata['git_commit'],
+            },
+            {
+                'name': 'almalinux:albs:build:source:gitRef',
+                'value': cas_metadata['git_ref'],
+            },
+            {
+                'name': 'almalinux:albs:build:source:gitCommitCasHash',
+                'value': cas_metadata['alma_commit_sbom_hash']
+                if 'alma_commit_sbom_hash' in cas_metadata else None,
+            }
+        ])
+    elif cas_metadata['source_type'] == 'srpm':
+        component['properties'].extend([
+            {
+                'name': 'almalinux:albs:build:source:srpmURL',
+                'value': cas_metadata['srpm_url'],
+            },
+            {
+                'name': 'almalinux:albs:build:source:type',
+                'value': 'srpm',
+            },
+            {
+                'name': 'almalinux:albs:build:source:srpmChecksum',
+                'value': cas_metadata['srpm_sha256'],
+            },
+            {
+                'name': 'almalinux:albs:build:source:srpmNEVRA',
+                'value': cas_metadata['srpm_nevra'],
+            },
+        ])
+
+
 def get_info_about_package(cas_hash: str, signer_id: str, albs_url: str):
     result = {}
     cas_info_about_package = _extract_cas_info_about_package(
@@ -227,6 +273,10 @@ def get_info_about_package(cas_hash: str, signer_id: str, albs_url: str):
         ]
     }
 
+    add_package_source_info(
+        cas_metadata=cas_metadata,
+        component=result['component'],
+    )
     return result
 
 
@@ -339,6 +389,10 @@ def get_info_about_build(build_id: int, signer_id: str, albs_url: str):
                     },
                 ]
             }
+            add_package_source_info(
+                cas_metadata=cas_metadata,
+                component=component,
+            )
             components.append(component)
     result['components'] = components
     return result
