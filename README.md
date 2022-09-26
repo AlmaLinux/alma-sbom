@@ -25,8 +25,7 @@ It comes with an easy-to-use CLI that allows you to create SBOM records for Buil
 The AlmaLinux OS SBOM CLI accepts the following arguments:
 
 * __output-file__: The file you want to save the generated SBOM to. If not provided, the resulting SBOM is printed to stdout
-* __sbom-type__: The SBOM type you want to generate. Either CycloneDX or SPDX, although right now we only support the CycloneDX format
-* __sbom-format__: The output format you want to use, either JSON or XML
+* __file-format__: The SBOM type and file format you want to generate. Either CycloneDX or SPDX, although right now we only support the CycloneDX format. The output format you want to use, either JSON or XML
 * __build-id__: The Build id you want to generate the SBOM for
 * __rpm-package-hash__: The cas hash of the package you want to generate the SBOM for
 * __signer-id__: The CAS signer id, if different from the default one, _cloud-infra@almalinux.org_
