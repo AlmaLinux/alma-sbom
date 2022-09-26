@@ -51,14 +51,26 @@ class SBOM:
             output_format=self.output_format)
 
         # [Potential] TODOs:
-        # - Shall we overwrite by default?
         # - Shall we check and/or include extension .json|.xml?
         # - Shall we output to a particular folder?
         output_str = output.output_as_string()
         if self.output_format == OutputFormat.XML:
-            pretty_output=xml.dom.minidom.parseString(output_str).toprettyxml()
+            xml_output = xml.dom.minidom.parseString(output_str)
+            ## Post generation version bump
+            if 'version' in self.input_data:
+                xml_output.firstChild.setAttribute(
+                    'version',
+                    str(self.input_data['version'])
+                )
+
+            pretty_output=xml_output.toprettyxml()
         else:
-            pretty_output=json.dumps(json.loads(output_str), indent=4)
+            json_output = json.loads(output_str)
+            ## Post generation version bump
+            if 'version' in self.input_data:
+                json_output['version'] = self.input_data['version']
+
+            pretty_output=json.dumps(json_output, indent=4)
 
         if self.output_file:
             with open(self.output_file, 'w') as fd:
