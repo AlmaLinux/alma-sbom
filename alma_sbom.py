@@ -41,10 +41,6 @@ class PackageNevra:
                    f'{self.release}.{self.arch}'
 
 
-class UnsupportedFileFormatException:
-    pass
-
-
 @dataclasses.dataclass
 class FileFormat:
     sbom_record_type: Literal[
@@ -390,7 +386,8 @@ def create_parser():
     parser.add_argument(
         '--output-file',
         type=str,
-        help='Full path to an output file with SBOM',
+        help='Full path to an output file with SBOM. Output will be '
+             'to stdout if the parameter is absent or emtpy',
         required=False,
         default=None,
     )

@@ -36,17 +36,17 @@ Note that you have to either provide a _build-id_ or an _rpm-package-hash_
 
 ### Creating an SBOM of a Build in JSON format
 
-`python alma_sbom.py --sbom-type cyclonedx --file-format json --build-id 4372`
+`python alma_sbom.py --file-format cyclonedx,json --build-id 4372`
 
 ### Creating an SBOM of a package in XML format
 
-`python alma_sbom.py --sbom-type cyclonedx --file-format xml --rpm-package-hash b00d871e204ca8cbcae72c37c53ab984fdadc3846c91fb35c315335adfe0699b`
+`python alma_sbom.py --file-format cyclonedx,xml --rpm-package-hash b00d871e204ca8cbcae72c37c53ab984fdadc3846c91fb35c315335adfe0699b`
 
 ## Contributing to Alma SBOM
 
 Any question? Found a bug? File an [issue](https://github.com/AlmaLinux/alma-sbom/issues).
 Do you want to contribute with source code?
-1. Fork the repository on Github
+1. Fork the repository on GitHub
 2. Create a new feature branch
 3. Write your change
 4. Submit a pull request
