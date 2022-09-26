@@ -53,7 +53,7 @@ class FileFormat:
     ] = 'json'
 
     def __repr__(self):
-        return f'"{self.sbom_record_type},{self.file_format}"'
+        return f'"{self.sbom_record_type}-{self.file_format}"'
 
 
 class FileFormatType(object):
@@ -66,7 +66,7 @@ class FileFormatType(object):
     })
 
     def __call__(self, sbom_type_file_format: str) -> FileFormat:
-        sbom_record_type, file_format = sbom_type_file_format.split(',')
+        sbom_record_type, file_format = sbom_type_file_format.split('-')
         if sbom_record_type not in self.supported_file_formats:
             logging.error('The utility doesn\'t support that SBOT type yet')
             sys.exit(1)
