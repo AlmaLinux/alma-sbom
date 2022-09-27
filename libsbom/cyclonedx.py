@@ -33,15 +33,15 @@ TOOLS = [
 
 
 class SBOM:
-    def __init__(self, data, sbom_type, output_format, output_file):
+    def __init__(self, data, sbom_object_type, output_format, output_file):
         self.input_data = data
-        self.sbom_type = sbom_type
+        self.sbom_object_type = sbom_object_type
         self.output_format = OutputFormat(output_format.capitalize())
         self.output_file = output_file
         self._bom = Bom()
 
     def run(self):
-        if self.sbom_type == 'build':
+        if self.sbom_object_type == 'build':
             self.generate_build_sbom()
         else:
             self.generate_package_sbom()
@@ -79,24 +79,29 @@ class SBOM:
         else:
             print(pretty_output)
 
-    def __generate_tool(self, tool):
+    @staticmethod
+    def __generate_tool(tool):
         return Tool(
                 vendor=tool['vendor'],
                 name=tool['name'],
-                version=tool['version'])
+                version=tool['version'],
+        )
 
-    def __generate_prop(self, prop):
+    @staticmethod
+    def __generate_prop(prop):
         # See Property spec:
         # https://cyclonedx.org/docs/1.4/json/#components_items_properties_items_value
         return Property(
                 name=prop['name'],
-                value=str(prop['value']))
+                value=str(prop['value']),
+        )
 
-    def __generate_hash(self, hash_):
+    @staticmethod
+    def __generate_hash(hash_):
         return HashType(
             algorithm=HashAlgorithm(hash_['alg']),
-            hash_value=hash_['content'])
-
+            hash_value=hash_['content'],
+        )
 
     def __generate_package_component(self, comp):
         return Component(
@@ -112,8 +117,9 @@ class SBOM:
             purl=PackageURL.from_string(comp['purl']),
             properties=[
                 self.__generate_prop(prop)
-                for prop in comp['properties']])
-
+                for prop in comp['properties']
+            ],
+        )
 
     def generate_build_sbom(self):
         input_metadata = self.input_data['metadata']
@@ -136,7 +142,7 @@ class SBOM:
             component_type=ComponentType('library'),
             name=input_metadata['name'],
             author=input_metadata['author'],
-            properties = properties
+            properties=properties,
         )
         self._bom.metadata.component = component
 
@@ -155,4 +161,5 @@ class SBOM:
             self._bom.metadata.tools.add(self.__generate_tool(tool))
 
         self._bom.metadata.component = self.__generate_package_component(
-            self.input_data['component'])
+            self.input_data['component'],
+        )
