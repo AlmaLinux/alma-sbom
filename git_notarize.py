@@ -2,15 +2,11 @@
 # -*- mode:python; coding:utf-8; -*-
 
 import argparse
-import json
 
 import logging
 import os
 import re
 import sys
-
-from enum import Enum
-from plumbum import local
 
 from git import Repo
 from git.exc import InvalidGitRepositoryError, GitCommandError
@@ -130,7 +126,7 @@ class GitRepo(Repo):
     def get_name(self):
         return self.working_dir.split("/")[-1]
 
-    def find_imports_tag(self, tag: str):
+    def find_matching_imports_tag(self, tag: str):
         # We want to find "imports" that match a given "changed" tag
         # As an example, we will receive a "changed" tag like this:
         #  changed/a8-beta/anaconda-33.16.7.10-1.el8.alma
@@ -177,10 +173,16 @@ def notarize(
         logging.info("Using upstream_commit_sbom_hash %s" % upstream_commit_sbom_hash)
         metadata['upstream_commit_sbom_hash'] = upstream_commit_sbom_hash
 
-    notarized_hash = cw.notarize(
-        local_path=f"git://{repo_path}",
-        metadata=metadata
-    )
+    try:
+        notarized_hash = cw.notarize(
+            local_path=f"git://{repo_path}",
+            metadata=metadata
+        )
+    except Exception as e:
+        raise Exception(
+            "There was an error while notarizing %s. Error was: %s" % \
+            (repo_path, str(e))
+        )
 
     return notarized_hash
 
@@ -261,17 +263,28 @@ def cli_main():
         )
         sys.exit(0)
 
-    matched_tag = alma_repo.find_imports_tag(current_tag)
+    matched_tag = alma_repo.find_matching_imports_tag(current_tag)
 
-    # Add some logging
     if not matched_tag:
+        logging.info("Couldn't find a matching imports tag for %s" % current_tag)
         if not args.notarize_without_upstream_hash:
             logging.error(
-                "Use --notarize-without-upstream-hash to notarize matching tag before notarizing AlmaLinux commit"
+                "Use --notarize-without-upstream-hash if you really want to " \
+                "notarize this tag without a corresponding upstream CAS hash"
             )
             sys.exit(1)
         else:
-            notarize(cw, alma_repo_path)
+            logging.info(
+                "Notarizing tag without a corresponding upstream CAS hash"
+            )
+            try:
+                cas_hash = notarize(cw, alma_repo_path)
+                logging.info(
+                    "The tag %s has been notarized. CAS hash: %s" % \
+                    (current_tag, cas_hash)
+                )
+            except Exception:
+                sys.exit(1)
     else:
         logging.info(f"Found matching tags for %s: %s" % (current_tag, matched_tag))
 
@@ -300,11 +313,23 @@ def cli_main():
                 )
                 sys.exit(1)
             else:
-                matched_cas_hash = notarize(cw, alma_repo_path)
+                try:
+                    cas_hash = notarize(cw, alma_repo_path)
+                    logging.info(
+                        "The upstream tag %s has been notarized. CAS hash: %s" % \
+                        (matched_tag, cas_hash)
+                    )
+                except Exception:
+                    alma_repo.git.checkout(current_branch)
+                    sys.exit(1)
 
+        # git checkout to the current_branch
         alma_repo.git.checkout(current_branch)
-        notarize(cw, alma_repo_path, matched_cas_hash)
-
+        cas_hash = notarize(cw, alma_repo_path, matched_cas_hash)
+        logging.info(
+            "The AlmaLinux tag %s has been notarized. CAS hash: %s" % \
+            (current_tag, cas_hash)
+        )
 
 if __name__ == "__main__":
     cli_main()
