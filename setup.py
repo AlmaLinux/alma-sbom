@@ -25,6 +25,7 @@ setup(
         'dataclasses>=0.8',
         'cyclonedx-python-lib==2.7.1',
         'packageurl-python==0.10.3',
+        'GitPython==3.1.29',
         'cas_wrapper'
     ],
     dependency_links=[
