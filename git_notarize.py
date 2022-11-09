@@ -300,7 +300,6 @@ def cli_main():
                 f"git://{alma_repo_path}",
                 signerID=CAS_SIGNER_ID
             )
-            logging.info(f"Upstream tag %s is authenticated" % matched_tag)
         except Exception:
             logging.warning(
                 "Couldn't authenticate commit %s" % matched_tag_commit.hexsha
@@ -314,10 +313,10 @@ def cli_main():
                 sys.exit(1)
             else:
                 try:
-                    cas_hash = notarize(cw, alma_repo_path)
+                    matched_cas_hash = notarize(cw, alma_repo_path)
                     logging.info(
                         "The upstream tag %s has been notarized. CAS hash: %s" % \
-                        (matched_tag, cas_hash)
+                        (matched_tag, matched_cas_hash)
                     )
                 except Exception:
                     alma_repo.git.checkout(current_branch)
@@ -325,10 +324,10 @@ def cli_main():
 
         # git checkout to the current_branch
         alma_repo.git.checkout(current_branch)
-        cas_hash = notarize(cw, alma_repo_path, matched_cas_hash)
+        alma_cas_hash = notarize(cw, alma_repo_path, matched_cas_hash)
         logging.info(
             "The AlmaLinux tag %s has been notarized. CAS hash: %s" % \
-            (current_tag, cas_hash)
+            (current_tag, alma_cas_hash)
         )
 
 if __name__ == "__main__":
