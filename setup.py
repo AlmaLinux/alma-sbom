@@ -25,10 +25,11 @@ setup(
         'dataclasses>=0.8',
         'cyclonedx-python-lib==2.7.1',
         'packageurl-python==0.10.3',
+        'GitPython==3.1.29',
         'cas_wrapper'
     ],
     dependency_links=[
-        'git+https://git.almalinux.org/almalinux/cas_wrapper.git@0.0.5#egg=cas_wrapper'
+        'git+https://git.almalinux.org/almalinux/cas_wrapper.git@0.0.6#egg=cas_wrapper'
     ],
     python_requires=">=3.9",
 )
