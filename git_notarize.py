@@ -16,15 +16,6 @@ from cas_wrapper import CasWrapper
 CAS_SIGNER_ID = "cloud-infra@almalinux.org"
 CAS_API_KEY = "Y2xvdWQtaW5mcmFAYWxtYWxpbnV4Lm9yZw=="
 
-logging.basicConfig(
-    format="%(levelname)-8s %(message)s",
-    level=logging.INFO,
-    datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[
-        logging.StreamHandler(),
-    ],
-)
-
 def create_parser():
     parser = argparse.ArgumentParser(
         "git_notarize.py",
@@ -58,7 +49,7 @@ def create_parser():
     parser.add_argument(
         "--notarize-without-upstream-hash",
         help="Force notarization of AlmaLinux commit even when " \
-            "there's no matched upstream tag",
+            "there's no matching upstream tag",
         action="store_true",
         required=False
     )
@@ -67,6 +58,14 @@ def create_parser():
         "--notarize-upstream-tag",
         help="Force notarization of upstream tag before " \
             "notarizing AlmaLinux commit",
+        action="store_true",
+        required=False
+    )
+
+    parser.add_argument(
+        "--debug",
+        help="Display debug information while running git_notarize.py. " \
+            "This info could be useful when diagnosing a problem in the tool",
         action="store_true",
         required=False
     )
@@ -102,9 +101,12 @@ class GitRepo(Repo):
 
         return current_tag
 
-    def check_alma_tag_format(self, tag: str):
-        logging.info("Checking AlmaLinux tag format")
+    def get_split_tag(self, name: str, tag: str):
         (tag_type, tag_distro, tag_nvr) = tag.split("/")
+        # Let the user know that the tag doesn't follow AlmaLinux tag format.
+        # We do not fail as there are packages that don't include AlmaLinux
+        # branding, i.e.: kernel
+
         if tag_type != "changed":
             logging.warning(
                 "Current tag's type is '%s' and should be 'changed'" % tag_type
@@ -113,20 +115,27 @@ class GitRepo(Repo):
             logging.warning(
                 "Current tag's distro %s doesn't start with 'a'" % tag_distro
             )
-        alma_nvr = re.search("^\w+-[\d|.]+-\d.el[\d]_?[\d]?.alma.?[\d]?", tag_nvr)
+
+        alma_nvr = re.search(r"\.alma.*$", tag_nvr)
         if not alma_nvr:
             logging.warning(
                 "Current tag's nvr '%s' doesn't include 'alma' branding" % alma_nvr
             )
+
+        return (tag_type, tag_distro, tag_nvr)
 
     def get_origin_url(self):
         origin = self.remote("origin")
         return list(origin.urls)[0]
 
     def get_name(self):
-        return self.working_dir.split("/")[-1]
+        return self.get_origin_url().split("/")[-1].replace(".git", "")
 
-    def find_matching_imports_tag(self, tag: str):
+    def find_matching_imports_tag(self, name: str, tag: str):
+        # Return tag if the source comes directly
+        # from CentOS sources
+        if tag.startswith('imports'):
+            return tag
         # We want to find "imports" that match a given "changed" tag
         # As an example, we will receive a "changed" tag like this:
         #  changed/a8-beta/anaconda-33.16.7.10-1.el8.alma
@@ -144,10 +153,7 @@ class GitRepo(Repo):
         debranded_distro = tag_distro.replace("a", "c", 1)
         # this will get, i.e.: anaconda-33.16.7.10-1.el8
         # Without AlmaLinux custom suffixes (.alma, .alma.2), if any
-        debranded_nvr = re.search(
-            "^\w+-[\d|.]+-\d.el[\d]_?[\d]?",
-            tag_nvr
-        ).group(0)
+        debranded_nvr = re.sub(r"\.alma.*$", "", tag_nvr)
 
         debranded_tag = (
             debranded_type,
@@ -157,44 +163,48 @@ class GitRepo(Repo):
 
         return "/".join(debranded_tag)
 
-
 def notarize(
         cw: CasWrapper,
         repo_path: str,
         upstream_commit_sbom_hash: str = None
     ):
-    logging.info("Notarizing %s" % repo_path)
-
     metadata = {
         "sbom_api_ver": "0.2",
     }
 
     if upstream_commit_sbom_hash:
-        logging.info("Using upstream_commit_sbom_hash %s" % upstream_commit_sbom_hash)
+        logging.info(
+            "Notarizing AlmaLinux source using the " \
+            "upstream_commit_sbom_hash %s" % upstream_commit_sbom_hash
+        )
         metadata['upstream_commit_sbom_hash'] = upstream_commit_sbom_hash
 
-    try:
-        notarized_hash = cw.notarize(
-            local_path=f"git://{repo_path}",
-            metadata=metadata
-        )
-    except Exception as e:
-        raise Exception(
-            "There was an error while notarizing %s. Error was: %s" % \
-            (repo_path, str(e))
-        )
+    notarized_hash = cw.notarize(
+        local_path=f"git://{repo_path}",
+        metadata=metadata
+    )
 
     return notarized_hash
 
 
 def cli_main():
-    logging.info("Starting git_notarize.py")
     args = create_parser().parse_args()
+
+    logging.basicConfig(
+        format="%(levelname)-8s %(message)s",
+        level=logging.DEBUG if args.debug else logging.INFO,
+        datefmt="%Y-%m-%d %H:%M:%S",
+        handlers=[
+            logging.StreamHandler(),
+        ],
+    )
+
+    logging.info("Starting git_notarize.py")
 
     cas_signer_id = args.cas_signer_id or CAS_SIGNER_ID
     cas_api_key = args.cas_api_key or CAS_API_KEY
-    logging.info("Using CAS signerID: %s" % cas_signer_id)
-    logging.info("Using CAS API key: %s" % cas_api_key)
+    logging.debug("Using CAS signerID: %s" % cas_signer_id)
+    logging.debug("Using CAS API key: %s" % cas_api_key)
 
     cw = CasWrapper(
         cas_signer_id=cas_signer_id,
@@ -209,19 +219,25 @@ def cli_main():
         logging.error("Current folder is not a git repository")
         sys.exit(1)
 
-    logging.info("Git repo name: %s", alma_repo.get_name())
-    logging.info("Git origin url: %s", alma_repo.get_origin_url())
-    logging.info("Git branches: %s" % str(alma_repo.get_branches()))
-    logging.info("Git tags: %s" % str(alma_repo.get_tags()))
+    logging.debug("Git repo name: %s", alma_repo.get_name())
+    logging.debug("Git origin url: %s", alma_repo.get_origin_url())
+    logging.debug("Git branches: %s" % str(alma_repo.get_branches()))
+    logging.debug("Git tags: %s" % str(alma_repo.get_tags()))
+
     if alma_repo.head.is_detached:
-        logging.warning("The git repo is in DETACHED state")
+        logging.warning(
+            "The git repo is in DETACHED state. This means that if " \
+            "git_notarize.py stops its execution, you will probably " \
+            "need to manually return to this detached state before " \
+            "running the tool again."
+        )
         current_branch = None
     else:
         current_branch = alma_repo.active_branch.name
         logging.info("Current branch is %s" % current_branch)
 
     current_commit = alma_repo.get_current_commit()
-    logging.info("Current commit is:\n\n%s\nAuthor: %s <%s>\nDate: %s\n\t%s" % \
+    logging.debug("Current commit is:\n\n%s\nAuthor: %s <%s>\nDate: %s\n\t%s" % \
         (
             current_commit.hexsha,
             current_commit.author.name,
@@ -233,7 +249,7 @@ def cli_main():
 
     current_tag = alma_repo.get_current_tag()
     if current_tag:
-        logging.info("Tag associated with current commit is: %s" % current_tag)
+        logging.debug("Tag associated with current commit is: %s" % current_tag)
     else:
         logging.error(
             "Couldn't find any tag associated with current commit.\n" \
@@ -241,12 +257,21 @@ def cli_main():
         )
         sys.exit(1)
 
-    # Let the user know that the tag doesn't follow AlmaLinux tag format.
-    # We do not fail as there are packages that don't include AlmaLinux
-    # branding, i.e.: kernel
-    alma_repo.check_alma_tag_format(current_tag)
+    (tag_type, tag_distro, tag_nvr) = alma_repo.get_split_tag(
+        alma_repo.get_name(),
+        current_tag
+    )
+    if tag_type.startswith("imports") and tag_distro.startswith("c"):
+        logging.error(
+            "Exiting as the current tag %s looks like an imported source " \
+            "from CentOS.\nImported sources should have been automatically " \
+            "notarized at import time, and this tool is meant to help with " \
+            "notarization of modified sources. Are you maybe in the wrong " \
+            "branch/tag?" % current_tag
+        )
+        sys.exit(1)
 
-    logging.info("Authenticating current tag %s" % current_tag)
+    logging.debug("Authenticating current tag %s" % current_tag)
     current_tag_is_authenticated = False
     current_cas_hash = None
     try:
@@ -255,76 +280,86 @@ def cli_main():
             signerID=CAS_SIGNER_ID
         )
     except Exception:
-        logging.warning("Couldn't authenticate current commit %s" % current_commit.hexsha)
+        pass
 
     if current_tag_is_authenticated:
         logging.info(
-            "Current tag is already notarized, its CAS hash is %s" % current_cas_hash
+            "Current tag is already notarized, its CAS hash is %s.\n" \
+            "Nothing to do, exiting now." % current_cas_hash
         )
         sys.exit(0)
 
-    matched_tag = alma_repo.find_matching_imports_tag(current_tag)
+    matching_tag = None
+    if tag_type.startswith("changed"):
+        matching_tag = alma_repo.find_matching_imports_tag(
+            alma_repo.get_name(),
+            current_tag
+        )
 
-    if not matched_tag:
-        logging.info("Couldn't find a matching imports tag for %s" % current_tag)
+    if not matching_tag:
+        logging.warning("Couldn't find a matching imports tag for %s" % current_tag)
         if not args.notarize_without_upstream_hash:
             logging.error(
                 "Use --notarize-without-upstream-hash if you really want to " \
-                "notarize this tag without a corresponding upstream CAS hash"
+                "notarize this AlmaLinux source without a corresponding " \
+                "upstream CAS hash"
             )
             sys.exit(1)
         else:
             logging.info(
                 "Notarizing tag without a corresponding upstream CAS hash"
             )
-            try:
-                cas_hash = notarize(cw, alma_repo_path)
-                logging.info(
-                    "The tag %s has been notarized. CAS hash: %s" % \
-                    (current_tag, cas_hash)
-                )
-            except Exception:
-                sys.exit(1)
+            cas_hash = notarize(cw, alma_repo_path)
+            logging.info(
+                "The tag %s has been notarized. CAS hash: %s" % \
+                (current_tag, cas_hash)
+            )
+            sys.exit(0)
     else:
-        logging.info(f"Found matching tags for %s: %s" % (current_tag, matched_tag))
+        logging.info(
+            "Found a matching tag for %s: %s" % \
+            (current_tag, matching_tag)
+        )
 
-        # git checkout the matched tag
-        alma_repo.git.checkout(matched_tag)
-        matched_tag_commit = alma_repo.get_current_commit()
+        # git checkout the matching tag
+        logging.debug("git checkout %s" % matching_tag)
+        alma_repo.git.checkout(matching_tag)
 
-        matched_tag_is_authenticated = False
-        matched_cas_hash = None
-        logging.info(f"Authenticating tag %s" % matched_tag)
+        matching_tag_is_authenticated = False
+        matching_cas_hash = None
+        logging.debug("Authenticating matching tag %s" % matching_tag)
         try:
-            matched_tag_is_authenticated, matched_cas_hash = cw.authenticate_source(
+            matching_tag_is_authenticated, matching_cas_hash = cw.authenticate_source(
                 f"git://{alma_repo_path}",
                 signerID=CAS_SIGNER_ID
             )
         except Exception:
             logging.warning(
-                "Couldn't authenticate commit %s" % matched_tag_commit.hexsha
+                "Couldn't authenticate the matching tag %s" % matching_tag
             )
 
-        if not matched_tag_is_authenticated:
+        if not matching_tag_is_authenticated:
             if not args.notarize_upstream_tag:
                 logging.error(
-                    "Use --notarize-upstream-tag to notarize matching tag before notarizing AlmaLinux commit"
+                    "Use --notarize-upstream-tag to notarize the matching " \
+                    "tag and keep going with the notarization of the " \
+                    "AlmaLinux tag"
                 )
+                alma_repo.git.checkout(current_branch)
                 sys.exit(1)
             else:
-                try:
-                    matched_cas_hash = notarize(cw, alma_repo_path)
-                    logging.info(
-                        "The upstream tag %s has been notarized. CAS hash: %s" % \
-                        (matched_tag, matched_cas_hash)
-                    )
-                except Exception:
-                    alma_repo.git.checkout(current_branch)
-                    sys.exit(1)
+                logging.info(
+                    "Notarizing the matching upstream tag"
+                )
+                matching_cas_hash = notarize(cw, alma_repo_path)
+                logging.info(
+                    "The matching upstream tag %s has been notarized. "\
+                    "CAS hash: %s" % (matching_tag, matching_cas_hash)
+                )
 
         # git checkout to the current_branch
         alma_repo.git.checkout(current_branch)
-        alma_cas_hash = notarize(cw, alma_repo_path, matched_cas_hash)
+        alma_cas_hash = notarize(cw, alma_repo_path, matching_cas_hash)
         logging.info(
             "The AlmaLinux tag %s has been notarized. CAS hash: %s" % \
             (current_tag, alma_cas_hash)
