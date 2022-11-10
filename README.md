@@ -13,7 +13,7 @@ These utilities consist in:
 * cyclonedx-python-lib >= 2.7.1
 * packageurl-python >= 0.10.3
 * GitPython == 3.1.29
-* cas_wrapper >= 0.0.5
+* cas_wrapper >= 0.0.6
 
 ## Getting started
 
