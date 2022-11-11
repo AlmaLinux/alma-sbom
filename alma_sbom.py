@@ -68,7 +68,7 @@ class FileFormatType(object):
     def __call__(self, sbom_type_file_format: str) -> FileFormat:
         sbom_record_type, file_format = sbom_type_file_format.split('-')
         if sbom_record_type not in self.supported_file_formats:
-            logging.error('The utility doesn\'t support that SBOT type yet')
+            logging.error('The utility doesn\'t support that SBOM type yet')
             sys.exit(1)
         if file_format not in self.supported_file_formats[sbom_record_type]:
             logging.error('The utility doesn\'t support that file format yet')
