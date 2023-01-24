@@ -134,7 +134,17 @@ def _get_specific_info_about_package(
         cas_info_about_package: Dict
 ) -> Tuple[Optional[str], PackageNevra]:
     cas_metadata = cas_info_about_package['metadata']
-    if cas_metadata['sbom_api'] == '0.1':
+    # We have `sbom_api_ver` in git records and `sbom_api`
+    # in RPM package records. The latter parameter is the bug,
+    # but we should handle it anyway
+    # since a lot of packages already have it.
+    api_ver = cas_metadata.get('sbom_api_ver')
+    if not api_ver:
+        api_ver = cas_metadata.get('sbom_api')
+    if not api_ver:
+        raise ValueError('CAS metadata is malformed, '
+                         'API version cannot be detected')
+    if api_ver == '0.1':
         package_name = cas_info_about_package['name']
         package_nevra = split_name_of_package_by_nevra(package_name)
         source_rpm = None
