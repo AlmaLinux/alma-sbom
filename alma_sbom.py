@@ -134,7 +134,7 @@ def _get_specific_info_about_package(
         cas_info_about_package: Dict
 ) -> Tuple[Optional[str], PackageNevra]:
     cas_metadata = cas_info_about_package['metadata']
-    if cas_metadata['sbom_api'] == '0.1':
+    if cas_metadata['sbom_api_ver'] == '0.1':
         package_name = cas_info_about_package['name']
         package_nevra = split_name_of_package_by_nevra(package_name)
         source_rpm = None
