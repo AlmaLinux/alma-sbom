@@ -301,7 +301,7 @@ def get_info_about_package(cas_hash: str, signer_id: str, albs_url: str):
                 'value': 'rpm',
             },
             {
-                'name': 'almalinux:sbom:cashHash',
+                'name': 'almalinux:sbom:casHash',
                 'value': cas_hash,
             },
             {
@@ -410,11 +410,11 @@ def get_info_about_build(build_id: int, signer_id: str, albs_url: str):
                         'value': cas_metadata['build_host'],
                     },
                     {
-                        'name': 'almalinux:abls:build:targetArch',
+                        'name': 'almalinux:albs:build:targetArch',
                         'value': cas_metadata['build_arch'],
                     },
                     {
-                        'name': 'almalinux:abls:build:packageType',
+                        'name': 'almalinux:albs:build:packageType',
                         'value': 'rpm',
                     },
                     {
