@@ -15,6 +15,7 @@ import sys
 from plumbum import local
 
 from libsbom import cyclonedx as alma_cyclonedx
+from libsbom import spdx as alma_spdx
 
 ALBS_URL = 'https://build.almalinux.org'
 SIGNER_ID = 'cloud-infra@almalinux.org'
@@ -49,7 +50,9 @@ class FileFormat:
     ] = 'cyclonedx'
     file_format: Literal[
         'json',
-        'xml'
+        'tagvalue',
+        'xml',
+        'yaml',
     ] = 'json'
 
     def __repr__(self):
@@ -62,6 +65,12 @@ class FileFormatType(object):
         'cyclonedx': [
             'json',
             'xml',
+        ],
+        'spdx': [
+            'json',
+            'tagvalue',
+            'xml',
+            'yaml',
         ]
     })
 
@@ -490,6 +499,10 @@ def create_parser():
 
 
 def cli_main():
+    formatters = {
+        'cyclonedx': alma_cyclonedx.SBOM,
+        'spdx':      alma_spdx.SBOM,
+    }
 
     args = create_parser().parse_args()
     signer_id = args.signer_id or SIGNER_ID
@@ -509,9 +522,7 @@ def cli_main():
         )
         sbom_object_type = 'package'
 
-    # TODO: For now we only support CycloneDX
-    # We should revisit this when adding SPDX
-    sbom_formatter = alma_cyclonedx.SBOM(
+    sbom_formatter = formatters[args.file_format.sbom_record_type](
         data=sbom,
         sbom_object_type=sbom_object_type,
         output_format=args.file_format.file_format,
