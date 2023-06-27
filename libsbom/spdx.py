@@ -113,11 +113,8 @@ class SBOM:
         self._org = Actor(ActorType.ORGANIZATION,
                           ALMAOS_VENDOR,
                           ALMAOS_EMAIL)
-        self._creators = [self._org]
-
-        for tool in TOOLS:
-            self._creators += [Actor(actor_type=ActorType.TOOL,
-                                     name=f"{tool['name']} {tool['version']}")]
+        self._creators = [self._org] + [Actor(actor_type=ActorType.TOOL,
+                                              name=f"{tool['name']} {tool['version']}") for tool in TOOLS]
 
         self._document = None
         self._next_id = 0
