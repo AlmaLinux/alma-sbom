@@ -22,6 +22,7 @@ from spdx_tools.spdx.model import (
     Relationship,
     RelationshipType
 )
+from spdx_tools.spdx.model.spdx_none import SpdxNone
 
 from cas_wrapper import CasWrapper
 from version import __version__
@@ -157,7 +158,7 @@ class SBOM:
 
         pkg = Package(spdx_id=pkgid,
                       name=component["name"],
-                      download_location=component["purl"]) # FIXME: download_location must point to the RPM on a mirror
+                      download_location=SpdxNone())
 
         for pkghash in component["hashes"]:
             pkg.checksums += [make_checksum(pkghash["alg"],
