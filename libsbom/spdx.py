@@ -140,11 +140,12 @@ class SBOM:
             pkgvers = self._input_data['component']['version']
             doc_name = f"{pkgname}-{pkgvers}"
 
+        doc_uuid = uuid.uuid4()
         doc_info = CreationInfo(spdx_version="SPDX-2.3",
-                                spdx_id=f"SPDXRef-{uuid.uuid4()}",
+                                spdx_id=f"SPDXRef-{doc_uuid}",
                                 name=doc_name,
                                 data_license=ALMAOS_SBOMLICENSE,
-                                document_namespace=ALMAOS_NAMESPACE,
+                                document_namespace=f"{ALMAOS_NAMESPACE}-{doc_name}-{doc_uuid}",
                                 creators=self._creators,
                                 created=datetime.datetime.now())
 
