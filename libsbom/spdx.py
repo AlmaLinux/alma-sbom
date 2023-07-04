@@ -133,7 +133,7 @@ class SBOM:
 
         doc_uuid = uuid.uuid4()
         doc_info = CreationInfo(spdx_version="SPDX-2.3",
-                                spdx_id=f"SPDXRef-{doc_uuid}",
+                                spdx_id="SPDXRef-DOCUMENT",
                                 name=doc_name,
                                 data_license=constants.ALMAOS_SBOMLICENSE,
                                 document_namespace=f"{constants.ALMAOS_NAMESPACE}-{doc_name}-{doc_uuid}",
