@@ -101,7 +101,21 @@ def make_checksum(algo: str, value: str) -> Checksum:
 
 def component_get_buildtime(component: dict) -> datetime.datetime:
     buildtime = component_get_property(component, "almalinux:package:timestamp")
-    return datetime.datetime.fromisoformat(buildtime)
+
+    # Components in build SBOMs do not have timestamps
+    try:
+        return datetime.datetime.fromisoformat(buildtime)
+    except TypeError:
+        return None
+
+
+def build_get_timestamp(build: dict) -> datetime.datetime:
+    buildtime = component_get_property(build, "almalinux:albs:build:timestamp")
+
+    try:
+        return datetime.datetime.fromisoformat(buildtime)
+    except TypeError:
+        return None
 
 
 class SBOM:
@@ -153,7 +167,7 @@ class SBOM:
         self._document = Document(doc_info)
 
 
-    def add_package(self, component):
+    def add_package(self, component, build):
         pkgid = self.get_next_package_id()
 
         pkg = Package(spdx_id=pkgid,
@@ -168,7 +182,11 @@ class SBOM:
         pkg.supplier = self._org
         pkg.external_references += [make_cpe_ref(component["cpe"]),
                                     make_purl_ref(component["purl"])]
-        pkg.built_date = component_get_buildtime(component)
+
+        pkg.built_date = component_get_buildtime(component) or build_get_timestamp(build)
+        if not pkg.built_date:
+            raise ValueError(f"Cannot determine build time of {pkg.name}")
+
         pkg.files_analyzed = False
 
         self._document.packages += [pkg]
@@ -188,6 +206,7 @@ class SBOM:
 
     def _generate(self):
         components = []
+        build_data = self._input_data["metadata"] if "metadata" in self._input_data else {}
 
         # There is either a single package in "component" or multiple packages in "components"
         if "component" in self._input_data:
@@ -196,11 +215,11 @@ class SBOM:
             components += self._input_data["components"]
 
         for component in components:
-            self.add_package(component)
+            self.add_package(component, build_data)
 
         # build SBOMs also contain build metadata
-        if "metadata" in self._input_data:
-            self.add_build(self._input_data["metadata"])
+        if build_data:
+            self.add_build(build_data)
 
 
     def run(self):
