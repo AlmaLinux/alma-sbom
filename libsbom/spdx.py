@@ -181,7 +181,7 @@ class SBOM:
     def add_build(self, metadata):
         spdxid = self._document.creation_info.spdx_id
 
-        for prop in metadata:
+        for prop in metadata["properties"]:
             note = make_annotation(spdxid, f"{prop['name']}={prop['value']}")
             self._document.annotations += [note]
 
