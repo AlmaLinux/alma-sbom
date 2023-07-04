@@ -11,26 +11,7 @@ from cyclonedx.output import OutputFormat, get_instance
 from packageurl import PackageURL
 from version import __version__
 
-ALMAOS_VENDOR = 'AlmaLinux OS Foundation'
-
-TOOLS = [
-    {
-        "vendor": ALMAOS_VENDOR,
-        "name": "AlmaLinux Build System",
-        "version": "0.1"  # Shall we start versioning ALBS?
-    },
-    {
-        "vendor": ALMAOS_VENDOR,
-        "name": "alma-sbom",
-        "version": __version__
-    },
-    {
-        "vendor": "Codenotary Inc",
-        "name": "Community Attestation Service (CAS)",
-        "version": CasWrapper.get_version()
-    }
-]
-
+from . import constants
 
 class SBOM:
     def __init__(self, data, sbom_object_type, output_format, output_file):
@@ -130,7 +111,7 @@ class SBOM:
         # in adding 'ersion: 1' to the final SBOM
 
         # We do this way to keep cyclonedx-python-lib as a tool
-        for tool in TOOLS:
+        for tool in constants.TOOLS:
             self._bom.metadata.tools.add(self.__generate_tool(tool))
 
         properties = [
@@ -157,7 +138,7 @@ class SBOM:
         # in adding 'ersion: 1' to the final SBOM
 
         # We do this way to keep cyclonedx-python-lib as a tool
-        for tool in TOOLS:
+        for tool in constants.TOOLS:
             self._bom.metadata.tools.add(self.__generate_tool(tool))
 
         self._bom.metadata.component = self.__generate_package_component(

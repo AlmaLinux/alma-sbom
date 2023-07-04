@@ -24,33 +24,8 @@ from spdx_tools.spdx.model import (
 )
 from spdx_tools.spdx.model.spdx_none import SpdxNone
 
-from cas_wrapper import CasWrapper
+from . import constants
 from version import __version__
-
-ALMAOS_VENDOR = 'AlmaLinux OS Foundation'
-ALMAOS_EMAIL = 'cloud-infra@almalinux.org'
-ALMAOS_SBOMLICENSE = 'CC0-1.0'                  # FIXME: Determine license for AlmaLinux SBOMs
-ALMAOS_NAMESPACE = 'https://security.almalinux.org/spdx'
-
-TOOLS = [
-    {
-        "vendor": ALMAOS_VENDOR,
-        "name": "AlmaLinux Build System",
-        "version": "0.1"
-    }, {
-        "vendor": ALMAOS_VENDOR,
-        "name": "alma-sbom",
-        "version": __version__
-    }, {
-        "vendor": ALMAOS_VENDOR,
-        "name": "spdx-tools",
-        "version": "0.0" # FIXME: Need correct version info for spdx-tools
-    }, {
-        "vendor": "Codenotary Inc",
-        "name": "Community Attestation Service (CAS)",
-        "version": CasWrapper.get_version()
-    }
-]
 
 writers = {
     'json':     json_writer,
@@ -120,16 +95,17 @@ def build_get_timestamp(build: dict) -> datetime.datetime:
 
 class SBOM:
     def __init__(self, data, sbom_object_type, output_format, output_file):
+        tools = constants.TOOLS + constants.TOOLS_SPDX
         self._input_data = data
         self._sbom_object_type = sbom_object_type
         self._output_format = output_format
         self._output_file = output_file
 
         self._org = Actor(ActorType.ORGANIZATION,
-                          ALMAOS_VENDOR,
-                          ALMAOS_EMAIL)
+                          constants.ALMAOS_VENDOR,
+                          constants.ALMAOS_EMAIL)
         self._creators = [self._org] + [Actor(actor_type=ActorType.TOOL,
-                                              name=f"{tool['name']} {tool['version']}") for tool in TOOLS]
+                                              name=f"{tool['name']} {tool['version']}") for tool in tools]
 
         self._document = None
         self._next_id = 0
@@ -159,8 +135,8 @@ class SBOM:
         doc_info = CreationInfo(spdx_version="SPDX-2.3",
                                 spdx_id=f"SPDXRef-{doc_uuid}",
                                 name=doc_name,
-                                data_license=ALMAOS_SBOMLICENSE,
-                                document_namespace=f"{ALMAOS_NAMESPACE}-{doc_name}-{doc_uuid}",
+                                data_license=constants.ALMAOS_SBOMLICENSE,
+                                document_namespace=f"{constants.ALMAOS_NAMESPACE}-{doc_name}-{doc_uuid}",
                                 creators=self._creators,
                                 created=datetime.datetime.now())
 
