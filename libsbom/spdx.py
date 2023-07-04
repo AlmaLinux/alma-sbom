@@ -204,4 +204,4 @@ class SBOM:
         self._generate()
         writer.write_document_to_file(self._document,
                                       self._output_file or "/dev/stdout",
-                                      validate=False)
+                                      validate=True)
