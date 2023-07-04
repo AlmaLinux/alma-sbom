@@ -149,6 +149,9 @@ class SBOM:
         pkg = Package(spdx_id=pkgid,
                       name=component["name"],
                       download_location=SpdxNone())
+        rel = Relationship(spdx_element_id="SPDXRef-DOCUMENT",
+                           relationship_type=RelationshipType.DESCRIBES,
+                           related_spdx_element_id=pkgid)
 
         for pkghash in component["hashes"]:
             pkg.checksums += [make_checksum(pkghash["alg"],
@@ -166,6 +169,7 @@ class SBOM:
         pkg.files_analyzed = False
 
         self._document.packages += [pkg]
+        self._document.relationships += [rel]
 
         for prop in component["properties"]:
             note = make_annotation(pkgid, f"{prop['name']}={prop['value']}")
