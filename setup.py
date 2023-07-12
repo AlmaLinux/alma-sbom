@@ -24,7 +24,7 @@ setup(
         'requests>=2.20.0',
         'dataclasses>=0.8',
         'cyclonedx-python-lib==2.7.1',
-        'spdx-tools>0.7.1',
+        'spdx-tools==0.8',
         'packageurl-python==0.10.3',
         'GitPython==3.1.29',
         'cas_wrapper'
