@@ -27,6 +27,6 @@ TOOLS_SPDX = [
     {
         "vendor": ALMAOS_VENDOR,
         "name": "spdx-tools",
-        "version": "0.0"
+        "version": "0.8"
     }
 ]
