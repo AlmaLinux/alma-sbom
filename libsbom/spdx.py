@@ -18,7 +18,6 @@ from spdx_tools.spdx.model import (
     ExternalPackageRef,
     ExternalPackageRefCategory,
     Package,
-    PackagePurpose,
     Relationship,
     RelationshipType
 )
