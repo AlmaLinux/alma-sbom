@@ -4,7 +4,7 @@
 
 import argparse
 import json
-from typing import Dict, Tuple, Optional, Literal
+from typing import Dict, Tuple, Optional, Literal, List
 
 import dataclasses
 from collections import defaultdict
@@ -88,7 +88,7 @@ class FileFormatType(object):
         )
 
     @classmethod
-    def choices(cls) -> list[FileFormat]:
+    def choices(cls) -> List[FileFormat]:
         return [FileFormat(sbom_record_type, file_format) for
                 sbom_record_type in
                 cls.supported_file_formats for file_format in
