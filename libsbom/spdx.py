@@ -73,12 +73,22 @@ def make_checksum(algo: str, value: str) -> Checksum:
     return Checksum(algo_map[algo], value)
 
 
+def buildtime_to_datetime(buildtime: str) -> datetime.datetime:
+    """Parse buildtime without nanoseconds into a datetime object.
+
+    The build timestamp is stored in nanosecond-precision in CAS, but
+    datetime.fromisoformat() on Python 3.10 or older is unable to parse
+    timestamps with sub-microsecond precision.
+    """
+    return datetime.datetime.fromisoformat(buildtime[:-4])
+
+
 def component_get_buildtime(component: dict) -> datetime.datetime:
     buildtime = component_get_property(component, "almalinux:package:timestamp")
 
     # Components in build SBOMs do not have timestamps
     try:
-        return datetime.datetime.fromisoformat(buildtime)
+        return buildtime_to_datetime(buildtime)
     except TypeError:
         return None
 
@@ -87,6 +97,7 @@ def build_get_timestamp(build: dict) -> datetime.datetime:
     buildtime = component_get_property(build, "almalinux:albs:build:timestamp")
 
     try:
+        # build timestamps don't have nanosecond-precision, no need for buildtime_to_datetime()
         return datetime.datetime.fromisoformat(buildtime)
     except TypeError:
         return None
