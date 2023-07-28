@@ -4,7 +4,7 @@
 
 import argparse
 import json
-from typing import Dict, Tuple, Optional, Literal
+from typing import Dict, Tuple, Optional, Literal, List
 
 import dataclasses
 from collections import defaultdict
@@ -15,6 +15,7 @@ import sys
 from plumbum import local
 
 from libsbom import cyclonedx as alma_cyclonedx
+from libsbom import spdx as alma_spdx
 
 ALBS_URL = 'https://build.almalinux.org'
 SIGNER_ID = 'cloud-infra@almalinux.org'
@@ -49,7 +50,9 @@ class FileFormat:
     ] = 'cyclonedx'
     file_format: Literal[
         'json',
-        'xml'
+        'tagvalue',
+        'xml',
+        'yaml',
     ] = 'json'
 
     def __repr__(self):
@@ -62,6 +65,12 @@ class FileFormatType(object):
         'cyclonedx': [
             'json',
             'xml',
+        ],
+        'spdx': [
+            'json',
+            'tagvalue',
+            'xml',
+            'yaml',
         ]
     })
 
@@ -79,7 +88,7 @@ class FileFormatType(object):
         )
 
     @classmethod
-    def choices(cls) -> list[FileFormat]:
+    def choices(cls) -> List[FileFormat]:
         return [FileFormat(sbom_record_type, file_format) for
                 sbom_record_type in
                 cls.supported_file_formats for file_format in
@@ -301,7 +310,7 @@ def get_info_about_package(cas_hash: str, signer_id: str, albs_url: str):
                 'value': 'rpm',
             },
             {
-                'name': 'almalinux:sbom:cashHash',
+                'name': 'almalinux:sbom:casHash',
                 'value': cas_hash,
             },
             {
@@ -410,11 +419,11 @@ def get_info_about_build(build_id: int, signer_id: str, albs_url: str):
                         'value': cas_metadata['build_host'],
                     },
                     {
-                        'name': 'almalinux:abls:build:targetArch',
+                        'name': 'almalinux:albs:build:targetArch',
                         'value': cas_metadata['build_arch'],
                     },
                     {
-                        'name': 'almalinux:abls:build:packageType',
+                        'name': 'almalinux:albs:build:packageType',
                         'value': 'rpm',
                     },
                     {
@@ -490,6 +499,10 @@ def create_parser():
 
 
 def cli_main():
+    formatters = {
+        'cyclonedx': alma_cyclonedx.SBOM,
+        'spdx':      alma_spdx.SBOM,
+    }
 
     args = create_parser().parse_args()
     signer_id = args.signer_id or SIGNER_ID
@@ -509,9 +522,7 @@ def cli_main():
         )
         sbom_object_type = 'package'
 
-    # TODO: For now we only support CycloneDX
-    # We should revisit this when adding SPDX
-    sbom_formatter = alma_cyclonedx.SBOM(
+    sbom_formatter = formatters[args.file_format.sbom_record_type](
         data=sbom,
         sbom_object_type=sbom_object_type,
         output_format=args.file_format.file_format,
