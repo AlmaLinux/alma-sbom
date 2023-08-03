@@ -1,4 +1,5 @@
 from setuptools import setup
+
 from version import __version__
 
 setup(
@@ -26,10 +27,10 @@ setup(
         'spdx-tools==0.8',
         'packageurl-python==0.10.3',
         'GitPython==3.1.29',
-        'immudb_wrapper'
+        'immudb_wrapper',
     ],
     dependency_links=[
-        'git+https://git.almalinux.org/danfimov/immudb_wrapper.git@init#egg=immudb_wrapper'
+        'git+https://github.com/AlmaLinux/immudb-wrapper.git@0.1.0#egg=immudb_wrapper'
     ],
     python_requires=">=3.9",
 )
