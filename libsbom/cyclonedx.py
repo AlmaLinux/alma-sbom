@@ -2,7 +2,6 @@ import json
 import logging
 import xml.dom.minidom
 
-from cas_wrapper import CasWrapper
 from cyclonedx.model import Property, HashType, HashAlgorithm
 from cyclonedx.model.bom import Bom, Tool
 from cyclonedx.model.component import Component, ComponentType

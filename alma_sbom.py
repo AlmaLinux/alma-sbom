@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 # -*- mode:python; coding:utf-8; -*-
 
-
+import os
 import argparse
-import json
 from typing import Dict, Tuple, Optional, Literal, List
 
 import dataclasses
@@ -12,13 +11,12 @@ from collections import defaultdict
 import requests
 import logging
 import sys
-from plumbum import local
+from immudb_wrapper import ImmudbWrapper
 
 from libsbom import cyclonedx as alma_cyclonedx
 from libsbom import spdx as alma_spdx
 
 ALBS_URL = 'https://build.almalinux.org'
-SIGNER_ID = 'cloud-infra@almalinux.org'
 IS_SIGNED = 3
 
 
@@ -115,34 +113,15 @@ def generate_sbom_version(json_data: Dict) -> int:
     return sbom_version
 
 
-def _extract_cas_info_about_package(cas_hash: str, signer_id: str):
-    def _convert_none_string_to_none(obj: Dict):
-        for key, value in obj.items():
-            if isinstance(value, dict):
-                obj[key] = _convert_none_string_to_none(obj=value)
-            if value == 'None':
-                obj[key] = None
-        return obj
-
-    # TODO: Use cas_wrapper instead of dealing directly with cas
-    command = local['cas'][
-        'authenticate',
-        '--signerID',
-        signer_id,
-        '--output',
-        'json',
-        '--hash',
-        cas_hash,
-    ]
-    logging.info(command)
-    result = json.loads(command())
-    return _convert_none_string_to_none(result)
+def _extract_cas_info_about_package(cas_hash: str, immudb_wrapper: ImmudbWrapper):
+    result = immudb_wrapper.authenticate(cas_hash)
+    return result.get('value', {})
 
 
 def _get_specific_info_about_package(
         cas_info_about_package: Dict
 ) -> Tuple[Optional[str], PackageNevra]:
-    cas_metadata = cas_info_about_package['metadata']
+    cas_metadata = cas_info_about_package['Metadata']
     # We have `sbom_api_ver` in git records and `sbom_api`
     # in RPM package records. The latter parameter is the bug,
     # but we should handle it anyway
@@ -243,16 +222,16 @@ def add_package_source_info(cas_metadata: Dict, component: Dict):
         ])
 
 
-def get_info_about_package(cas_hash: str, signer_id: str, albs_url: str):
+def get_info_about_package(cas_hash: str, albs_url: str, immudb_wrapper: ImmudbWrapper = None):
     result = {}
     cas_info_about_package = _extract_cas_info_about_package(
         cas_hash=cas_hash,
-        signer_id=signer_id,
+        immudb_wrapper=immudb_wrapper,
     )
     source_rpm, package_nevra = _get_specific_info_about_package(
         cas_info_about_package=cas_info_about_package,
     )
-    cas_metadata = cas_info_about_package['metadata']
+    cas_metadata = cas_info_about_package['Metadata']
     result['version'] = 1
     if 'unsigned_hash' in cas_metadata:
         result['version'] += 1
@@ -335,7 +314,7 @@ def get_info_about_package(cas_hash: str, signer_id: str, albs_url: str):
     return result
 
 
-def get_info_about_build(build_id: int, signer_id: str, albs_url: str):
+def get_info_about_build(build_id: int, albs_url: str, immudb_wrapper: ImmudbWrapper = None):
     result = {}
     albs_builds_endpoint = f'{albs_url}/api/v1/builds'
     response = requests.get(
@@ -373,9 +352,9 @@ def get_info_about_build(build_id: int, signer_id: str, albs_url: str):
             cas_hash = artifact['cas_hash']
             result_of_execution = _extract_cas_info_about_package(
                 cas_hash=cas_hash,
-                signer_id=signer_id,
+                immudb_wrapper=immudb_wrapper,
             )
-            cas_metadata = result_of_execution['metadata']
+            cas_metadata = result_of_execution['Metadata']
             source_rpm, package_nevra = _get_specific_info_about_package(
                 cas_info_about_package=result_of_execution,
             )
@@ -428,7 +407,7 @@ def get_info_about_build(build_id: int, signer_id: str, albs_url: str):
                     },
                     {
                         'name': 'almalinux:sbom:casHash',
-                        'value': result_of_execution['hash'],
+                        'value': result_of_execution['Hash'],
                     },
                     {
                         'name': 'almalinux:albs:build:ID',
@@ -485,14 +464,43 @@ def create_parser():
         help='SHA256 hash of an RPM package',
     )
     parser.add_argument(
-        '--signer-id',
-        type=str,
-        help='Override signerID',
-    )
-    parser.add_argument(
         '--albs-url',
         type=str,
         help='Override ALBS url',
+    )
+    parser.add_argument(
+        "--immudb-username",
+        type=str,
+        help="Provide your immudb username if not set as an environmental variable",
+        required=False
+    )
+
+    parser.add_argument(
+        "--immudb-password",
+        type=str,
+        help="Provide your immudb password if not set as an environmental variable",
+        required=False
+    )
+
+    parser.add_argument(
+        "--immudb-database",
+        type=str,
+        help="Provide your immudb database if not set as an environmental variable",
+        required=False
+    )
+
+    parser.add_argument(
+        "--immudb-address",
+        type=str,
+        help="Provide your immudb address if not set as an environmental variable",
+        required=False
+    )
+
+    parser.add_argument(
+        "--immudb-public-key-file",
+        type=str,
+        help="Provide your immudb public key file if not set as an environmental variable",
+        required=False
     )
 
     return parser
@@ -505,20 +513,26 @@ def cli_main():
     }
 
     args = create_parser().parse_args()
-    signer_id = args.signer_id or SIGNER_ID
+    immudb_wrapper = ImmudbWrapper(
+        username=args.immudb_username or os.getenv('IMMUDB_USERNAME'),
+        password=args.immudb_password or os.getenv('IMMUDB_PASSWORD'),
+        database=args.immudb_database or os.getenv('IMMUDB_DATABASE'),
+        immudb_address=args.immudb_address or os.getenv('IMMUDB_ADDRESS'),
+        public_key_file=args.immudb_public_key_file or os.getenv('IMMUDB_PUBLIC_KEY_FILE'),
+    )
     albs_url = args.albs_url or ALBS_URL
     if args.build_id:
         sbom = get_info_about_build(
             args.build_id,
-            signer_id=signer_id,
             albs_url=albs_url,
+            immudb_wrapper=immudb_wrapper,
         )
         sbom_object_type = 'build'
     else:
         sbom = get_info_about_package(
             args.rpm_package_hash,
-            signer_id=signer_id,
             albs_url=albs_url,
+            immudb_wrapper=immudb_wrapper,
         )
         sbom_object_type = 'package'
 

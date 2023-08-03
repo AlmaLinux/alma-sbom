@@ -11,7 +11,7 @@ import sys
 from git import Repo
 from git.exc import InvalidGitRepositoryError, GitCommandError
 
-from cas_wrapper import CasWrapper
+from immudb_wrapper import ImmudbWrapper
 
 def create_parser():
     parser = argparse.ArgumentParser(
@@ -21,17 +21,37 @@ def create_parser():
     )
 
     parser.add_argument(
-        "--cas-signer-id",
+        "--immudb-username",
         type=str,
-        help="Provide the CAS signerID if you want to authenticate assets " \
-            "notarized by other CAS users",
+        help="Provide your immudb username if not set as an environmental variable",
         required=False
     )
 
     parser.add_argument(
-        "--cas-api-key",
+        "--immudb-password",
         type=str,
-        help="Provide your CAS API KEY if not set as an environmental variable",
+        help="Provide your immudb password if not set as an environmental variable",
+        required=False
+    )
+
+    parser.add_argument(
+        "--immudb-database",
+        type=str,
+        help="Provide your immudb database if not set as an environmental variable",
+        required=False
+    )
+
+    parser.add_argument(
+        "--immudb-address",
+        type=str,
+        help="Provide your immudb address if not set as an environmental variable",
+        required=False
+    )
+
+    parser.add_argument(
+        "--immudb-public-key-file",
+        type=str,
+        help="Provide your immudb public key file if not set as an environmental variable",
         required=False
     )
 
@@ -162,9 +182,9 @@ class GitRepo(Repo):
         return "/".join(debranded_tag)
 
 def notarize(
-        cw: CasWrapper,
+        immudb_wrapper: ImmudbWrapper,
         repo_path: str,
-        upstream_commit_sbom_hash: str = None
+        upstream_commit_sbom_hash: str = None,
     ):
     metadata = {
         "sbom_api_ver": "0.2",
@@ -177,10 +197,11 @@ def notarize(
         )
         metadata['upstream_commit_sbom_hash'] = upstream_commit_sbom_hash
 
-    notarized_hash = cw.notarize(
-        local_path=f"git://{repo_path}",
-        metadata=metadata
+    result = immudb_wrapper.notarize_git_repo(
+        repo_path=repo_path,
+        user_metadata=metadata,
     )
+    notarized_hash = result.get('value', {}).get('Hash')
 
     return notarized_hash
 
@@ -199,20 +220,31 @@ def cli_main():
 
     logging.info("Starting git_notarize.py")
 
-    cas_api_key = args.cas_api_key or os.getenv('CAS_API_KEY')
-    if not cas_api_key:
+    immudb_username, immudb_password = (
+        args.immudb_username or os.getenv('IMMUDB_USERNAME'),
+        args.immudb_password or os.getenv('IMMUDB_PASSWORD'),
+    )
+    if not immudb_username:
         logging.error(
-            "No CAS_API_KEY found, and it's required to operate with CAS. " \
-            "You can either set it as an environmental variable (CAS_API_KEY) " \
-            "or providing it using the --cas-api-key option."
+            "No IMMUDB_USERNAME found, and it's required to operate with CAS. "
+            "You can either set it as an environmental variable or providing "
+            "it using the --immudb-username option."
+        )
+        sys.exit(1)
+    if not immudb_password:
+        logging.error(
+            "No IMMUDB_PASSWORD found, and it's required to operate with CAS. "
+            "You can either set it as an environmental variable or providing "
+            "it using the --immudb-username option."
         )
         sys.exit(1)
 
-    cas_signer_id = args.cas_signer_id
-
-    cw = CasWrapper(
-        cas_signer_id=cas_signer_id,
-        cas_api_key=cas_api_key
+    immudb_wrapper = ImmudbWrapper(
+        username=immudb_username,
+        password=immudb_password,
+        database=args.immudb_database or os.getenv('IMMUDB_DATABASE'),
+        immudb_address=args.immudb_address or os.getenv('IMMUDB_ADDRESS'),
+        public_key_file=args.immudb_public_key_file or os.getenv('IMMUDB_PUBLIC_KEY_FILE'),
     )
 
     alma_repo_path = os.path.abspath(args.local_git_repo)
@@ -279,10 +311,11 @@ def cli_main():
     current_tag_is_authenticated = False
     current_cas_hash = None
     try:
-        current_tag_is_authenticated, current_cas_hash = cw.authenticate_source(
-            f"git://{alma_repo_path}",
-            signer_id=cas_signer_id
+        result = immudb_wrapper.authenticate_git_repo(
+            alma_repo_path,
         )
+        current_tag_is_authenticated = result.get('verified', False)
+        current_cas_hash = result.get('value', {}).get('Hash')
     except Exception:
         pass
 
@@ -313,7 +346,7 @@ def cli_main():
             logging.info(
                 "Notarizing tag without a corresponding upstream CAS hash"
             )
-            cas_hash = notarize(cw, alma_repo_path)
+            cas_hash = notarize(immudb_wrapper, alma_repo_path)
             logging.info(
                 "The tag %s has been notarized. CAS hash: %s" % \
                 (current_tag, cas_hash)
@@ -333,10 +366,11 @@ def cli_main():
         matching_cas_hash = None
         logging.debug("Authenticating matching tag %s" % matching_tag)
         try:
-            matching_tag_is_authenticated, matching_cas_hash = cw.authenticate_source(
-                f"git://{alma_repo_path}",
-                signer_id=cas_signer_id
+            result = immudb_wrapper.authenticate_git_repo(
+                alma_repo_path,
             )
+            matching_tag_is_authenticated = result.get('verified', False)
+            matching_cas_hash = result.get('value', {}).get('Hash')
         except Exception:
             logging.warning(
                 "Couldn't authenticate the matching tag %s" % matching_tag
@@ -355,7 +389,7 @@ def cli_main():
                 logging.info(
                     "Notarizing the matching upstream tag"
                 )
-                matching_cas_hash = notarize(cw, alma_repo_path)
+                matching_cas_hash = notarize(immudb_wrapper, alma_repo_path)
                 logging.info(
                     "The matching upstream tag %s has been notarized. "\
                     "CAS hash: %s" % (matching_tag, matching_cas_hash)
@@ -363,7 +397,7 @@ def cli_main():
 
         # git checkout to the current_branch
         alma_repo.git.checkout(current_branch)
-        alma_cas_hash = notarize(cw, alma_repo_path, matching_cas_hash)
+        alma_cas_hash = notarize(immudb_wrapper, alma_repo_path, matching_cas_hash)
         logging.info(
             "The AlmaLinux tag %s has been notarized. CAS hash: %s" % \
             (current_tag, alma_cas_hash)

@@ -1,4 +1,4 @@
-from cas_wrapper import CasWrapper
+from immudb_wrapper import ImmudbWrapper
 from version import __version__
 
 ALMAOS_VENDOR = 'AlmaLinux OS Foundation'
@@ -20,7 +20,7 @@ TOOLS = [
     {
         "vendor": "Codenotary Inc",
         "name": "Community Attestation Service (CAS)",
-        "version": CasWrapper.get_version()
+        "version": ImmudbWrapper.get_version()
     }
 ]
 TOOLS_SPDX = [
