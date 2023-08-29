@@ -249,16 +249,16 @@ def cli_main():
     )
     if not immudb_username:
         logging.error(
-            "No IMMUDB_USERNAME found, and it's required to operate with CAS. "
+            "No IMMUDB_USERNAME found, and it's required to operate with immudb. "
             "You can either set it as an environmental variable or providing "
             "it using the --immudb-username option."
         )
         sys.exit(1)
     if not immudb_password:
         logging.error(
-            "No IMMUDB_PASSWORD found, and it's required to operate with CAS. "
+            "No IMMUDB_PASSWORD found, and it's required to operate with immudb. "
             "You can either set it as an environmental variable or providing "
-            "it using the --immudb-username option."
+            "it using the --immudb-password option."
         )
         sys.exit(1)
 
@@ -340,21 +340,21 @@ def cli_main():
 
     logging.debug("Authenticating current tag %s", current_tag)
     current_tag_is_authenticated = False
-    current_cas_hash = None
+    current_immudb_hash = None
     try:
         result = immudb_wrapper.authenticate_git_repo(
             alma_repo_path,
         )
         current_tag_is_authenticated = result.get('verified', False)
-        current_cas_hash = result.get('value', {}).get('Hash')
+        current_immudb_hash = result.get('value', {}).get('Hash')
     except Exception:
         pass
 
     if current_tag_is_authenticated:
         logging.info(
-            "Current tag is already notarized, its CAS hash is %s.\n"
+            "Current tag is already notarized, its Immudb hash is %s.\n"
             "Nothing to do, exiting now.",
-            current_cas_hash,
+            current_immudb_hash,
         )
         sys.exit(0)
 
@@ -374,18 +374,18 @@ def cli_main():
             logging.error(
                 "Use --notarize-without-upstream-hash if you really want to "
                 "notarize this AlmaLinux source without a corresponding "
-                "upstream CAS hash"
+                "upstream Immudb hash"
             )
             sys.exit(1)
         else:
             logging.info(
-                "Notarizing tag without a corresponding upstream CAS hash"
+                "Notarizing tag without a corresponding upstream Immudb hash"
             )
-            cas_hash = notarize(immudb_wrapper, alma_repo_path)
+            immudb_hash = notarize(immudb_wrapper, alma_repo_path)
             logging.info(
-                "The tag %s has been notarized. CAS hash: %s",
+                "The tag %s has been notarized. Immudb hash: %s",
                 current_tag,
-                cas_hash,
+                immudb_hash,
             )
             sys.exit(0)
     else:
@@ -400,14 +400,14 @@ def cli_main():
         alma_repo.git.checkout(matching_tag)
 
         matching_tag_is_authenticated = False
-        matching_cas_hash = None
+        matching_immudb_hash = None
         logging.debug("Authenticating matching tag %s", matching_tag)
         try:
             result = immudb_wrapper.authenticate_git_repo(
                 alma_repo_path,
             )
             matching_tag_is_authenticated = result.get('verified', False)
-            matching_cas_hash = result.get('value', {}).get('Hash')
+            matching_immudb_hash = result.get('value', {}).get('Hash')
         except Exception:
             logging.warning(
                 "Couldn't authenticate the matching tag %s",
@@ -425,25 +425,25 @@ def cli_main():
                 sys.exit(1)
             else:
                 logging.info("Notarizing the matching upstream tag")
-                matching_cas_hash = notarize(immudb_wrapper, alma_repo_path)
+                matching_immudb_hash = notarize(immudb_wrapper, alma_repo_path)
                 logging.info(
                     "The matching upstream tag %s has been notarized. "
-                    "CAS hash: %s",
+                    "Immudb hash: %s",
                     matching_tag,
-                    matching_cas_hash,
+                    matching_immudb_hash,
                 )
 
         # git checkout to the current_branch
         alma_repo.git.checkout(current_branch)
-        alma_cas_hash = notarize(
+        alma_immudb_hash = notarize(
             immudb_wrapper,
             alma_repo_path,
-            matching_cas_hash,
+            matching_immudb_hash,
         )
         logging.info(
-            "The AlmaLinux tag %s has been notarized. CAS hash: %s",
+            "The AlmaLinux tag %s has been notarized. Immudb hash: %s",
             current_tag,
-            alma_cas_hash,
+            alma_immudb_hash,
         )
 
 

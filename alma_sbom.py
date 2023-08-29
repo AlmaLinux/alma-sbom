@@ -115,42 +115,42 @@ def generate_sbom_version(json_data: Dict) -> int:
     return sbom_version
 
 
-def _extract_cas_info_about_package(
-    cas_hash: str,
+def _extract_immudb_info_about_package(
+    immudb_hash: str,
     immudb_wrapper: ImmudbWrapper,
 ) -> Dict:
-    result = immudb_wrapper.authenticate(cas_hash)
+    result = immudb_wrapper.authenticate(immudb_hash)
     return result.get('value', {})
 
 
 def _get_specific_info_about_package(
-    cas_info_about_package: Dict,
+    immudb_info_about_package: Dict,
 ) -> Tuple[Optional[str], PackageNevra]:
-    cas_metadata = cas_info_about_package['Metadata']
+    immudb_metadata = immudb_info_about_package['Metadata']
     # We have `sbom_api_ver` in git records and `sbom_api`
     # in RPM package records. The latter parameter is the bug,
     # but we should handle it anyway
     # since a lot of packages already have it.
-    api_ver = cas_metadata.get('sbom_api_ver')
+    api_ver = immudb_metadata.get('sbom_api_ver')
     if not api_ver:
-        api_ver = cas_metadata.get('sbom_api')
+        api_ver = immudb_metadata.get('sbom_api')
     if not api_ver:
         raise ValueError(
-            'CAS metadata is malformed, API version cannot be detected'
+            'Immudb metadata is malformed, API version cannot be detected'
         )
     if api_ver == '0.1':
-        package_name = cas_info_about_package['name']
+        package_name = immudb_info_about_package['name']
         package_nevra = split_name_of_package_by_nevra(package_name)
         source_rpm = None
     else:
         package_nevra = PackageNevra(
-            name=cas_metadata['name'],
-            epoch=cas_metadata['epoch'],
-            version=cas_metadata['version'],
-            release=cas_metadata['release'],
-            arch=cas_metadata['arch'],
+            name=immudb_metadata['name'],
+            epoch=immudb_metadata['epoch'],
+            version=immudb_metadata['version'],
+            release=immudb_metadata['release'],
+            arch=immudb_metadata['arch'],
         )
-        source_rpm = cas_metadata['sourcerpm']
+        source_rpm = immudb_metadata['sourcerpm']
     return source_rpm, package_nevra
 
 
@@ -186,13 +186,13 @@ def _generate_purl(package_nevra: PackageNevra, source_rpm: str):
     return purl
 
 
-def add_package_source_info(cas_metadata: Dict, component: Dict):
-    if cas_metadata['source_type'] == 'git':
+def add_package_source_info(immudb_metadata: Dict, component: Dict):
+    if immudb_metadata['source_type'] == 'git':
         component['properties'].extend(
             [
                 {
                     'name': 'almalinux:albs:build:source:gitURL',
-                    'value': cas_metadata['git_url'],
+                    'value': immudb_metadata['git_url'],
                 },
                 {
                     'name': 'almalinux:albs:build:source:type',
@@ -200,26 +200,26 @@ def add_package_source_info(cas_metadata: Dict, component: Dict):
                 },
                 {
                     'name': 'almalinux:albs:build:source:gitCommit',
-                    'value': cas_metadata['git_commit'],
+                    'value': immudb_metadata['git_commit'],
                 },
                 {
                     'name': 'almalinux:albs:build:source:gitRef',
-                    'value': cas_metadata['git_ref'],
+                    'value': immudb_metadata['git_ref'],
                 },
                 {
-                    'name': 'almalinux:albs:build:source:gitCommitCasHash',
-                    'value': cas_metadata['alma_commit_sbom_hash']
-                    if 'alma_commit_sbom_hash' in cas_metadata
+                    'name': 'almalinux:albs:build:source:gitCommitImmudbHash',
+                    'value': immudb_metadata['alma_commit_sbom_hash']
+                    if 'alma_commit_sbom_hash' in immudb_metadata
                     else None,
                 },
             ]
         )
-    elif cas_metadata['source_type'] == 'srpm':
+    elif immudb_metadata['source_type'] == 'srpm':
         component['properties'].extend(
             [
                 {
                     'name': 'almalinux:albs:build:source:srpmURL',
-                    'value': cas_metadata['srpm_url'],
+                    'value': immudb_metadata['srpm_url'],
                 },
                 {
                     'name': 'almalinux:albs:build:source:type',
@@ -227,32 +227,32 @@ def add_package_source_info(cas_metadata: Dict, component: Dict):
                 },
                 {
                     'name': 'almalinux:albs:build:source:srpmChecksum',
-                    'value': cas_metadata['srpm_sha256'],
+                    'value': immudb_metadata['srpm_sha256'],
                 },
                 {
                     'name': 'almalinux:albs:build:source:srpmNEVRA',
-                    'value': cas_metadata['srpm_nevra'],
+                    'value': immudb_metadata['srpm_nevra'],
                 },
             ]
         )
 
 
 def get_info_about_package(
-    cas_hash: str,
+    immudb_hash: str,
     albs_url: str,
     immudb_wrapper: ImmudbWrapper,
 ):
     result = {}
-    cas_info_about_package = _extract_cas_info_about_package(
-        cas_hash=cas_hash,
+    immudb_info_about_package = _extract_immudb_info_about_package(
+        immudb_hash=immudb_hash,
         immudb_wrapper=immudb_wrapper,
     )
     source_rpm, package_nevra = _get_specific_info_about_package(
-        cas_info_about_package=cas_info_about_package,
+        immudb_info_about_package=immudb_info_about_package,
     )
-    cas_metadata = cas_info_about_package['Metadata']
+    immudb_metadata = immudb_info_about_package['Metadata']
     result['version'] = 1
-    if 'unsigned_hash' in cas_metadata:
+    if 'unsigned_hash' in immudb_metadata:
         result['version'] += 1
     result['component'] = {
         'name': package_nevra.name,
@@ -264,7 +264,7 @@ def get_info_about_package(
         'hashes': [
             {
                 'alg': 'SHA-256',
-                'content': cas_hash,
+                'content': immudb_hash,
             }
         ],
         'cpe': _generate_cpe(package_nevra=package_nevra),
@@ -295,41 +295,41 @@ def get_info_about_package(
             },
             {
                 'name': 'almalinux:package:buildhost',
-                'value': cas_metadata['build_host'],
+                'value': immudb_metadata['build_host'],
             },
             {
                 'name': 'almalinux:package:timestamp',
-                'value': cas_info_about_package['timestamp'],
+                'value': immudb_info_about_package['timestamp'],
             },
             {
                 'name': 'almalinux:albs:build:targetArch',
-                'value': cas_metadata['build_arch'],
+                'value': immudb_metadata['build_arch'],
             },
             {
                 'name': 'almalinux:albs:build:packageType',
                 'value': 'rpm',
             },
             {
-                'name': 'almalinux:sbom:casHash',
-                'value': cas_hash,
+                'name': 'almalinux:sbom:immudbHash',
+                'value': immudb_hash,
             },
             {
                 'name': 'almalinux:albs:build:ID',
-                'value': cas_metadata['build_id'],
+                'value': immudb_metadata['build_id'],
             },
             {
                 'name': 'almalinux:albs:build:URL',
-                'value': f'{albs_url}/build/{cas_metadata["build_id"]}',
+                'value': f'{albs_url}/build/{immudb_metadata["build_id"]}',
             },
             {
                 'name': 'almalinux:albs:build:author',
-                'value': cas_metadata['built_by'],
+                'value': immudb_metadata['built_by'],
             },
         ],
     }
 
     add_package_source_info(
-        cas_metadata=cas_metadata,
+        immudb_metadata=immudb_metadata,
         component=result['component'],
     )
     return result
@@ -374,14 +374,14 @@ def get_info_about_build(
         for artifact in task['artifacts']:
             if artifact['type'] != 'rpm':
                 continue
-            cas_hash = artifact['cas_hash']
-            result_of_execution = _extract_cas_info_about_package(
-                cas_hash=cas_hash,
+            immudb_hash = artifact['cas_hash']
+            result_of_execution = _extract_immudb_info_about_package(
+                immudb_hash=immudb_hash,
                 immudb_wrapper=immudb_wrapper,
             )
-            cas_metadata = result_of_execution['Metadata']
+            immudb_metadata = result_of_execution['Metadata']
             source_rpm, package_nevra = _get_specific_info_about_package(
-                cas_info_about_package=result_of_execution,
+                immudb_info_about_package=result_of_execution,
             )
             component = {
                 'name': package_nevra.name,
@@ -394,7 +394,7 @@ def get_info_about_build(
                 'hashes': [
                     {
                         'alg': 'SHA-256',
-                        'content': cas_hash,
+                        'content': immudb_hash,
                     }
                 ],
                 'properties': [
@@ -420,18 +420,18 @@ def get_info_about_build(
                     },
                     {
                         'name': 'almalinux:package:buildhost',
-                        'value': cas_metadata['build_host'],
+                        'value': immudb_metadata['build_host'],
                     },
                     {
                         'name': 'almalinux:albs:build:targetArch',
-                        'value': cas_metadata['build_arch'],
+                        'value': immudb_metadata['build_arch'],
                     },
                     {
                         'name': 'almalinux:albs:build:packageType',
                         'value': 'rpm',
                     },
                     {
-                        'name': 'almalinux:sbom:casHash',
+                        'name': 'almalinux:sbom:immudbHash',
                         'value': result_of_execution['Hash'],
                     },
                     {
@@ -444,12 +444,12 @@ def get_info_about_build(
                     },
                     {
                         'name': 'almalinux:albs:build:author',
-                        'value': cas_metadata['built_by'],
+                        'value': immudb_metadata['built_by'],
                     },
                 ],
             }
             add_package_source_info(
-                cas_metadata=cas_metadata,
+                immudb_metadata=immudb_metadata,
                 component=component,
             )
             components.append(component)

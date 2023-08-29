@@ -19,8 +19,8 @@ TOOLS = [
         "version": __version__,
     },
     {
-        "vendor": "Codenotary Inc",
-        "name": "Community Attestation Service (CAS)",
+        "vendor": ALMAOS_VENDOR,
+        "name": "Immudb Wrapper",
         "version": ImmudbWrapper.get_version(),
     },
 ]
