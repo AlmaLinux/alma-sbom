@@ -265,8 +265,16 @@ def cli_main():
     immudb_wrapper = ImmudbWrapper(
         username=immudb_username,
         password=immudb_password,
-        database=args.immudb_database or os.getenv('IMMUDB_DATABASE'),
-        immudb_address=args.immudb_address or os.getenv('IMMUDB_ADDRESS'),
+        database=(
+            args.immudb_database
+            or os.getenv('IMMUDB_DATABASE')
+            or ImmudbWrapper.almalinux_database_name
+        ),
+        immudb_address=(
+            args.immudb_address
+            or os.getenv('IMMUDB_ADDRESS')
+            or ImmudbWrapper.almalinux_database_address
+        ),
         public_key_file=args.immudb_public_key_file
         or os.getenv('IMMUDB_PUBLIC_KEY_FILE'),
     )

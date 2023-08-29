@@ -28,11 +28,11 @@ The AlmaLinux OS SBOM CLI accepts the following arguments:
 * __build-id__: The Build id you want to generate the SBOM for
 * __rpm-package-hash__: The cas hash of the package you want to generate the SBOM for
 * __albs-url__: The URL of the AlmaLinux Build System, if different from the production one, _https://build.almalinux.org_
-* __immudb-username__: The immudb username, must be provided either by setting the environmental variable or by using this option
-* __immudb-password__: The immudb password, must be provided either by setting the environmental variable or by using this option
-* __immudb-database__: The immudb database name, must be provided either by setting the environmental variable or by using this option
-* __immudb-address__: The immudb host address, must be provided either by setting the environmental variable or by using this option
-* __immudb-public-key-file__: Path of the public key to use for authenticating requests, must be provided either by setting the environmental variable or by using this option
+* __immudb-username__: The immudb username, could be provided either by setting the environmental variable or by using this option, by default uses value from ImmudbWrapper module
+* __immudb-password__: The immudb password, could be provided either by setting the environmental variable or by using this option, by default uses value from ImmudbWrapper module
+* __immudb-database__: The immudb database name, could be provided either by setting the environmental variable or by using this option, by default uses value from ImmudbWrapper module
+* __immudb-address__: The immudb host address, could be provided either by setting the environmental variable or by using this option, by default uses value from ImmudbWrapper module 
+* __immudb-public-key-file__: (Optional) Path of the public key to use for authenticating requests, must be provided either by setting the environmental variable or by using this option
 
 Note that you have to either provide a _build-id_ or an _rpm-package-hash_
 
@@ -57,11 +57,11 @@ To summarize what the tool does:
 * If no upstream matching tag can be found, the tool allows notarizing the AlmaLinux source without having a notarized upstream corresponding tag
 
 The AlmaLinux Git Notarization Tool accepts the following arguments:
-* __immudb-username__: The immudb username, must be provided either by setting the environmental variable or by using this option
-* __immudb-password__: The immudb password, must be provided either by setting the environmental variable or by using this option
-* __immudb-database__: The immudb database name, must be provided either by setting the environmental variable or by using this option
-* __immudb-address__: The immudb host address, must be provided either by setting the environmental variable or by using this option
-* __immudb-public-key-file__: Path of the public key to use for authenticating requests, must be provided either by setting the environmental variable or by using this option
+* __immudb-username__: The immudb username, must be provided either by setting the environmental variable or by using this option to notarize sources
+* __immudb-password__: The immudb password, must be provided either by setting the environmental variable or by using this option to notarize sources
+* __immudb-database__: The immudb database name, could be provided either by setting the environmental variable or by using this option, by default uses value from ImmudbWrapper module
+* __immudb-address__: The immudb host address, could be provided either by setting the environmental variable or by using this option, by default uses value from ImmudbWrapper module 
+* __immudb-public-key-file__: (Optional) Path of the public key to use for authenticating requests, must be provided either by setting the environmental variable or by using this option
 * __local-git-repo__: The path to a local AlmaLinux git source repository. If not provided, uses the current working directory
 * __notarize-without-upstream-hash__: Use this option if you want to force the notarization of an AlmaLinux commit even when there's no matched upstream tag
 * __notarize-upstream-tag__: Use this option if you want to force the notarization of an upstream tag before notarizing an AlmaLinux source
