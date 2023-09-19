@@ -65,6 +65,7 @@ The AlmaLinux Git Notarization Tool accepts the following arguments:
 * __local-git-repo__: The path to a local AlmaLinux git source repository. If not provided, uses the current working directory
 * __notarize-without-upstream-hash__: Use this option if you want to force the notarization of an AlmaLinux commit even when there's no matched upstream tag
 * __notarize-upstream-tag__: Use this option if you want to force the notarization of an upstream tag before notarizing an AlmaLinux source
+* __notarize-without-imported-source-notarization__: Use this option if you want to force the notarization of an upstream tag without an imported source notarization
 * __debug__: This option will make the tool to display debug information while running, which could be useful when diagnosing a problem in the tool
 
 There are no mandatory arguments to pass (unless strictly required to force a notarization), if you are currently in a local clone of an AlmaLinux source, you can run `python /path/to/git_notarize.py`.
