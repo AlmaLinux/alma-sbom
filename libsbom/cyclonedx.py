@@ -2,16 +2,16 @@ import json
 import logging
 import xml.dom.minidom
 
-from cas_wrapper import CasWrapper
-from cyclonedx.model import Property, HashType, HashAlgorithm
+from cyclonedx.model import HashAlgorithm, HashType, Property
 from cyclonedx.model.bom import Bom, Tool
 from cyclonedx.model.component import Component, ComponentType
 from cyclonedx.output import OutputFormat, get_instance
-
 from packageurl import PackageURL
+
 from version import __version__
 
 from . import constants
+
 
 class SBOM:
     def __init__(self, data, sbom_object_type, output_format, output_file):
@@ -27,9 +27,7 @@ class SBOM:
         else:
             self.generate_package_sbom()
 
-        output = get_instance(
-            bom=self._bom,
-            output_format=self.output_format)
+        output = get_instance(bom=self._bom, output_format=self.output_format)
 
         # [Potential] TODOs:
         # - Shall we check and/or include extension .json|.xml?
@@ -37,21 +35,20 @@ class SBOM:
         output_str = output.output_as_string()
         if self.output_format == OutputFormat.XML:
             xml_output = xml.dom.minidom.parseString(output_str)
-            ## Post generation version bump
+            # Post generation version bump
             if 'version' in self.input_data:
                 xml_output.firstChild.setAttribute(
-                    'version',
-                    str(self.input_data['version'])
+                    'version', str(self.input_data['version'])
                 )
 
-            pretty_output=xml_output.toprettyxml()
+            pretty_output = xml_output.toprettyxml()
         else:
             json_output = json.loads(output_str)
-            ## Post generation version bump
+            # Post generation version bump
             if 'version' in self.input_data:
                 json_output['version'] = self.input_data['version']
 
-            pretty_output=json.dumps(json_output, indent=4)
+            pretty_output = json.dumps(json_output, indent=4)
 
         if self.output_file:
             with open(self.output_file, 'w') as fd:
@@ -63,9 +60,9 @@ class SBOM:
     @staticmethod
     def __generate_tool(tool):
         return Tool(
-                vendor=tool['vendor'],
-                name=tool['name'],
-                version=tool['version'],
+            vendor=tool['vendor'],
+            name=tool['name'],
+            version=tool['version'],
         )
 
     @staticmethod
@@ -73,8 +70,8 @@ class SBOM:
         # See Property spec:
         # https://cyclonedx.org/docs/1.4/json/#components_items_properties_items_value
         return Property(
-                name=prop['name'],
-                value=str(prop['value']),
+            name=prop['name'],
+            value=str(prop['value']),
         )
 
     @staticmethod
@@ -90,15 +87,11 @@ class SBOM:
             name=comp['name'],
             version=comp['version'],
             publisher='AlmaLinux',
-            hashes=[
-                self.__generate_hash(h)
-                for h in comp['hashes']
-            ],
+            hashes=[self.__generate_hash(h) for h in comp['hashes']],
             cpe=comp['cpe'],
             purl=PackageURL.from_string(comp['purl']),
             properties=[
-                self.__generate_prop(prop)
-                for prop in comp['properties']
+                self.__generate_prop(prop) for prop in comp['properties']
             ],
         )
 
@@ -115,8 +108,7 @@ class SBOM:
             self._bom.metadata.tools.add(self.__generate_tool(tool))
 
         properties = [
-            self.__generate_prop(prop)
-            for prop in input_metadata['properties']
+            self.__generate_prop(prop) for prop in input_metadata['properties']
         ]
 
         component = Component(

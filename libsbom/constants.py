@@ -1,4 +1,5 @@
-from cas_wrapper import CasWrapper
+from immudb_wrapper import ImmudbWrapper
+
 from version import __version__
 
 ALMAOS_VENDOR = 'AlmaLinux OS Foundation'
@@ -10,23 +11,23 @@ TOOLS = [
     {
         "vendor": ALMAOS_VENDOR,
         "name": "AlmaLinux Build System",
-        "version": "0.1"  # Shall we start versioning ALBS?
+        "version": "0.1",  # Shall we start versioning ALBS?
     },
     {
         "vendor": ALMAOS_VENDOR,
         "name": "alma-sbom",
-        "version": __version__
+        "version": __version__,
     },
     {
-        "vendor": "Codenotary Inc",
-        "name": "Community Attestation Service (CAS)",
-        "version": CasWrapper.get_version()
-    }
+        "vendor": ALMAOS_VENDOR,
+        "name": "Immudb Wrapper",
+        "version": ImmudbWrapper.get_version(),
+    },
 ]
 TOOLS_SPDX = [
     {
         "vendor": ALMAOS_VENDOR,
         "name": "spdx-tools",
-        "version": "0.8"
+        "version": "0.8",
     }
 ]
