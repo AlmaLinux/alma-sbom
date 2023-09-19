@@ -25,6 +25,7 @@ setup(
         'dataclasses>=0.8',
         'cyclonedx-python-lib==2.7.1',
         'spdx-tools==0.8',
+        'urllib3<2.0',
         'packageurl-python==0.10.3',
         'GitPython==3.1.29',
         'immudb_wrapper',

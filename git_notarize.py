@@ -100,6 +100,16 @@ def create_parser():
     )
 
     parser.add_argument(
+        "--notarize-without-imported-source-notarization",
+        help=(
+            "Force notarization of upstream tag without an "
+            "imported source notarization"
+        ),
+        action="store_true",
+        required=False,
+    )
+
+    parser.add_argument(
         "--debug",
         help=(
             "Display debug information while running git_notarize.py. "
@@ -268,15 +278,16 @@ def cli_main():
         database=(
             args.immudb_database
             or os.getenv('IMMUDB_DATABASE')
-            or ImmudbWrapper.almalinux_database_name
+            or ImmudbWrapper.almalinux_database_name()
         ),
         immudb_address=(
             args.immudb_address
             or os.getenv('IMMUDB_ADDRESS')
-            or ImmudbWrapper.almalinux_database_address
+            or ImmudbWrapper.almalinux_database_address()
         ),
-        public_key_file=args.immudb_public_key_file
-        or os.getenv('IMMUDB_PUBLIC_KEY_FILE'),
+        public_key_file=(
+            args.immudb_public_key_file or os.getenv('IMMUDB_PUBLIC_KEY_FILE')
+        ),
     )
 
     alma_repo_path = os.path.abspath(args.local_git_repo)
@@ -327,13 +338,20 @@ def cli_main():
     tag_type, tag_distro, tag_nvr = alma_repo.get_split_tag(
         alma_repo.get_name(), current_tag
     )
-    if tag_type.startswith("imports") and tag_distro.startswith("c"):
+    if (
+        tag_type.startswith("imports")
+        and tag_distro.startswith("c")
+        and not args.notarize_without_imported_source_notarization
+    ):
         logging.error(
-            "Exiting as the current tag %s looks like an imported source "
-            "from CentOS.\nImported sources should have been automatically "
+            "Exiting as the current tag %s looks like an imported source\n"
+            "Imported sources should have been automatically "
             "notarized at import time, and this tool is meant to help with "
             "notarization of modified sources. Are you maybe in the wrong "
-            "branch/tag?",
+            "branch/tag?\n"
+            "Use --notarize-without-imported-source-notarization if you "
+            "really want to notarize this AlmaLinux source without "
+            "an imported source notarization",
             current_tag,
         )
         sys.exit(1)
