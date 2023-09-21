@@ -119,8 +119,10 @@ def _extract_immudb_info_about_package(
     immudb_hash: str,
     immudb_wrapper: ImmudbWrapper,
 ) -> Dict:
-    result = immudb_wrapper.authenticate(immudb_hash)
-    return result.get('value', {})
+    response = immudb_wrapper.authenticate(immudb_hash)
+    result = response.get('value', {})
+    result['timestamp'] = response.get('timestamp')
+    return result
 
 
 def _get_specific_info_about_package(
@@ -139,7 +141,7 @@ def _get_specific_info_about_package(
             'Immudb metadata is malformed, API version cannot be detected'
         )
     if api_ver == '0.1':
-        package_name = immudb_info_about_package['name']
+        package_name = immudb_info_about_package['Name']
         package_nevra = split_name_of_package_by_nevra(package_name)
         source_rpm = None
     else:
@@ -559,22 +561,22 @@ def cli_main():
         username=(
             args.immudb_username
             or os.getenv('IMMUDB_USERNAME')
-            or ImmudbWrapper.read_only_username
+            or ImmudbWrapper.read_only_username()
         ),
         password=(
             args.immudb_password
             or os.getenv('IMMUDB_PASSWORD')
-            or ImmudbWrapper.read_only_password
+            or ImmudbWrapper.read_only_password()
         ),
         database=(
             args.immudb_database
             or os.getenv('IMMUDB_DATABASE')
-            or ImmudbWrapper.almalinux_database_name
+            or ImmudbWrapper.almalinux_database_name()
         ),
         immudb_address=(
             args.immudb_address
             or os.getenv('IMMUDB_ADDRESS')
-            or ImmudbWrapper.almalinux_database_address
+            or ImmudbWrapper.almalinux_database_address()
         ),
         public_key_file=(
             args.immudb_public_key_file or os.getenv('IMMUDB_PUBLIC_KEY_FILE')
