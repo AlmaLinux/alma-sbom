@@ -1,6 +1,6 @@
 import datetime
 import uuid
-from typing import Optional
+from typing import Optional, Union
 
 from spdx_tools.spdx.model import (
     Actor,
@@ -38,8 +38,8 @@ writers = {
 def component_get_property(
     component: dict,
     property_name: str,
-) -> Optional[str]:
-    for prop in component["properties"]:
+) -> Optional[Union[str, int]]:
+    for prop in component.get("properties", []):
         if prop["name"] == property_name:
             return prop["value"]
 
@@ -88,14 +88,8 @@ def make_checksum(algo: str, value: str) -> Checksum:
     return Checksum(algo_map[algo], value)
 
 
-def buildtime_to_datetime(buildtime: str) -> datetime.datetime:
-    """Parse buildtime without nanoseconds into a datetime object.
-
-    The build timestamp is stored in nanosecond-precision in Immudb, but
-    datetime.fromisoformat() on Python 3.10 or older is unable to parse
-    timestamps with sub-microsecond precision.
-    """
-    return datetime.datetime.fromisoformat(buildtime[:-4])
+def buildtime_to_datetime(buildtime: int) -> datetime.datetime:
+    return datetime.datetime.fromtimestamp(buildtime)
 
 
 def component_get_buildtime(component: dict) -> Optional[datetime.datetime]:
@@ -105,10 +99,9 @@ def component_get_buildtime(component: dict) -> Optional[datetime.datetime]:
     )
 
     # Components in build SBOMs do not have timestamps
-    try:
-        return buildtime_to_datetime(buildtime)
-    except TypeError:
+    if not buildtime:
         return None
+    return buildtime_to_datetime(buildtime)
 
 
 def build_get_timestamp(build: dict) -> Optional[datetime.datetime]:
