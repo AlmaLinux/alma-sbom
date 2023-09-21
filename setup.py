@@ -31,7 +31,7 @@ setup(
         'immudb_wrapper',
     ],
     dependency_links=[
-        'git+https://github.com/AlmaLinux/immudb-wrapper.git@0.1.0#egg=immudb_wrapper'
+        'git+https://github.com/AlmaLinux/immudb-wrapper.git@0.1.1#egg=immudb_wrapper'
     ],
     python_requires=">=3.9",
 )
