@@ -26,6 +26,7 @@ from spdx_tools.spdx.writer.yaml import yaml_writer
 from version import __version__
 
 from . import constants
+from . import common
 
 writers = {
     'json': json_writer,
@@ -50,7 +51,7 @@ def make_cpe_ref(cpe: str) -> ExternalPackageRef:
     return ExternalPackageRef(
         ExternalPackageRefCategory.SECURITY,
         "cpe23Type",
-        cpe,
+        common.normalize_epoch_in_cpe(cpe),
     )
 
 
@@ -58,7 +59,7 @@ def make_purl_ref(purl: str) -> ExternalPackageRef:
     return ExternalPackageRef(
         ExternalPackageRefCategory.PACKAGE_MANAGER,
         "purl",
-        purl,
+        common.normalize_epoch_in_purl(purl),
     )
 
 
@@ -73,7 +74,8 @@ def make_annotation(spdxid: str, content: str) -> Annotation:
         annotation_type=AnnotationType.OTHER,
         annotator=this_tool,
         annotation_date=datetime.datetime.now(),
-        annotation_comment=content,
+        annotation_comment=common.normalize_epoch_in_prop(name=None,
+                                                          value=content),
     )
 
 
@@ -155,6 +157,7 @@ class SBOM:
         else:
             pkgname = self._input_data['component']['name']
             pkgvers = self._input_data['component']['version']
+            pkgvers = common.normalize_epoch_in_version(pkgvers)
             doc_name = f"{pkgname}-{pkgvers}"
 
         doc_uuid = uuid.uuid4()
@@ -189,7 +192,7 @@ class SBOM:
                 make_checksum(pkghash["alg"], pkghash["content"])
             ]
 
-        pkg.version = component["version"]
+        pkg.version = common.normalize_epoch_in_version(component['version'])
         pkg.supplier = self._org
         pkg.external_references += [
             make_cpe_ref(component["cpe"]),
@@ -208,14 +211,18 @@ class SBOM:
         self._document.relationships += [rel]
 
         for prop in component["properties"]:
-            note = make_annotation(pkgid, f"{prop['name']}={prop['value']}")
+            value = common.normalize_epoch_in_prop(prop['name'],
+                                                   str(prop['value']))
+            note = make_annotation(pkgid, f"{prop['name']}={value}")
             self._document.annotations += [note]
 
     def add_build(self, metadata):
         spdxid = self._document.creation_info.spdx_id
 
         for prop in metadata["properties"]:
-            note = make_annotation(spdxid, f"{prop['name']}={prop['value']}")
+            value = common.normalize_epoch_in_prop(prop['name'],
+                                                   str(prop['value']))
+            note = make_annotation(spdxid, f"{prop['name']}={value}")
             self._document.annotations += [note]
 
     def _generate(self):
