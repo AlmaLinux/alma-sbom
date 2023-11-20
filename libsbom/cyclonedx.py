@@ -86,7 +86,7 @@ class SBOM:
             component_type=ComponentType('library'),
             name=comp['name'],
             version=comp['version'],
-            publisher='AlmaLinux',
+            publisher=constants.ALMAOS_VENDOR,
             hashes=[self.__generate_hash(h) for h in comp['hashes']],
             cpe=comp['cpe'],
             purl=PackageURL.from_string(comp['purl']),
