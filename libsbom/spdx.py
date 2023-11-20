@@ -17,7 +17,7 @@ from spdx_tools.spdx.model import (
     Relationship,
     RelationshipType,
 )
-from spdx_tools.spdx.model.spdx_none import SpdxNone
+from spdx_tools.spdx.model.spdx_no_assertion import SpdxNoAssertion
 from spdx_tools.spdx.writer.json import json_writer
 from spdx_tools.spdx.writer.tagvalue import tagvalue_writer
 from spdx_tools.spdx.writer.xml import xml_writer
@@ -176,7 +176,7 @@ class SBOM:
         pkg = Package(
             spdx_id=pkgid,
             name=component["name"],
-            download_location=SpdxNone(),
+            download_location=SpdxNoAssertion(),
         )
         rel = Relationship(
             spdx_element_id="SPDXRef-DOCUMENT",
