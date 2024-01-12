@@ -89,7 +89,7 @@ class SBOM:
             component_type=ComponentType('library'),
             name=comp['name'],
             version=common.normalize_epoch_in_version(str(comp['version'])),
-            publisher='AlmaLinux',
+            publisher=constants.ALMAOS_VENDOR,
             hashes=[self.__generate_hash(h) for h in comp['hashes']],
             cpe=common.normalize_epoch_in_cpe(comp['cpe']),
             purl=PackageURL.from_string(purl),
