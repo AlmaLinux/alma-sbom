@@ -11,6 +11,7 @@ from packageurl import PackageURL
 from version import __version__
 
 from . import constants
+from . import common
 
 
 class SBOM:
@@ -71,7 +72,8 @@ class SBOM:
         # https://cyclonedx.org/docs/1.4/json/#components_items_properties_items_value
         return Property(
             name=prop['name'],
-            value=str(prop['value']),
+            value=common.normalize_epoch_in_prop(prop['name'],
+                                                 str(prop['value'])),
         )
 
     @staticmethod
@@ -82,14 +84,15 @@ class SBOM:
         )
 
     def __generate_package_component(self, comp):
+        purl = common.normalize_epoch_in_purl(comp['purl'])
         return Component(
             component_type=ComponentType('library'),
             name=comp['name'],
-            version=comp['version'],
+            version=common.normalize_epoch_in_version(str(comp['version'])),
             publisher=constants.ALMAOS_VENDOR,
             hashes=[self.__generate_hash(h) for h in comp['hashes']],
-            cpe=comp['cpe'],
-            purl=PackageURL.from_string(comp['purl']),
+            cpe=common.normalize_epoch_in_cpe(comp['cpe']),
+            purl=PackageURL.from_string(purl),
             properties=[
                 self.__generate_prop(prop) for prop in comp['properties']
             ],
