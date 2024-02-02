@@ -256,7 +256,8 @@ def get_info_about_package(
     result['version'] = 1
     if 'unsigned_hash' in immudb_metadata:
         result['version'] += 1
-    result['component'] = {
+    result['metadata'] = {}
+    result['metadata']['component'] = {
         'name': package_nevra.name,
         'version': (
             f'{package_nevra.epoch if package_nevra.epoch else ""}'
@@ -332,7 +333,7 @@ def get_info_about_package(
 
     add_package_source_info(
         immudb_metadata=immudb_metadata,
-        component=result['component'],
+        component=result['metadata']['component'],
     )
     return result
 
@@ -370,7 +371,8 @@ def get_info_about_build(
             },
         ],
     }
-    result['metadata'] = build_metadata
+    result['metadata'] = {}
+    result['metadata']['component'] = build_metadata
     components = []
     for task in json_data['tasks']:
         for artifact in task['artifacts']:

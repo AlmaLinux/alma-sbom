@@ -99,7 +99,7 @@ class SBOM:
         )
 
     def generate_build_sbom(self):
-        input_metadata = self.input_data['metadata']
+        input_metadata = self.input_data['metadata']['component']
         input_components = self.input_data['components']
 
         # TODO: Figure out how to set the SBOM version, because
@@ -137,5 +137,5 @@ class SBOM:
             self._bom.metadata.tools.add(self.__generate_tool(tool))
 
         self._bom.metadata.component = self.__generate_package_component(
-            self.input_data['component'],
+            self.input_data['metadata']['component'],
         )
