@@ -461,6 +461,27 @@ def get_info_about_build(
     return result
 
 
+def _proc_opt_creators(
+    persons_name: list,
+    persons_email: list,
+    orgs_name: list,
+    orgs_email: list,
+):
+    creators_person = {
+        'name': persons_name,
+        'email': persons_email,
+    }
+    creators_org = {
+        'name': orgs_name,
+        'email': orgs_email,
+    }
+    opt_creators = {
+        'creators_person': creators_person,
+        'creators_org': creators_org,
+    }
+    return opt_creators
+
+
 def create_parser():
     parser = argparse.ArgumentParser()
 
@@ -565,6 +586,52 @@ def create_parser():
         required=False,
         action='store_const', dest='loglevel', const=DEBUG,
     )
+    parser.add_argument(
+        '--creator-name-person',
+        type=str,
+        action='append',
+        help=(
+            'The person(s) who create SBOM'
+        ),
+        required=False,
+        default=[],
+    )
+    parser.add_argument(
+        '--creator-email-person',
+        type=str,
+        action='append',
+        help=(
+            'The email address of SBOM creator. '
+            'This option is only required if --creator-name-personal is provided. '
+            'The combination of name and email address depends on the order specified. '
+            'If an extra email address is specified, it will be ignored'
+        ),
+        required=False,
+        default=[],
+    )
+    parser.add_argument(
+        '--creator-name-org',
+        type=str,
+        action='append',
+        help=(
+            'The organization(s) who create SBOM'
+        ),
+        required=False,
+        default=[],
+    )
+    parser.add_argument(
+        '--creator-email-org',
+        type=str,
+        action='append',
+        help=(
+            'The email address of SBOM creator. '
+            'This option is only required if --creator-name-org is provided. '
+            'The combination of name and email address depends on the order specified. '
+            'If an extra email address is specified, it will be ignored.'
+        ),
+        required=False,
+        default=[],
+    )
 
     return parser
 
@@ -623,12 +690,19 @@ def cli_main():
             immudb_wrapper=immudb_wrapper,
         )
         sbom_object_type = 'package'
+    opt_creators = _proc_opt_creators(
+        args.creator_name_person,
+        args.creator_email_person,
+        args.creator_name_org,
+        args.creator_email_org
+    )
 
     sbom_formatter = formatters[args.file_format.sbom_record_type](
         data=sbom,
         sbom_object_type=sbom_object_type,
         output_format=args.file_format.file_format,
         output_file=args.output_file,
+        opt_creators=opt_creators,
     )
 
     sbom_formatter.run()
