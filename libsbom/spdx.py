@@ -1,6 +1,7 @@
 import datetime
 import uuid
 from typing import Optional, Union
+from logging import getLogger
 
 from spdx_tools.spdx.model import (
     Actor,
@@ -34,6 +35,8 @@ writers = {
     'xml': xml_writer,
     'yaml': yaml_writer,
 }
+
+_logger = getLogger('alma-sbom')
 
 
 def component_get_property(
@@ -255,3 +258,5 @@ class SBOM:
             self._output_file or "/dev/stdout",
             validate=True,
         )
+        if self._output_file:
+            _logger.info('Wrote generated SBOM to %s', self._output_file)

@@ -1,6 +1,6 @@
 import json
-import logging
 import xml.dom.minidom
+from logging import getLogger
 
 from cyclonedx.model import HashAlgorithm, HashType, Property
 from cyclonedx.model.bom import Bom, Tool
@@ -12,6 +12,8 @@ from version import __version__
 
 from . import constants
 from . import common
+
+_logger = getLogger('alma-sbom')
 
 
 class SBOM:
@@ -54,7 +56,7 @@ class SBOM:
         if self.output_file:
             with open(self.output_file, 'w') as fd:
                 fd.write(pretty_output)
-            logging.info('Wrote generated SBOM to %s', self.output_file)
+            _logger.info('Wrote generated SBOM to %s', self.output_file)
         else:
             print(pretty_output)
 
