@@ -22,7 +22,6 @@ setup(
     scripts=['alma_sbom.py'],
     install_requires=[
         'requests>=2.20.0',
-        'dataclasses>=0.8',
         'cyclonedx-python-lib==2.7.1',
         'spdx-tools==0.8',
         'urllib3<2.0',
