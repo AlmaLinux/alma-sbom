@@ -12,7 +12,7 @@ These utilities consist in:
 * cyclonedx-python-lib >= 2.7.1
 * packageurl-python >= 0.10.3
 * GitPython == 3.1.29
-* immudb_wrapper >= 0.1.0
+* immudb_wrapper >= 0.1.4
 
 ## Getting started
 
