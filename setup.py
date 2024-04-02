@@ -28,10 +28,7 @@ setup(
         'urllib3<2.0',
         'packageurl-python==0.10.3',
         'GitPython==3.1.29',
-        'immudb_wrapper',
-    ],
-    dependency_links=[
-        'git+https://github.com/AlmaLinux/immudb-wrapper.git@0.1.4#egg=immudb_wrapper'
+        'immudb_wrapper @ git+https://github.com/AlmaLinux/immudb-wrapper.git@0.1.4#egg=immudb_wrapper',
     ],
     python_requires=">=3.9",
 )
