@@ -18,7 +18,7 @@ These utilities consist in:
 
 1. Create a Python Virtual Environment: `python3.9 -m venv env`
 2. Activate the Virtual Environment: `source env/bin/activate`
-3. Install dependencies: `python setup.py install`
+3. Install dependencies: `pip install .`
 
 ## Using the AlmaLinux SBOM CLI
 
