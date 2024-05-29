@@ -3,9 +3,9 @@
 
 import argparse
 import dataclasses
-import logging
 import os
 import sys
+from logging import basicConfig, getLogger, DEBUG, INFO, WARNING
 from collections import defaultdict
 from typing import Dict, List, Literal, Optional, Tuple
 
@@ -19,7 +19,7 @@ ALBS_URL = 'https://build.almalinux.org'
 IS_SIGNED = 3
 
 
-logging.basicConfig(level=logging.INFO)
+_logger = getLogger('alma-sbom')
 
 
 @dataclasses.dataclass
@@ -76,10 +76,10 @@ class FileFormatType:
     def __call__(self, sbom_type_file_format: str) -> FileFormat:
         sbom_record_type, file_format = sbom_type_file_format.split('-')
         if sbom_record_type not in self.supported_file_formats:
-            logging.error('The utility doesn\'t support that SBOM type yet')
+            _logger.error('The utility doesn\'t support that SBOM type yet')
             sys.exit(1)
         if file_format not in self.supported_file_formats[sbom_record_type]:
-            logging.error('The utility doesn\'t support that file format yet')
+            _logger.error('The utility doesn\'t support that file format yet')
             sys.exit(1)
         return FileFormat(
             sbom_record_type=sbom_record_type,
@@ -546,6 +546,23 @@ def create_parser():
         ),
         required=False,
     )
+    parser.add_argument(
+        '--verbose',
+        help=(
+            'Print verbose output'
+        ),
+        required=False,
+        default=WARNING,
+        action='store_const', dest='loglevel', const=INFO,
+    )
+    parser.add_argument(
+        '--debug',
+        help=(
+            'Print debug log'
+        ),
+        required=False,
+        action='store_const', dest='loglevel', const=DEBUG,
+    )
 
     return parser
 
@@ -556,7 +573,14 @@ def cli_main():
         'spdx': alma_spdx.SBOM,
     }
 
+    fmt = '%(asctime)s %(name)s: [%(levelname)s] %(message)s'
+    datefmt = '%b %d %H:%M:%S'
+    basicConfig(format=fmt, datefmt=datefmt)
+
     args = create_parser().parse_args()
+
+    _logger.setLevel(args.loglevel)
+
     immudb_wrapper = ImmudbWrapper(
         username=(
             args.immudb_username
