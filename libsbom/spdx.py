@@ -155,11 +155,12 @@ class SBOM:
         return f"SPDXRef-{cur_id}"
 
     def _prepare_document(self):
-        if "metadata" in self._input_data:
-            doc_name = self._input_data["metadata"]["name"]
-        else:
-            pkgname = self._input_data['component']['name']
-            pkgvers = self._input_data['component']['version']
+        metadata = self._input_data["metadata"]['component']
+        if self._sbom_object_type == 'build':
+            doc_name = metadata["name"]
+        else: # self._sbom_object_type == 'package':
+            pkgname = metadata['name']
+            pkgvers = metadata['version']
             pkgvers = common.normalize_epoch_in_version(pkgvers)
             doc_name = f"{pkgname}-{pkgvers}"
 
@@ -230,24 +231,20 @@ class SBOM:
 
     def _generate(self):
         components = []
-        build_data = (
-            self._input_data["metadata"]
-            if "metadata" in self._input_data
-            else {}
-        )
 
-        # There is either a single package in "component" or multiple packages in "components"
-        if "component" in self._input_data:
-            components += [self._input_data["component"]]
-        if "components" in self._input_data:
+        # packages data are in "components" if sbom_object_type = 'build'
+        # package data is in "metadata"."component" if sbom_object_type = 'package'
+        # build SBOMs also contain build metadata
+        if self._sbom_object_type == 'build':
+            build_data = self._input_data["metadata"]["component"]
+            self.add_build(build_data)
             components += self._input_data["components"]
+        else: # self._sbom_object_type == 'package':
+            build_data = {}
+            components += [self._input_data["metadata"]["component"]]
 
         for component in components:
             self.add_package(component, build_data)
-
-        # build SBOMs also contain build metadata
-        if build_data:
-            self.add_build(build_data)
 
     def run(self):
         writer = writers[self._output_format]
