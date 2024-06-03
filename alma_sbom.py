@@ -124,7 +124,7 @@ def _extract_immudb_info_about_package(
         response = immudb_wrapper.authenticate(immudb_hash)
     elif rpm_package != None :
         if not os.path.exists(rpm_package):
-            logging.error(f'File {rpm_package} Not Found')
+            _logger.error(f'File {rpm_package} Not Found')
             sys.exit(1)
         response = immudb_wrapper.authenticate_file(rpm_package)
     result = response.get('value', {})
