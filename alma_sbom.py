@@ -5,9 +5,11 @@ import argparse
 import dataclasses
 import os
 import sys
+import rpm
 from logging import basicConfig, getLogger, DEBUG, INFO, WARNING
 from collections import defaultdict
 from typing import Dict, List, Literal, Optional, Tuple
+from license_expression import get_spdx_licensing, ExpressionError
 
 import requests
 from immudb_wrapper import ImmudbWrapper
@@ -194,6 +196,21 @@ def _generate_purl(package_nevra: PackageNevra, source_rpm: str):
     )
     return purl
 
+def _proc_licenses(licenses_str: str):
+    licensing = get_spdx_licensing()
+    l = {}
+    l['ids'] = []
+    l['expression'] = licenses_str
+    try:
+        parsed = licensing.parse(licenses_str, validate=True)
+    except ExpressionError as err:
+        pass
+    else:
+        symbols = licensing.license_symbols(parsed)
+        for sym in symbols:
+            l['ids'].append(str(sym))
+    return l
+
 
 def add_package_source_info(immudb_metadata: Dict, component: Dict):
     if immudb_metadata['source_type'] == 'git':
@@ -245,6 +262,36 @@ def add_package_source_info(immudb_metadata: Dict, component: Dict):
             ]
         )
 
+def add_rpm_package_info(
+    component: Dict,
+    rpm_package: str = None,
+):
+    if not rpm_package:
+        return
+    ts = rpm.TransactionSet()
+    try:
+        fd = os.open(rpm_package, os.O_RDONLY)
+        hdr = ts.hdrFromFdno(fd)
+    except OSError as e:
+        _logger.error(f'file open error: {e.strerror}')
+        sys.exit(1)
+    except rpm.error as e:
+        _logger.error(f'file open error: {str(e)}')
+        sys.exit(1)
+    except Exception as e:
+        _logger.error(f'unknown error: {str(e)}')
+        sys.exit(1)
+    else:
+        pass
+    finally:
+        try:
+            os.close(fd)
+        except Exception:
+            pass
+
+    component['licenses'] = _proc_licenses(hdr[rpm.RPMTAG_LICENSE])
+    component['summary'] = hdr[rpm.RPMTAG_SUMMARY]
+    component['description'] = hdr[rpm.RPMTAG_DESCRIPTION]
 
 def get_info_about_package(
     albs_url: str,
@@ -344,6 +391,10 @@ def get_info_about_package(
     add_package_source_info(
         immudb_metadata=immudb_metadata,
         component=result['metadata']['component'],
+    )
+    add_rpm_package_info(
+        component=result['metadata']['component'],
+        rpm_package=rpm_package,
     )
     return result
 
