@@ -120,26 +120,13 @@ def build_get_timestamp(build: dict) -> Optional[datetime.datetime]:
 
 
 class SBOM:
-    def __init__(self, data, sbom_object_type, output_format, output_file):
-        tools = constants.TOOLS + constants.TOOLS_SPDX
+    def __init__(self, data, sbom_object_type, output_format, output_file, opt_creators):
         self._input_data = data
         self._sbom_object_type = sbom_object_type
         self._output_format = output_format
         self._output_file = output_file
-
-        self._org = Actor(
-            ActorType.ORGANIZATION,
-            constants.ALMAOS_VENDOR,
-            constants.ALMAOS_EMAIL,
-        )
-        self._creators = [self._org] + [
-            Actor(
-                actor_type=ActorType.TOOL,
-                name=f"{tool['name']} {tool['version']}",
-            )
-            for tool in tools
-        ]
-
+        self._opt_creators = opt_creators
+        self._prepare_creators()
         self._document = None
         self._next_id = 0
         self._prepare_document()
@@ -153,6 +140,42 @@ class SBOM:
         cur_id = self._next_id
         self._next_id += 1
         return f"SPDXRef-{cur_id}"
+
+    def _add_creators(self, actor_type, creators):
+        if creators == None:
+            return None
+
+        d = len(creators['name']) - len(creators['email'])
+        if d > 0:
+            creators['email'] += [None] * d
+        for name, email in zip(creators['name'], creators['email']):
+            self._creators += [
+                Actor(
+                    actor_type=actor_type,
+                    name=name,
+                    email=email,
+                )
+            ]
+
+    def _prepare_creators(self):
+        tools = constants.TOOLS + constants.TOOLS_SPDX
+        self._org = Actor(
+            ActorType.ORGANIZATION,
+            constants.ALMAOS_VENDOR,
+            constants.ALMAOS_EMAIL,
+        )
+        self._creators = [self._org] + [
+            Actor(
+                actor_type=ActorType.TOOL,
+                name=f"{tool['name']} {tool['version']}",
+            )
+            for tool in tools
+        ]
+
+        persons = self._opt_creators['creators_person']
+        orgs = self._opt_creators['creators_org']
+        self._add_creators(ActorType.PERSON, persons)
+        self._add_creators(ActorType.ORGANIZATION, orgs)
 
     def _prepare_document(self):
         metadata = self._input_data["metadata"]['component']

@@ -2,7 +2,7 @@ import json
 import xml.dom.minidom
 from logging import getLogger
 
-from cyclonedx.model import HashAlgorithm, HashType, Property
+from cyclonedx.model import HashAlgorithm, HashType, Property, OrganizationalContact
 from cyclonedx.model.bom import Bom, Tool
 from cyclonedx.model.component import Component, ComponentType
 from cyclonedx.output import OutputFormat, get_instance
@@ -17,12 +17,13 @@ _logger = getLogger('alma-sbom')
 
 
 class SBOM:
-    def __init__(self, data, sbom_object_type, output_format, output_file):
+    def __init__(self, data, sbom_object_type, output_format, output_file, opt_creators):
         self.input_data = data
         self.sbom_object_type = sbom_object_type
         self.output_format = OutputFormat(output_format.capitalize())
         self.output_file = output_file
         self._bom = Bom()
+        self._opt_creators = opt_creators
 
     def run(self):
         if self.sbom_object_type == 'build':
@@ -85,6 +86,28 @@ class SBOM:
             hash_value=hash_['content'],
         )
 
+    def __add_authors(self, authors):
+        if authors != None:
+            d = len(authors['name']) - len(authors['email'])
+            if d > 0:
+                authors['email'] += [None] * d
+            for name, email in zip(authors['name'], authors['email']):
+                self._bom.metadata.authors.add(OrganizationalContact(
+                        name=name,
+                        email=email,
+                    )
+                )
+
+    def __generate_metadata(self):
+        # We do this way to keep cyclonedx-python-lib as a tool
+        for tool in constants.TOOLS:
+            self._bom.metadata.tools.add(self.__generate_tool(tool))
+
+        persons = self._opt_creators['creators_person']
+        orgs = self._opt_creators['creators_org']
+        self.__add_authors(persons)
+        self.__add_authors(orgs)
+
     def __generate_package_component(self, comp):
         purl = common.normalize_epoch_in_purl(comp['purl'])
         return Component(
@@ -108,9 +131,7 @@ class SBOM:
         # self._bom.version = self.input_data['version'] results
         # in adding 'ersion: 1' to the final SBOM
 
-        # We do this way to keep cyclonedx-python-lib as a tool
-        for tool in constants.TOOLS:
-            self._bom.metadata.tools.add(self.__generate_tool(tool))
+        self.__generate_metadata()
 
         properties = [
             self.__generate_prop(prop) for prop in input_metadata['properties']
@@ -134,9 +155,7 @@ class SBOM:
         # self._bom.version = self.input_data['version'] results
         # in adding 'ersion: 1' to the final SBOM
 
-        # We do this way to keep cyclonedx-python-lib as a tool
-        for tool in constants.TOOLS:
-            self._bom.metadata.tools.add(self.__generate_tool(tool))
+        self.__generate_metadata()
 
         self._bom.metadata.component = self.__generate_package_component(
             self.input_data['metadata']['component'],
