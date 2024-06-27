@@ -254,8 +254,10 @@ class SBOM:
         #                 pass
         #         pkg.license_info_from_files = l
 
-        pkg.summary = component['summary']
-        pkg.description = component['description']
+        if 'summary' in component and component['summary']:
+            pkg.summary = component['summary']
+        if 'description' in component and component['description']:
+            pkg.description = component['description']
 
         self._document.packages += [pkg]
         self._document.relationships += [rel]

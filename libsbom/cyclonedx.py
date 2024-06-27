@@ -133,8 +133,9 @@ class SBOM:
                 self.__generate_prop(prop) for prop in comp['properties']
             ],
             licenses=self.__generate_licenses(comp['licenses'])
-                if 'licenses' in comp and comp['licenses'] else [] ,
+                if 'licenses' in comp and comp['licenses'] else None ,
             description=comp['description']
+                if 'description' in comp and comp['description'] else None ,
         )
 
     def generate_build_sbom(self):
