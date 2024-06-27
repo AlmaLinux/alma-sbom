@@ -116,10 +116,17 @@ def generate_sbom_version(json_data: Dict) -> int:
 
 
 def _extract_immudb_info_about_package(
-    immudb_hash: str,
     immudb_wrapper: ImmudbWrapper,
+    immudb_hash: str = None,
+    rpm_package: str = None,
 ) -> Dict:
-    response = immudb_wrapper.authenticate(immudb_hash)
+    if immudb_hash != None :
+        response = immudb_wrapper.authenticate(immudb_hash)
+    elif rpm_package != None :
+        if not os.path.exists(rpm_package):
+            _logger.error(f'File {rpm_package} Not Found')
+            sys.exit(1)
+        response = immudb_wrapper.authenticate_file(rpm_package)
     result = response.get('value', {})
     result['timestamp'] = response.get('timestamp')
     return result
@@ -355,15 +362,18 @@ def add_package_info(
 
 
 def get_info_about_package(
-    immudb_hash: str,
     albs_url: str,
     immudb_wrapper: ImmudbWrapper,
+    immudb_hash: str = None,
+    rpm_package: str = None,
 ):
     result = {}
     immudb_info_about_package = _extract_immudb_info_about_package(
-        immudb_hash=immudb_hash,
         immudb_wrapper=immudb_wrapper,
+        immudb_hash=immudb_hash,
+        rpm_package=rpm_package,
     )
+    immudb_hash = immudb_hash or immudb_info_about_package['Hash']
     immudb_metadata = immudb_info_about_package['Metadata']
     result['version'] = 1
     if 'unsigned_hash' in immudb_metadata:
@@ -421,8 +431,8 @@ def get_info_about_build(
                 continue
             immudb_hash = artifact['cas_hash']
             result_of_execution = _extract_immudb_info_about_package(
-                immudb_hash=immudb_hash,
                 immudb_wrapper=immudb_wrapper,
+                immudb_hash=immudb_hash,
             )
             immudb_metadata = result_of_execution['Metadata']
             component = {}
@@ -490,6 +500,11 @@ def create_parser():
         '--rpm-package-hash',
         type=str,
         help='SHA256 hash of an RPM package',
+    )
+    object_id_group.add_argument(
+        '--rpm-package',
+        type=str,
+        help='path to an RPM package',
     )
     parser.add_argument(
         '--albs-url',
@@ -661,9 +676,10 @@ def cli_main():
         sbom_object_type = 'build'
     else:
         sbom = get_info_about_package(
-            args.rpm_package_hash,
             albs_url=albs_url,
             immudb_wrapper=immudb_wrapper,
+            immudb_hash=args.rpm_package_hash,
+            rpm_package=args.rpm_package,
         )
         sbom_object_type = 'package'
     opt_creators = _proc_opt_creators(
