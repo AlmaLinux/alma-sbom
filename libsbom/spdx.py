@@ -2,6 +2,7 @@ import datetime
 import uuid
 from typing import Optional, Union
 from logging import getLogger
+from license_expression import Licensing, ExpressionError
 
 from spdx_tools.spdx.model import (
     Actor,
@@ -233,6 +234,28 @@ class SBOM:
             raise ValueError(f"Cannot determine build time of {pkg.name}")
 
         pkg.files_analyzed = False
+
+        if 'licenses' in component and component['licenses']:
+            pkg.license_concluded = SpdxNoAssertion()
+            if 'expression' in component['licenses'] and component['licenses']['expression']:
+                pkg.license_comment = component['licenses']['expression']
+
+        ### NOTE
+        ### license_info_frpm_files needs file_analyzed = True.
+        ### Now pending implementation as it is unclear if this value can be set.
+        ### see https://spdx.github.io/spdx-spec/v2.3/package-information/#714-all-licenses-information-from-files-field
+        #     if 'ids' in component['licenses'] and component['licenses']['ids']:
+        #         l = []
+        #         for lid in component['licenses']['ids']:
+        #             try:
+        #                 le = Licensing().parse(lid, validate=False)
+        #                 l.append(le)
+        #             except ExpressionError as err:
+        #                 pass
+        #         pkg.license_info_from_files = l
+
+        pkg.summary = component['summary']
+        pkg.description = component['description']
 
         self._document.packages += [pkg]
         self._document.relationships += [rel]

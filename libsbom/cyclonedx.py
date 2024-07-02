@@ -2,7 +2,7 @@ import json
 import xml.dom.minidom
 from logging import getLogger
 
-from cyclonedx.model import HashAlgorithm, HashType, Property, OrganizationalContact
+from cyclonedx.model import HashAlgorithm, HashType, Property, OrganizationalContact, LicenseChoice
 from cyclonedx.model.bom import Bom, Tool
 from cyclonedx.model.component import Component, ComponentType
 from cyclonedx.output import OutputFormat, get_instance
@@ -25,11 +25,13 @@ class SBOM:
         self._bom = Bom()
         self._opt_creators = opt_creators
 
-    def run(self):
+    def run(self, iso_releasever=None, iso_type=None):
         if self.sbom_object_type == 'build':
             self.generate_build_sbom()
-        else:
+        elif self.sbom_object_type == 'package':
             self.generate_package_sbom()
+        else: # self.sbom_object_type == 'iso'
+            self.generate_iso_sbom(iso_releasever=iso_releasever, iso_type=iso_type)
 
         output = get_instance(bom=self._bom, output_format=self.output_format)
 
@@ -86,6 +88,17 @@ class SBOM:
             hash_value=hash_['content'],
         )
 
+    @staticmethod
+    def __generate_licenses(_license):
+        l = []
+        if 'ids' in _license and _license['ids']:
+            for lid in _license['ids']:
+                l.append( LicenseChoice(license_=lid) )
+
+        elif 'expression' in _license and _license['expression']:
+            l.append( LicenseChoice(license_expression=_license['expression']) )
+        return l
+
     def __add_authors(self, authors):
         if authors != None:
             d = len(authors['name']) - len(authors['email'])
@@ -121,6 +134,10 @@ class SBOM:
             properties=[
                 self.__generate_prop(prop) for prop in comp['properties']
             ],
+            licenses=self.__generate_licenses(comp['licenses'])
+                if 'licenses' in comp and comp['licenses'] else None ,
+            description=comp['description']
+                if 'description' in comp and comp['description'] else None ,
         )
 
     def generate_build_sbom(self):
@@ -160,3 +177,18 @@ class SBOM:
         self._bom.metadata.component = self.__generate_package_component(
             self.input_data['metadata']['component'],
         )
+
+    def generate_iso_sbom(self, iso_releasever, iso_type):
+        input_components = self.input_data['components']
+        self.__generate_metadata()
+
+        component = Component(
+            component_type=ComponentType('operating-system'),
+            name=f'AlmaLinux {iso_releasever} {iso_type} ISO',
+            author=constants.ALMAOS_VENDOR,
+        )
+        self._bom.metadata.component = component
+
+        for component in input_components:
+            comp = self.__generate_package_component(component)
+            self._bom.components.add(comp)
