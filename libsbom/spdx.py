@@ -229,8 +229,6 @@ class SBOM:
         pkg.built_date = component_get_buildtime(
             component
         ) or build_get_timestamp(build)
-        if not pkg.built_date:
-            raise ValueError(f"Cannot determine build time of {pkg.name}")
 
         pkg.files_analyzed = False
 

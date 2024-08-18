@@ -5,6 +5,8 @@ import argparse
 import dataclasses
 import os
 import sys
+import contextlib
+import rpm
 from logging import basicConfig, getLogger, DEBUG, INFO, WARNING
 from collections import defaultdict
 from typing import Dict, List, Literal, Optional, Tuple
@@ -14,6 +16,7 @@ from immudb_wrapper import ImmudbWrapper
 
 from libsbom import cyclonedx as alma_cyclonedx
 from libsbom import spdx as alma_spdx
+from libsbom import common
 
 ALBS_URL = 'https://build.almalinux.org'
 IS_SIGNED = 3
@@ -195,7 +198,33 @@ def _generate_purl(package_nevra: PackageNevra, source_rpm: str):
     return purl
 
 
-def add_package_source_info(immudb_metadata: Dict, component: Dict):
+def _add_package_build_info(immudb_metadata: Dict, component: Dict, albs_url: str = None, build_url: str = None):
+    component['properties'].extend(
+        [
+            {
+                'name': 'almalinux:package:buildhost',
+                'value': immudb_metadata['build_host'],
+            },
+            {
+                'name': 'almalinux:albs:build:targetArch',
+                'value': immudb_metadata['build_arch'],
+            },
+            {
+                'name': 'almalinux:albs:build:ID',
+                'value': immudb_metadata['build_id'],
+            },
+            {
+                'name': 'almalinux:albs:build:URL',
+                'value': build_url or f'{albs_url}/build/{immudb_metadata["build_id"]}',
+            },
+            {
+                'name': 'almalinux:albs:build:author',
+                'value': immudb_metadata['built_by'],
+            },
+        ]
+    )
+
+def _add_package_source_info(immudb_metadata: Dict, component: Dict):
     if immudb_metadata['source_type'] == 'git':
         component['properties'].extend(
             [
@@ -245,34 +274,30 @@ def add_package_source_info(immudb_metadata: Dict, component: Dict):
             ]
         )
 
-
-def get_info_about_package(
+def _get_each_package_component(
+    immudb_info_about_package: Dict,
     albs_url: str,
-    immudb_wrapper: ImmudbWrapper,
+    build_url: str = None,
     immudb_hash: str = None,
     rpm_package: str = None,
 ):
     result = {}
-    immudb_info_about_package = _extract_immudb_info_about_package(
-        immudb_wrapper=immudb_wrapper,
-        immudb_hash=immudb_hash,
-        rpm_package=rpm_package,
-    )
     source_rpm, package_nevra = _get_specific_info_about_package(
         immudb_info_about_package=immudb_info_about_package,
     )
     immudb_hash = immudb_hash or immudb_info_about_package['Hash']
     immudb_metadata = immudb_info_about_package['Metadata']
-    result['version'] = 1
-    if 'unsigned_hash' in immudb_metadata:
-        result['version'] += 1
-    result['metadata'] = {}
-    result['metadata']['component'] = {
+    result = {
         'name': package_nevra.name,
         'version': (
             f'{package_nevra.epoch if package_nevra.epoch else ""}'
             f'{":" if package_nevra.epoch else ""}'
             f'{package_nevra.version}-{package_nevra.release}'
+        ),
+        'cpe': _generate_cpe(package_nevra=package_nevra),
+        'purl': _generate_purl(
+            package_nevra=package_nevra,
+            source_rpm=source_rpm,
         ),
         'hashes': [
             {
@@ -280,11 +305,6 @@ def get_info_about_package(
                 'content': immudb_hash,
             }
         ],
-        'cpe': _generate_cpe(package_nevra=package_nevra),
-        'purl': _generate_purl(
-            package_nevra=package_nevra,
-            source_rpm=source_rpm,
-        ),
         'properties': [
             {
                 'name': 'almalinux:package:epoch',
@@ -307,16 +327,8 @@ def get_info_about_package(
                 'value': source_rpm,
             },
             {
-                'name': 'almalinux:package:buildhost',
-                'value': immudb_metadata['build_host'],
-            },
-            {
                 'name': 'almalinux:package:timestamp',
                 'value': immudb_info_about_package['timestamp'],
-            },
-            {
-                'name': 'almalinux:albs:build:targetArch',
-                'value': immudb_metadata['build_arch'],
             },
             {
                 'name': 'almalinux:albs:build:packageType',
@@ -326,25 +338,122 @@ def get_info_about_package(
                 'name': 'almalinux:sbom:immudbHash',
                 'value': immudb_hash,
             },
-            {
-                'name': 'almalinux:albs:build:ID',
-                'value': immudb_metadata['build_id'],
-            },
-            {
-                'name': 'almalinux:albs:build:URL',
-                'value': f'{albs_url}/build/{immudb_metadata["build_id"]}',
-            },
-            {
-                'name': 'almalinux:albs:build:author',
-                'value': immudb_metadata['built_by'],
-            },
         ],
     }
 
-    add_package_source_info(
-        immudb_metadata=immudb_metadata,
-        component=result['metadata']['component'],
+    build_info_fields = ['build_host', 'build_arch', 'build_id', 'built_by']
+    is_build_info, missing_fields = common.check_required_data(immudb_metadata, build_info_fields)
+    if is_build_info:
+        _add_package_build_info(
+            immudb_metadata=immudb_metadata,
+            component=result,
+            albs_url=albs_url,
+            build_url=build_url
+        )
+    else:
+        _logger.warning(f'build info are lacking.')
+
+    if 'source_type' in immudb_metadata:
+        _add_package_source_info(
+            immudb_metadata=immudb_metadata,
+            component=result,
+        )
+    else:
+        _logger.warning(f'source info are lacking.')
+
+    return result
+
+def comp_package_info(
+    immudb_info_about_package: Dict,
+    rpm_package: str = None,
+):
+    ts = None
+    if not rpm_package:
+        pass
+    else:
+        ts = rpm.TransactionSet()
+        try:
+            fd = os.open(rpm_package, os.O_RDONLY)
+            hdr = ts.hdrFromFdno(fd)
+        except OSError as e:
+            raise RuntimeError(f'File open error: {e.strerror}') from e
+        except rpm.error as e:
+            raise RuntimeError(f'RPM error: {str(e)}') from e
+        finally:
+            if fd is not None:
+                with contextlib.suppress(Exception):
+                    os.close(fd)
+
+    if 'Hash' not in immudb_info_about_package:
+        if rpm_package is not None:
+            immudb_info_about_package['Hash'] = ImmudbWrapper.hash_file(self=ImmudbWrapper, file_path=rpm_package)
+        else:
+            raise ValueError('Cannot get required package info from immudb or The data is lacking. Cannot make SBOM.')
+
+    immudb_metadata = immudb_info_about_package['Metadata'] if 'Metadata' in immudb_info_about_package else {}
+    if immudb_metadata == {}: # There isn't metadata on immudb
+        immudb_metadata['sbom_api'] = '0.0'
+
+    required_fields = ['name', 'epoch', 'version', 'release', 'arch', 'sourcerpm']
+    dict_field_rpmtag = {
+        'name': rpm.RPMTAG_NAME,
+        'epoch': rpm.RPMTAG_EPOCH,
+        'version': rpm.RPMTAG_VERSION,
+        'release': rpm.RPMTAG_RELEASE,
+        'arch': rpm.RPMTAG_ARCH,
+        'sourcerpm': rpm.RPMTAG_SOURCERPM,
+    }
+    is_required_data, missing_fields = common.check_required_data(immudb_metadata, required_fields)
+    if not is_required_data:
+        _logger.warning('Required data are missing')
+        if ts is None:
+            raise ValueError('Cannot get required package info from immudb or The data is lacking.')
+        else:
+            _logger.warning('Complete the data from the RPM package information.')
+            for field in missing_fields:
+                immudb_metadata[field] = hdr[dict_field_rpmtag[field]]
+    ### NOTE
+    ### There are little bit difference of buildtime between immudb_metadata & rpm_package.
+    ### So, now we don't set buildtime using rpm_package info.
+    ### According to the specifications of extractimmudb_info_about_package, even if there is no timestamp
+    ### info in immudb, None will be stored.
+    ### Or, We should set it anymore? because whenever this code is executed, immudb_metadata is None or lacking.
+    ### If you want do this, uncomment below block.
+    # if 'timestamp' not in immudb_info_about_package or immudb_info_about_package['timestamp'] is None:
+    #     immudb_info_about_package['timestamp'] = hdr[rpm.RPMTAG_BUILDTIME]
+
+    immudb_info_about_package['Metadata'] = immudb_metadata
+
+def get_info_about_package(
+    albs_url: str,
+    immudb_wrapper: ImmudbWrapper,
+    immudb_hash: str = None,
+    rpm_package: str = None,
+):
+    result = {}
+
+    immudb_info_about_package = _extract_immudb_info_about_package(
+        immudb_wrapper=immudb_wrapper,
+        immudb_hash=immudb_hash,
+        rpm_package=rpm_package,
     )
+    comp_package_info(
+        immudb_info_about_package=immudb_info_about_package,
+        rpm_package=rpm_package,
+    )
+    immudb_metadata = immudb_info_about_package['Metadata']
+    result['version'] = 1
+    if 'unsigned_hash' in immudb_metadata:
+        result['version'] += 1
+    result['metadata'] = {}
+
+    result['metadata']['component'] = _get_each_package_component(
+        immudb_info_about_package=immudb_info_about_package,
+        albs_url = albs_url,
+        immudb_hash=immudb_hash,
+        rpm_package=rpm_package,
+    )
+
     return result
 
 
@@ -389,82 +498,21 @@ def get_info_about_build(
             if artifact['type'] != 'rpm':
                 continue
             immudb_hash = artifact['cas_hash']
-            result_of_execution = _extract_immudb_info_about_package(
+
+            immudb_info_about_package = _extract_immudb_info_about_package(
                 immudb_wrapper=immudb_wrapper,
                 immudb_hash=immudb_hash,
             )
-            immudb_metadata = result_of_execution['Metadata']
-            source_rpm, package_nevra = _get_specific_info_about_package(
-                immudb_info_about_package=result_of_execution,
+            comp_package_info(
+                immudb_info_about_package=immudb_info_about_package,
             )
-            component = {
-                'name': package_nevra.name,
-                'version': package_nevra.version,
-                'cpe': _generate_cpe(package_nevra=package_nevra),
-                'purl': _generate_purl(
-                    package_nevra=package_nevra,
-                    source_rpm=source_rpm,
-                ),
-                'hashes': [
-                    {
-                        'alg': 'SHA-256',
-                        'content': immudb_hash,
-                    }
-                ],
-                'properties': [
-                    {
-                        'name': 'almalinux:package:epoch',
-                        'value': package_nevra.epoch,
-                    },
-                    {
-                        'name': 'almalinux:package:version',
-                        'value': package_nevra.version,
-                    },
-                    {
-                        'name': 'almalinux:package:release',
-                        'value': package_nevra.release,
-                    },
-                    {
-                        'name': 'almalinux:package:arch',
-                        'value': package_nevra.arch,
-                    },
-                    {
-                        'name': 'almalinux:package:sourcerpm',
-                        'value': source_rpm,
-                    },
-                    {
-                        'name': 'almalinux:package:buildhost',
-                        'value': immudb_metadata['build_host'],
-                    },
-                    {
-                        'name': 'almalinux:albs:build:targetArch',
-                        'value': immudb_metadata['build_arch'],
-                    },
-                    {
-                        'name': 'almalinux:albs:build:packageType',
-                        'value': 'rpm',
-                    },
-                    {
-                        'name': 'almalinux:sbom:immudbHash',
-                        'value': result_of_execution['Hash'],
-                    },
-                    {
-                        'name': 'almalinux:albs:build:ID',
-                        'value': build_id,
-                    },
-                    {
-                        'name': 'almalinux:albs:build:URL',
-                        'value': build_url,
-                    },
-                    {
-                        'name': 'almalinux:albs:build:author',
-                        'value': immudb_metadata['built_by'],
-                    },
-                ],
-            }
-            add_package_source_info(
-                immudb_metadata=immudb_metadata,
-                component=component,
+
+            component = _get_each_package_component(
+                immudb_info_about_package=immudb_info_about_package,
+                albs_url = albs_url,
+                build_url = build_url,
+                immudb_hash=immudb_hash,
+                rpm_package=rpm_package,
             )
             components.append(component)
     result['components'] = components

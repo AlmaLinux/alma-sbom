@@ -1,5 +1,26 @@
 import typing
 
+def check_required_data(
+        data_dict: typing.Dict[str, any],
+        required_fields: typing.List[str],
+    ) -> typing.Tuple[bool, typing.List[str]]:
+    """
+    Check if all the required fields exist in the specified data dictionary
+
+    Args:
+        data_dict (Dict[str, any]): A dictionary containing the data to be checked
+        required_fields (List[str]): A list of required field names
+
+    Returns:
+        Tuple[bool, List[str]]:
+            - bool: If all required fields exist, return True; otherwise, return False
+            - List[str]: A list of missing field names
+    """
+
+    missing_fields = [field for field in required_fields if field not in data_dict]
+    return not bool(missing_fields), missing_fields
+
+
 def replace_patterns(input_str: str, patterns: typing.Dict[str, str]) -> str:
     """Convenience function to perform multiple string replacements."""
 
