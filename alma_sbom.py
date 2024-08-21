@@ -14,6 +14,7 @@ from immudb_wrapper import ImmudbWrapper
 
 from libsbom import cyclonedx as alma_cyclonedx
 from libsbom import spdx as alma_spdx
+from libsbom import common
 
 ALBS_URL = 'https://build.almalinux.org'
 IS_SIGNED = 3
@@ -164,8 +165,8 @@ def _generate_cpe(package_nevra: PackageNevra) -> str:
     cpe_epoch_part += '\\:' if cpe_epoch_part else ""
     cpe = (
         f'cpe:{cpe_version}:a:almalinux:'
-        f'{package_nevra.name}:{cpe_epoch_part}'
-        f'{package_nevra.version}-{package_nevra.release}:*:*:*:*:*:*:*'
+        f'{common.escape_encode_cpe_part(package_nevra.name)}:{cpe_epoch_part}'
+        f'{common.escape_encode_cpe_part(package_nevra.version)}-{common.escape_encode_cpe_part(package_nevra.release)}:*:*:*:*:*:*:*'
     )
     return cpe
 
