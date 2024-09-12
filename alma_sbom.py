@@ -406,11 +406,13 @@ def comp_package_info(
     is_required_data, missing_fields = common.check_required_data(immudb_metadata, required_fields)
     if not is_required_data:
         _logger.warning('Required data are missing')
+        _logger.debug(f'missing_required_field: {missing_fields}')
         if ts is None:
             raise ValueError('Cannot get required package info from immudb or The data is lacking.')
         else:
             _logger.warning('Complete the data from the RPM package information.')
             for field in missing_fields:
+                _logger.debug(f'Complete {field}-field with {hdr[dict_field_rpmtag[field]]}')
                 immudb_metadata[field] = hdr[dict_field_rpmtag[field]]
     ### NOTE
     ### There are little bit difference of buildtime between immudb_metadata & rpm_package.
