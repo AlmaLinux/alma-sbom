@@ -303,6 +303,19 @@ def _get_each_package_component(
     )
     immudb_hash = immudb_hash or immudb_info_about_package['Hash']
     immudb_metadata = immudb_info_about_package['Metadata']
+
+    # We have `sbom_api_ver` in git records and `sbom_api`
+    # in RPM package records. The latter parameter is the bug,
+    # but we should handle it anyway
+    # since a lot of packages already have it.
+    api_ver = immudb_metadata.get('sbom_api_ver')
+    if not api_ver:
+        api_ver = immudb_metadata.get('sbom_api')
+    if not api_ver:
+        raise ValueError(
+            'Immudb metadata is malformed, API version cannot be detected'
+        )
+
     result = {
         'name': package_nevra.name,
         'version': (
@@ -322,10 +335,10 @@ def _get_each_package_component(
             }
         ],
         'properties': [
-            {
+            *([{
                 'name': 'almalinux:package:epoch',
                 'value': package_nevra.epoch,
-            },
+            }] if api_ver != '0.1' else []),
             {
                 'name': 'almalinux:package:version',
                 'value': package_nevra.version,
@@ -402,37 +415,51 @@ def comp_package_info(
     if immudb_metadata == {}: # There isn't metadata on immudb
         immudb_metadata['sbom_api'] = '0.0'
 
-    required_fields = ['name', 'epoch', 'version', 'release', 'arch', 'sourcerpm']
-    dict_field_rpmtag = {
-        'name': rpm.RPMTAG_NAME,
-        'epoch': rpm.RPMTAG_EPOCH,
-        'version': rpm.RPMTAG_VERSION,
-        'release': rpm.RPMTAG_RELEASE,
-        'arch': rpm.RPMTAG_ARCH,
-        'sourcerpm': rpm.RPMTAG_SOURCERPM,
-    }
-    is_required_data, missing_fields = common.check_required_data(immudb_metadata, required_fields)
-    if not is_required_data:
-        _logger.warning('Required data are missing')
-        _logger.debug(f'missing_required_field: {missing_fields}')
-        if ts is None:
-            raise ValueError('Cannot get required package info from immudb or The data is lacking.')
-        else:
-            _logger.warning('Complete the data from the RPM package information.')
-            for field in missing_fields:
-                _logger.debug(f'Complete {field}-field with {hdr[dict_field_rpmtag[field]]}')
-                immudb_metadata[field] = hdr[dict_field_rpmtag[field]]
-    ### NOTE
-    ### There are little bit difference of buildtime between immudb_metadata & rpm_package.
-    ### So, now we don't set buildtime using rpm_package info.
-    ### According to the specifications of extractimmudb_info_about_package, even if there is no timestamp
-    ### info in immudb, None will be stored.
-    ### Or, We should set it anymore? because whenever this code is executed, immudb_metadata is None or lacking.
-    ### If you want do this, uncomment below block.
-    # if 'timestamp' not in immudb_info_about_package or immudb_info_about_package['timestamp'] is None:
-    #     immudb_info_about_package['timestamp'] = hdr[rpm.RPMTAG_BUILDTIME]
+    # We have `sbom_api_ver` in git records and `sbom_api`
+    # in RPM package records. The latter parameter is the bug,
+    # but we should handle it anyway
+    # since a lot of packages already have it.
+    api_ver = immudb_metadata.get('sbom_api_ver')
+    if not api_ver:
+        api_ver = immudb_metadata.get('sbom_api')
+    if not api_ver:
+        raise ValueError(
+            'Immudb metadata is malformed, API version cannot be detected'
+        )
 
-    immudb_info_about_package['Metadata'] = immudb_metadata
+    # when api_ver == '0.1', make NVRA using package name, so required_fileds is must not lacking
+    if api_ver != '0.1':
+        required_fields = ['name', 'epoch', 'version', 'release', 'arch', 'sourcerpm']
+        dict_field_rpmtag = {
+            'name': rpm.RPMTAG_NAME,
+            'epoch': rpm.RPMTAG_EPOCH,
+            'version': rpm.RPMTAG_VERSION,
+            'release': rpm.RPMTAG_RELEASE,
+            'arch': rpm.RPMTAG_ARCH,
+            'sourcerpm': rpm.RPMTAG_SOURCERPM,
+        }
+        is_required_data, missing_fields = common.check_required_data(immudb_metadata, required_fields)
+        if not is_required_data:
+            _logger.warning('Required data are missing')
+            _logger.debug(f'missing_required_field: {missing_fields}')
+            if ts is None:
+                raise ValueError('Cannot get required package info from immudb or The data is lacking.')
+            else:
+                _logger.warning('Complete the data from the RPM package information.')
+                for field in missing_fields:
+                    _logger.debug(f'Complete {field}-field with {hdr[dict_field_rpmtag[field]]}')
+                    immudb_metadata[field] = hdr[dict_field_rpmtag[field]]
+        ### NOTE
+        ### There are little bit difference of buildtime between immudb_metadata & rpm_package.
+        ### So, now we don't set buildtime using rpm_package info.
+        ### According to the specifications of extractimmudb_info_about_package, even if there is no timestamp
+        ### info in immudb, None will be stored.
+        ### Or, We should set it anymore? because whenever this code is executed, immudb_metadata is None or lacking.
+        ### If you want do this, uncomment below block.
+        # if 'timestamp' not in immudb_info_about_package or immudb_info_about_package['timestamp'] is None:
+        #     immudb_info_about_package['timestamp'] = hdr[rpm.RPMTAG_BUILDTIME]
+
+        immudb_info_about_package['Metadata'] = immudb_metadata
 
 def get_info_about_package(
     albs_url: str,
