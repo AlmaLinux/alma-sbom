@@ -199,80 +199,96 @@ def _generate_purl(package_nevra: PackageNevra, source_rpm: str):
 
 
 def _add_package_build_info(immudb_metadata: Dict, component: Dict, albs_url: str = None, build_url: str = None):
-    component['properties'].extend(
-        [
-            {
-                'name': 'almalinux:package:buildhost',
-                'value': immudb_metadata['build_host'],
-            },
-            {
-                'name': 'almalinux:albs:build:targetArch',
-                'value': immudb_metadata['build_arch'],
-            },
-            {
-                'name': 'almalinux:albs:build:ID',
-                'value': immudb_metadata['build_id'],
-            },
-            {
-                'name': 'almalinux:albs:build:URL',
-                'value': build_url or f'{albs_url}/build/{immudb_metadata["build_id"]}',
-            },
-            {
-                'name': 'almalinux:albs:build:author',
-                'value': immudb_metadata['built_by'],
-            },
-        ]
-    )
+    build_info_fields = ['build_host', 'build_arch', 'build_id', 'built_by']
+    is_build_info, missing_fields = common.check_required_data(immudb_metadata, build_info_fields)
+    if is_build_info:
+        component['properties'].extend(
+            [
+                {
+                    'name': 'almalinux:package:buildhost',
+                    'value': immudb_metadata['build_host'],
+                },
+                {
+                    'name': 'almalinux:albs:build:targetArch',
+                    'value': immudb_metadata['build_arch'],
+                },
+                {
+                    'name': 'almalinux:albs:build:ID',
+                    'value': immudb_metadata['build_id'],
+                },
+                {
+                    'name': 'almalinux:albs:build:URL',
+                    'value': build_url or f'{albs_url}/build/{immudb_metadata["build_id"]}',
+                },
+                {
+                    'name': 'almalinux:albs:build:author',
+                    'value': immudb_metadata['built_by'],
+                },
+            ]
+        )
+    else:
+        _logger.warning(f'There is insufficient build info.')
 
 def _add_package_source_info(immudb_metadata: Dict, component: Dict):
-    if immudb_metadata['source_type'] == 'git':
-        component['properties'].extend(
-            [
-                {
-                    'name': 'almalinux:albs:build:source:gitURL',
-                    'value': immudb_metadata['git_url'],
-                },
-                {
-                    'name': 'almalinux:albs:build:source:type',
-                    'value': 'git',
-                },
-                {
-                    'name': 'almalinux:albs:build:source:gitCommit',
-                    'value': immudb_metadata['git_commit'],
-                },
-                {
-                    'name': 'almalinux:albs:build:source:gitRef',
-                    'value': immudb_metadata['git_ref'],
-                },
-                {
-                    'name': 'almalinux:albs:build:source:gitCommitImmudbHash',
-                    'value': immudb_metadata['alma_commit_sbom_hash']
-                    if 'alma_commit_sbom_hash' in immudb_metadata
-                    else None,
-                },
-            ]
-        )
-    elif immudb_metadata['source_type'] == 'srpm':
-        component['properties'].extend(
-            [
-                {
-                    'name': 'almalinux:albs:build:source:srpmURL',
-                    'value': immudb_metadata['srpm_url'],
-                },
-                {
-                    'name': 'almalinux:albs:build:source:type',
-                    'value': 'srpm',
-                },
-                {
-                    'name': 'almalinux:albs:build:source:srpmChecksum',
-                    'value': immudb_metadata['srpm_sha256'],
-                },
-                {
-                    'name': 'almalinux:albs:build:source:srpmNEVRA',
-                    'value': immudb_metadata['srpm_nevra'],
-                },
-            ]
-        )
+    if 'source_type' in immudb_metadata:
+        if immudb_metadata['source_type'] == 'git':
+            git_source_fields = ['git_url', 'git_commit', 'git_ref', 'alma_commit_sbom_hash']
+            is_git_source_info, missing_fields = common.check_required_data(immudb_metadata, git_source_fields)
+            if is_git_source_info:
+                component['properties'].extend(
+                    [
+                        {
+                            'name': 'almalinux:albs:build:source:gitURL',
+                            'value': immudb_metadata['git_url'],
+                        },
+                        {
+                            'name': 'almalinux:albs:build:source:type',
+                            'value': 'git',
+                        },
+                        {
+                            'name': 'almalinux:albs:build:source:gitCommit',
+                            'value': immudb_metadata['git_commit'],
+                        },
+                        {
+                            'name': 'almalinux:albs:build:source:gitRef',
+                            'value': immudb_metadata['git_ref'],
+                        },
+                        {
+                            'name': 'almalinux:albs:build:source:gitCommitImmudbHash',
+                            'value': immudb_metadata['alma_commit_sbom_hash'],
+                        },
+                    ]
+                )
+            else:
+                _logger.warning('There is insufficient git source info.')
+        elif immudb_metadata['source_type'] == 'srpm':
+            srpm_source_fields = ['srpm_url', 'srpm_sha256', 'srpm_nevra']
+            is_srpm_source_info, missing_fields = common.check_required_data(immudb_metadata, srpm_source_fields)
+            if is_srpm_source_info:
+                component['properties'].extend(
+                    [
+                        {
+                            'name': 'almalinux:albs:build:source:srpmURL',
+                            'value': immudb_metadata['srpm_url'],
+                        },
+                        {
+                            'name': 'almalinux:albs:build:source:type',
+                            'value': 'srpm',
+                        },
+                        {
+                            'name': 'almalinux:albs:build:source:srpmChecksum',
+                            'value': immudb_metadata['srpm_sha256'],
+                        },
+                        {
+                            'name': 'almalinux:albs:build:source:srpmNEVRA',
+                            'value': immudb_metadata['srpm_nevra'],
+                        },
+                    ]
+                )
+            else:
+                _logger.warning('There is insufficient srpm source info.')
+    else:
+        _logger.warning(f'There is insufficient source info.')
 
 def _get_each_package_component(
     immudb_info_about_package: Dict,
@@ -341,25 +357,17 @@ def _get_each_package_component(
         ],
     }
 
-    build_info_fields = ['build_host', 'build_arch', 'build_id', 'built_by']
-    is_build_info, missing_fields = common.check_required_data(immudb_metadata, build_info_fields)
-    if is_build_info:
-        _add_package_build_info(
-            immudb_metadata=immudb_metadata,
-            component=result,
-            albs_url=albs_url,
-            build_url=build_url
-        )
-    else:
-        _logger.warning(f'build info are lacking.')
+    _add_package_build_info(
+        immudb_metadata=immudb_metadata,
+        component=result,
+        albs_url=albs_url,
+        build_url=build_url
+    )
 
-    if 'source_type' in immudb_metadata:
-        _add_package_source_info(
-            immudb_metadata=immudb_metadata,
-            component=result,
-        )
-    else:
-        _logger.warning(f'source info are lacking.')
+    _add_package_source_info(
+        immudb_metadata=immudb_metadata,
+        component=result,
+    )
 
     return result
 
