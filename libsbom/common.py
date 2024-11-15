@@ -1,4 +1,5 @@
 import typing
+import re
 
 def replace_patterns(input_str: str, patterns: typing.Dict[str, str]) -> str:
     """Convenience function to perform multiple string replacements."""
@@ -34,6 +35,18 @@ def normalize_epoch_in_purl(purl: str) -> str:
     return replace_patterns(input_str=purl,
                             patterns=patterns)
 
+def escape_encode_cpe_part(cpe: str) -> str:
+    """Escape special characters in cpe each part in accordance with the spdx-tools validation"""
+
+    allowed_chars = r'a-zA-Z0-9\-\._'
+    escape_chars = r'\\*?!"#$%&\'()+,/:;<=>@[]^`{|}~'
+
+    def encode_char(match):
+        char = match.group(0)
+        if char in escape_chars:
+            return '\\' + char
+
+    return re.sub(f'[^{allowed_chars}]', encode_char, cpe)
 
 def normalize_epoch_in_cpe(cpe: str) -> str:
     """Replace unset epochs in CPEs with 0."""
