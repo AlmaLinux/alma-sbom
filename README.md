@@ -13,6 +13,7 @@ These utilities consist in:
 * packageurl-python >= 0.10.3
 * GitPython == 3.1.29
 * immudb_wrapper >= 0.1.4
+* rpm >= 4.14 (or rpm == 0.3.1 in venv)
 
 ## Getting started
 
