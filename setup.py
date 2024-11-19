@@ -31,4 +31,12 @@ setup(
         'immudb_wrapper @ git+https://github.com/AlmaLinux/immudb-wrapper.git@0.1.5#egg=immudb_wrapper',
     ],
     python_requires=">=3.9",
+
+    ### tests setting
+    extras_require={
+        'dev': [
+            'pytest',
+            'pytest-cov',
+        ],
+    },
 )
