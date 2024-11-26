@@ -1,5 +1,5 @@
 import unittest
-from alma_sbom.models.package import Package
+from alma_sbom.models import Package
 
 class TestPackage(unittest.TestCase):
     def setUp(self):

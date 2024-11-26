@@ -2,7 +2,7 @@
 import os
 from immudb_wrapper import ImmudbWrapper
 
-from alma_sbom.models.package import Package
+from alma_sbom.models import Package, Build
 
 class ImmudbCollector:
     client: ImmudbWrapper
@@ -24,5 +24,8 @@ class ImmudbCollector:
          )
 
     def collect_package_by_hash(self, hash: str) -> Package:
+        pass
+
+    def collect_build_by_id(self, build_id: str) -> Build:
         pass
 
