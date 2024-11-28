@@ -2,7 +2,7 @@
 import os
 from immudb_wrapper import ImmudbWrapper
 
-from alma_sbom.models import Package, Build
+from alma_sbom.data.models import Package, Build
 
 class ImmudbCollector:
     client: ImmudbWrapper

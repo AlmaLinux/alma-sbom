@@ -1,6 +1,6 @@
 from rpm import TransactionSet
 
-from alma_sbom.models import Package
+from alma_sbom.data.models import Package
 
 class RpmCollector:
     ts: TransactionSet
