@@ -270,24 +270,14 @@ def add_rpm_package_info(
         return
     ts = rpm.TransactionSet()
     try:
-        fd = os.open(rpm_package, os.O_RDONLY)
-        hdr = ts.hdrFromFdno(fd)
-    except OSError as e:
-        _logger.error(f'file open error: {e.strerror}')
-        sys.exit(1)
-    except rpm.error as e:
+        with open(rpm_package) as fd:
+            hdr = ts.hdrFromFdno(fd)
+    except (OSError, rpm.error) as e:
         _logger.error(f'file open error: {str(e)}')
         sys.exit(1)
     except Exception as e:
         _logger.error(f'unknown error: {str(e)}')
         sys.exit(1)
-    else:
-        pass
-    finally:
-        try:
-            os.close(fd)
-        except Exception:
-            pass
 
     component['licenses'] = _proc_licenses(hdr[rpm.RPMTAG_LICENSE])
     component['summary'] = hdr[rpm.RPMTAG_SUMMARY]
