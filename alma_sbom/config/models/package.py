@@ -8,7 +8,8 @@ class PackageConfig(CommonConfig):
 
     def __post_init__(self) -> None:
         # validation? need to be spalate?
-        if (config.rpm_package_hash is None and config.rpm_package is None) or \
-           (config.rpm_package_hash is not None and config.rpm_package is not None):
+        if (self.rpm_package_hash is None and self.rpm_package is None) or \
+           (self.rpm_package_hash is not None and self.rpm_package is not None):
             raise ValueError("Either rpm_package_hash or rpm_package must be specified")
+        super().__post_init__()
 

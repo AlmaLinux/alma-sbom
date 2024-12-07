@@ -2,11 +2,14 @@ import argparse
 from abc import ABC, abstractmethod
 from typing import Type, Dict
 
-#from . import command_classes
+from ...config.config import CommonConfig
 
 class SubCommand(ABC):
+    config: CommonConfig
+
+    @staticmethod
     @abstractmethod
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(parser: argparse.ArgumentParser) -> None:
         pass
 
     @abstractmethod

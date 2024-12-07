@@ -14,8 +14,11 @@ class SBOMFormat(Enum):
 
 @dataclass
 class CommonConfig:
-    loglevel: int = INFO
     output_file: str = None
     #sbom_format: SBOMFormat
     #file_format: Union[SPDXFormat, CDXFormat]
+
+    def __post_init__(self):
+        print("It's in __post_init__ in CommonConfig.")
+
 

@@ -1,9 +1,16 @@
 import argparse
 
 from .commands import SubCommand
+from ...config.models.package import PackageConfig
 
 class PackageCommand(SubCommand):
-    def add_arguments(self, parser: argparse._SubParsersAction) -> None:
+    config: PackageConfig
+
+    def __init__(self, args: argparse.Namespace) -> None:
+        self.config = self._get_PackageConfig_from_args(args)
+
+    @staticmethod
+    def add_arguments(parser: argparse._SubParsersAction) -> None:
         package_parser = parser.add_parser('package', help='Generate package SBOM')
         object_id_group = package_parser.add_mutually_exclusive_group(required=True)
         object_id_group.add_argument(
@@ -19,3 +26,12 @@ class PackageCommand(SubCommand):
 
     def execute(self, args: argparse.Namespace) -> None:
         pass
+
+    @staticmethod
+    def _get_PackageConfig_from_args(args: argparse.Namespace) -> PackageConfig:
+        return PackageConfig(
+            output_file=args.output_file,
+            rpm_package_hash=args.rpm_package_hash,
+            rpm_package=args.rpm_package,
+        )
+
