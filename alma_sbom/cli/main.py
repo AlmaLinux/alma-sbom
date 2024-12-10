@@ -1,22 +1,27 @@
 import argparse
 import sys
-from logging import DEBUG, INFO, WARNING
+from logging import DEBUG, INFO, WARNING, getLogger, Logger
 
+from .logging import Logging
 from .commands import SubCommand, setup_subparsers, command_factory
 #from ..config.config import CommonConfig
+
+_logger = getLogger(__name__)
 
 class Main:
     command: SubCommand
     args: argparse.Namespace
+    #logging: Logging
+    #logger: Logger
 
     def __init__(self, args: list[str]) -> None:
         parser = create_parser()
         self.args = parser.parse_args(args)
+        logging = Logging(loglevel=self.args.loglevel)
         self.command = command_factory(self.args)
 
     def run(self) -> int:
-        return 0
-
+        _logger.debug('Hello from Main.run')
 
 def create_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description='alma-sbom')

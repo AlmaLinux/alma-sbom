@@ -2,10 +2,12 @@ import argparse
 from dataclasses import dataclass
 from enum import Enum
 from typing import Union
-from logging import DEBUG, INFO, WARNING
+from logging import getLogger
 
 from ..formats.spdx.models import SPDXFormat
 from ..formats.cyclonedx.models import CDXFormat
+
+_logger = getLogger(__name__)
 
 @dataclass
 class SBOMFormat(Enum):
@@ -19,6 +21,6 @@ class CommonConfig:
     #file_format: Union[SPDXFormat, CDXFormat]
 
     def __post_init__(self):
-        print("It's in __post_init__ in CommonConfig.")
+        _logger.debug("CommonConfig.__post_init__")
 
 

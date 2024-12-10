@@ -1,12 +1,16 @@
 import argparse
+from logging import getLogger
 
 from .commands import SubCommand
 from ...config.models.package import PackageConfig
+
+_logger = getLogger(__name__)
 
 class PackageCommand(SubCommand):
     config: PackageConfig
 
     def __init__(self, args: argparse.Namespace) -> None:
+        _logger.debug('PackageCommand.__init__')
         self.config = self._get_PackageConfig_from_args(args)
 
     @staticmethod
