@@ -13,6 +13,6 @@ class SubCommand(ABC):
         pass
 
     @abstractmethod
-    def execute(self, args: argparse.Namespace) -> None:
+    def run(self, args: argparse.Namespace) -> int:
         pass
 

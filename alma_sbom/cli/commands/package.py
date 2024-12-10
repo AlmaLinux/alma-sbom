@@ -28,8 +28,9 @@ class PackageCommand(SubCommand):
             help='path to an RPM package',
         )
 
-    def execute(self, args: argparse.Namespace) -> None:
-        pass
+    def run(self) -> int:
+        _logger.debug('PackageCommand.run')
+        return 0
 
     @staticmethod
     def _get_PackageConfig_from_args(args: argparse.Namespace) -> PackageConfig:

@@ -23,8 +23,9 @@ class BuildCommand(SubCommand):
             required=True,
         )
 
-    def execute(self, args: argparse.Namespace) -> None:
-        pass
+    def run(self) -> int:
+        _logger.debug('BuildCommand.run')
+        return 0
 
     @staticmethod
     def _get_BuildConfig_from_args(args: argparse.Namespace) -> BuildConfig:

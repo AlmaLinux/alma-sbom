@@ -22,6 +22,7 @@ class Main:
 
     def run(self) -> int:
         _logger.debug('Hello from Main.run')
+        return self.command.run()
 
 def create_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description='alma-sbom')
