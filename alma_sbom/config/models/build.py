@@ -9,3 +9,8 @@ class BuildConfig(CommonConfig):
         if not self.build_id:
             raise ValueError("build_id must not be empty")
         super().__post_init__()
+
+    @classmethod
+    def from_base(cls, base: CommonConfig, build_id: str) -> 'BuildConfig':
+        base_fields = vars(base)
+        return cls(**base_fields, build_id=build_id)

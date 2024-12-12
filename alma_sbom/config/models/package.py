@@ -13,3 +13,8 @@ class PackageConfig(CommonConfig):
             raise ValueError("Either rpm_package_hash or rpm_package must be specified")
         super().__post_init__()
 
+    @classmethod
+    def from_base(cls, base: CommonConfig, rpm_package_hash: str, rpm_package: str) -> 'PackageConfig':
+        base_fields = vars(base)
+        return cls(**base_fields, rpm_package_hash=rpm_package_hash, rpm_package=rpm_package)
+
