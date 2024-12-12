@@ -4,16 +4,18 @@ from .commands import SubCommand
 from .package import PackageCommand
 from .build import BuildCommand
 
+from ...config.config import CommonConfig
+
 
 command_classes: dict[str, type[SubCommand]] = {
     'package': PackageCommand,
     'build': BuildCommand
 }
 
-def command_factory(args: argparse.Namespace) -> SubCommand:
+def command_factory(base: CommonConfig, args: argparse.Namespace) -> SubCommand:
     try:
         command_class = command_classes[args.command]
-        return command_class(args)
+        return command_class(base, args)
     except KeyError:
         raise ValueError(f"Unknown command: {args.command}")
 

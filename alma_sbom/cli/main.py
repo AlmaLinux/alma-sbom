@@ -4,13 +4,14 @@ from logging import DEBUG, INFO, WARNING, getLogger, Logger
 
 from .logging import Logging
 from .commands import SubCommand, setup_subparsers, command_factory
-#from ..config.config import CommonConfig
+from ..config.config import CommonConfig, SbomType
 
 _logger = getLogger(__name__)
 
 class Main:
     command: SubCommand
     args: argparse.Namespace
+    config: CommonConfig
     #logging: Logging
     #logger: Logger
 
@@ -18,10 +19,15 @@ class Main:
         parser = create_parser()
         self.args = parser.parse_args(args)
         logging = Logging(loglevel=self.args.loglevel)
-        self.command = command_factory(self.args)
+        self.config = self._get_CommonConfig_from_args(self.args)
+        self.command = command_factory(self.config, self.args)
+
+    def _get_CommonConfig_from_args(self, args: argparse.Namespace) -> CommonConfig:
+        return CommonConfig.from_str(args.output_file, args.file_format)
 
     def run(self) -> int:
         _logger.debug('Hello from Main.run')
+        _logger.debug(f'CommonConfig: {self.config}')
         return self.command.run()
 
 def create_parser() -> argparse.ArgumentParser:
@@ -36,17 +42,17 @@ def create_parser() -> argparse.ArgumentParser:
             'to stdout if the parameter is absent or emtpy'
         ),
         required=False,
-        default=None,
+        default='/dev/stdout',
     )
-    # parser.add_argument(
-    #     '--file-format',
-    #     default=FileFormat(),
-    #     const=FileFormat(),
-    #     nargs='?',
-    #     choices=FileFormatType.choices(),
-    #     type=FileFormatType(),
-    #     help='Generate SBOM in one of format mode (default: %(default)s)',
-    # )
+    parser.add_argument(
+        '--file-format',
+        default=SbomType(),
+        const=SbomType(),
+        nargs='?',
+        choices=SbomType.choices(),
+        type=str,
+        help='Generate SBOM in one of format mode (default: %(default)s)',
+    )
 
     # ### ALBS/immudb settings ###
     # parser.add_argument(
