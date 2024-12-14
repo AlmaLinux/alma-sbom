@@ -1,4 +1,5 @@
 import datetime
+import uuid
 from enum import Enum
 from typing import Callable
 from logging import getLogger
@@ -11,6 +12,7 @@ from spdx_tools.spdx.writer.tagvalue import tagvalue_writer
 from spdx_tools.spdx.writer.xml import xml_writer
 from spdx_tools.spdx.writer.yaml import yaml_writer
 
+from alma_sbom import constants
 from alma_sbom.data.models import Package, Build
 from alma_sbom.config.config import CommonConfig, SbomFileFormatType
 
@@ -30,21 +32,24 @@ class SPDXFormatter:
         self.formatter = self.FORMATTERS[file_format]
 
 class SPDXDocument:
+    SPDX_ALMAOS_NAMESPACE = constants.ALMAOS_NAMESPACE + '/spdx'
+
     document: Document
     config: CommonConfig
     formatter: SPDXFormatter
+    doc_uuid: str
 
-    def __init__(self, config: CommonConfig) -> None:
+    def __init__(self, config: CommonConfig, doc_name: str) -> None:
         ### TODO
         # This is test implementation
         # need to be fixed
+        self.doc_uuid = uuid.uuid4()
         doc_info = CreationInfo(
             spdx_version="SPDX-2.3",
             spdx_id="SPDXRef-DOCUMENT",
-            name='test implementation doc',
-            #data_license=constants.ALMAOS_SBOMLICENSE,
-            #document_namespace=f"{constants.ALMAOS_NAMESPACE}-{doc_name}-{doc_uuid}",
-            document_namespace=f"testimple-testdoc",
+            name=doc_name,
+            data_license=constants.ALMAOS_SBOMLICENSE,
+            document_namespace=f"{SPDXDocument.SPDX_ALMAOS_NAMESPACE}-{doc_name}-{self.doc_uuid}",
             creators=[],
             created=datetime.datetime.now(),
         )
@@ -57,12 +62,14 @@ class SPDXDocument:
 
     @classmethod
     def from_package(cls, package: Package, config: CommonConfig) -> "SPDXDocument":
-        doc = cls(config)
+        doc_name = package.get_doc_name()
+        doc = cls(config, doc_name)
         return doc
 
     @classmethod
     def from_build(cls, build: Build, config: CommonConfig) -> "SPDXDocument":
-        doc = cls(config)
+        doc_name = 'testtesttest doc_name'
+        doc = cls(config, doc_name)
         return doc
 
     def write(self) -> None:

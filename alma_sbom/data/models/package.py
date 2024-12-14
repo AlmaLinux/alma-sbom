@@ -2,8 +2,8 @@ from dataclasses import dataclass
 
 @dataclass
 class PackageNevra:
-    epoch: str = None
     name: str = None
+    epoch: str = None
     version: str = None
     release: str = None
     arch: str = None
@@ -54,4 +54,9 @@ class Package:
 
     ### source info
     source_info: PackageSourceInfo = None
+
+    ### TODO
+    # need to be defined in PackageNevra class??
+    def get_doc_name(self) -> str:
+        return f'{self.package_nevra.name}-{self.package_nevra.version}'
 
