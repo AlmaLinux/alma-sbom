@@ -23,6 +23,7 @@ from spdx_tools.spdx.writer.yaml import yaml_writer
 from alma_sbom import constants
 from alma_sbom.data.models import Package, Build
 from alma_sbom.config.config import CommonConfig, SbomFileFormatType
+from ..document import Document as AlmasbomDocument
 
 _logger = getLogger(__name__)
 
@@ -39,7 +40,7 @@ class SPDXFormatter:
     def __init__(self, file_format: SbomFileFormatType) -> None:
         self.formatter = self.FORMATTERS[file_format]
 
-class SPDXDocument:
+class SPDXDocument(AlmasbomDocument):
     SPDX_ALMAOS_NAMESPACE = constants.ALMAOS_NAMESPACE + '/spdx'
 
     document: Document

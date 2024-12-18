@@ -2,10 +2,12 @@ import argparse
 from abc import ABC, abstractmethod
 from typing import Type, Dict
 
-from ...config.config import CommonConfig
+from alma_sbom.config.config import CommonConfig
+from alma_sbom.formats.document import Document
 
 class SubCommand(ABC):
     config: CommonConfig
+    doc: Document
 
     @staticmethod
     @abstractmethod

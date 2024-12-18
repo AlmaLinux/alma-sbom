@@ -2,15 +2,17 @@ import argparse
 from logging import getLogger
 
 from .commands import SubCommand
-from ...config.config import CommonConfig, SbomType
-from ...config.models.package import PackageConfig
-from ...data import ImmudbCollector
-from ...formats.spdx.models import SPDXDocument
+from alma_sbom.config.config import CommonConfig, SbomType
+from alma_sbom.config.models.package import PackageConfig
+from alma_sbom.data import ImmudbCollector
+from alma_sbom.formats.document import Document
+from alma_sbom.formats import document_factory
 
 _logger = getLogger(__name__)
 
 class PackageCommand(SubCommand):
     config: PackageConfig
+    doc: Document
 
     def __init__(self, base: CommonConfig, args: argparse.Namespace) -> None:
         self.config = self._get_PackageConfig_from_args(base, args)
@@ -39,8 +41,9 @@ class PackageCommand(SubCommand):
         package = immudb_collector.collect_package_by_hash(self.config.rpm_package_hash)
         _logger.debug(f'get package data: {package}')
 
-        doc = SPDXDocument.from_package(package, self.config)
-        doc.write()
+        document_class = document_factory(self.config.sbom_type.record_type)
+        self.doc = document_class.from_package(package, self.config)
+        self.doc.write()
 
         return 0
 
