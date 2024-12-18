@@ -1,4 +1,3 @@
-
 import os
 from immudb_wrapper import ImmudbWrapper
 
@@ -27,6 +26,9 @@ class ImmudbCollector:
     def collect_package_by_hash(self, hash: str) -> Package:
         immudb_info = self._extract_immudb_info_about_package(hash=hash)
 
+        ### need to be rethink below
+        immudb_hash = hash or immudb_info['Hash']
+
         if 'Metadata' in immudb_info:
             immudb_metadata = immudb_info['Metadata']
         else:
@@ -47,7 +49,9 @@ class ImmudbCollector:
         )
         package = Package(
             package_nevra = package_nevra,
-            source_rpm = immudb_metadata['sourcerpm']
+            source_rpm = immudb_metadata['sourcerpm'],
+            immudb_hash = immudb_hash,
+            package_timestamp = immudb_info['timestamp'],
         )
 
         return package
