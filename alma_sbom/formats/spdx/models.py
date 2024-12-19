@@ -1,20 +1,12 @@
-import datetime
 import uuid
+from datetime import datetime
 from enum import Enum
 from typing import Callable
 from logging import getLogger
 from spdx_tools.spdx.model import (
-    Checksum,
-    ChecksumAlgorithm,
     CreationInfo,
     Document,
-    ExternalPackageRef,
-    ExternalPackageRefCategory,
-    Package as PackageComponent,
-    Relationship,
-    RelationshipType,
 )
-from spdx_tools.spdx.model.spdx_no_assertion import SpdxNoAssertion
 from spdx_tools.spdx.writer.json import json_writer
 from spdx_tools.spdx.writer.tagvalue import tagvalue_writer
 from spdx_tools.spdx.writer.xml import xml_writer
@@ -24,6 +16,7 @@ from alma_sbom import constants
 from alma_sbom.data.models import Package, Build
 from alma_sbom.config.config import CommonConfig, SbomFileFormatType
 from ..document import Document as AlmasbomDocument
+from .component import component_from_package
 
 _logger = getLogger(__name__)
 
@@ -61,7 +54,7 @@ class SPDXDocument(AlmasbomDocument):
             data_license=constants.ALMAOS_SBOMLICENSE,
             document_namespace=f"{SPDXDocument.SPDX_ALMAOS_NAMESPACE}-{doc_name}-{self.doc_uuid}",
             creators=[],
-            created=datetime.datetime.now(),
+            created=datetime.now(),
         )
         self.document = Document(doc_info)
         self.config = config
@@ -101,37 +94,7 @@ class SPDXDocument(AlmasbomDocument):
         return f"SPDXRef-{cur_id}"
 
     def _add_each_package_component(self, package: Package) -> None:
-        pkgid = self.get_next_package_id()
-        pkg_component = PackageComponent(
-            spdx_id=pkgid,
-            name=package.package_nevra.name,
-            download_location=SpdxNoAssertion(),
-        )
-        rel = Relationship(
-            spdx_element_id="SPDXRef-DOCUMENT",
-            relationship_type=RelationshipType.DESCRIBES,
-            related_spdx_element_id=pkgid,
-        )
-
-        ### TODO:
-        # need to be considered multiple hashs
-        pkg_component.checksums = [Checksum(ChecksumAlgorithm.SHA256, package.immudb_hash)]
-        pkg_component.version = package.package_nevra.get_EVR()
-        pkg_component.external_references += [
-            ExternalPackageRef(
-                ExternalPackageRefCategory.SECURITY,
-                'cpe23Type',
-                package.package_nevra.get_cpe23(),
-            ),
-            ExternalPackageRef(
-                ExternalPackageRefCategory.PACKAGE_MANAGER,
-                'purl',
-                package.get_purl(),
-            ),
-        ]
-        pkg_component.built_date = datetime.datetime.fromtimestamp(package.package_timestamp)
-        pkg_component.files_analyzed = False
-
-        self.document.packages += [pkg_component]
+        pkg, rel = component_from_package(package, self.get_next_package_id())
+        self.document.packages += [pkg]
         self.document.relationships += [rel]
 
