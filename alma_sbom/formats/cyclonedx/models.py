@@ -10,6 +10,7 @@ from cyclonedx.output.xml import XmlV1Dot4
 from alma_sbom.data.models import Package, Build
 from alma_sbom.config.config import CommonConfig, SbomFileFormatType
 from ..document import Document as AlmasbomDocument
+from .component import component_from_package
 
 _logger = getLogger(__name__)
 
@@ -39,15 +40,15 @@ class CDXFormatter:
     # writer functions are likely renmove after library update.
     def _write_json(self, bom: Bom) -> str:
         import json
-        fff = self.formatter(bom)
-        output_str = fff.output_as_string()
+        formatter = self.formatter(bom)
+        output_str = formatter.output_as_string()
         json_output = json.loads(output_str)
         return json.dumps(json_output, indent=4)
 
     def _write_xml(self, bom: Bom) -> str:
         import xml.dom.minidom
-        fff = self.formatter(bom)
-        output_str = fff.output_as_string()
+        formatter = self.formatter(bom)
+        output_str = formatter.output_as_string()
         xml_output = xml.dom.minidom.parseString(output_str)
         return xml_output.toprettyxml()
 
@@ -65,6 +66,7 @@ class CDXDocument(AlmasbomDocument):
     @classmethod
     def from_package(cls, package: Package, config: CommonConfig) -> "CDXDocument":
         doc = cls(config)
+        doc.bom.metadata.component = component_from_package(package)
         return doc
 
     @classmethod
