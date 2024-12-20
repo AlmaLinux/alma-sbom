@@ -51,26 +51,6 @@ class PackageNevra:
         return cpe
 
 @dataclass
-class PackageSourceInfo:
-    pass
-
-@dataclass
-class GitSourceInfo(PackageSourceInfo):
-    source_type: str = 'git'
-    git_url: str = None
-    git_commit: str = None
-    git_ref: str = None
-    git_commit_immudb_hash: str = None
-
-@dataclass
-class SrpmSourceInfo(PackageSourceInfo):
-    source_type: str = 'srpm'
-    srpm_url: str = None
-    srpm_checksum: str = None
-    srpm_nevra: str = None
-
-
-@dataclass
 class Package:
     ### required data
     package_nevra: PackageNevra = None
@@ -79,15 +59,6 @@ class Package:
     package_timestamp: str  = None
     package_type: str = None
     immudb_hash: str = None
-
-    ### build info
-    build_host: str = None
-    build_arch: str = None
-    build_id: str = None
-    build_author: str = None
-
-    ### source info
-    source_info: PackageSourceInfo = None
 
     ### TODO
     # need to be defined in PackageNevra class??
