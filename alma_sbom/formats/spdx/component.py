@@ -26,7 +26,7 @@ def component_from_package(package: Package, pkgid: int) -> tuple[PackageCompone
 
     ### TODO:
     # need to be considered multiple hashs
-    pkg.checksums = [Checksum(ChecksumAlgorithm.SHA256, package.immudb_hash)]
+    pkg.checksums = [Checksum(ChecksumAlgorithm.SHA256, package.hash)]
     pkg.version = package.package_nevra.get_EVR()
     pkg.external_references += [
         ExternalPackageRef(

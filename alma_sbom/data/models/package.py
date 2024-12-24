@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from ..attributes.property import PackageProperties, BuildProperties, SBOMProperties
+
 @dataclass
 class PackageNevra:
     name: str = None
@@ -52,13 +54,17 @@ class PackageNevra:
 
 @dataclass
 class Package:
-    ### required data
+    ### info as package component of SBOM
     package_nevra: PackageNevra = None
     source_rpm: str = None
-    ### package info
+    ### need to be rethink that 'package_timestamp' is actually nedded?
     package_timestamp: str  = None
-    package_type: str = None
-    immudb_hash: str = None
+    hash: str = None
+
+    ### properties (got from database?? (or include package info))
+    package_properties: PackageProperties = None
+    build_properties: BuildProperties = None
+    sbom_properties: SBOMProperties = None
 
     ### TODO
     # need to be defined in PackageNevra class??

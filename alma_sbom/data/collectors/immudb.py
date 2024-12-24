@@ -1,8 +1,19 @@
 import os
 from immudb_wrapper import ImmudbWrapper
+from logging import getLogger
 
 #from alma_sbom.data.models import Package, Build, PackageNevra
 from alma_sbom.data import Package, Build, PackageNevra
+from ..attributes.property import (
+    PackageProperties,
+    BuildSourceProperties,
+    GitSourceProperties,
+    SrpmSourceProperties,
+    BuildProperties,
+    SBOMProperties,
+)
+
+_logger=getLogger(__name__)
 
 class ImmudbCollector:
     client: ImmudbWrapper
@@ -27,7 +38,7 @@ class ImmudbCollector:
         immudb_info = self._extract_immudb_info_about_package(hash=hash)
 
         ### need to be rethink below
-        immudb_hash = hash or immudb_info['Hash']
+        hash = hash or immudb_info['Hash']
 
         if 'Metadata' in immudb_info:
             immudb_metadata = immudb_info['Metadata']
@@ -47,11 +58,16 @@ class ImmudbCollector:
             release = immudb_metadata['release'],
             arch = immudb_metadata['arch'],
         )
+        pkg_props, build_props, sbom_props = self._properties_from_immudb_info_about_package(immudb_info)
+
         package = Package(
             package_nevra = package_nevra,
             source_rpm = immudb_metadata['sourcerpm'],
-            immudb_hash = immudb_hash,
+            hash = hash,
             package_timestamp = immudb_info['timestamp'],
+            package_properties = pkg_props,
+            build_properties = build_props,
+            sbom_properties = sbom_props,
         )
 
         return package
@@ -75,4 +91,58 @@ class ImmudbCollector:
         result = response.get('value', {})
         result['timestamp'] = response.get('timestamp')
         return result
+
+    def _properties_from_immudb_info_about_package(self, immudb_info: dict) -> tuple[
+                PackageProperties,
+                BuildProperties,
+                SBOMProperties,
+        ]:
+        if 'Metadata' in immudb_info:
+            immudb_metadata = immudb_info['Metadata']
+        else: ### need to implement errro handling
+            return None
+
+        ### TODO:
+        # need to rethink if api_ver?
+        pkg_props = PackageProperties(
+            epoch=immudb_metadata['epoch'],
+            version=immudb_metadata['version'],
+            release=immudb_metadata['release'],
+            arch=immudb_metadata['arch'],
+            buildhost=immudb_metadata['build_host'],
+            sourcerpm=immudb_metadata['sourcerpm'],
+            timestamp=immudb_info['timestamp'],
+        )
+
+        ### TODO:
+        # rewrite as other func or/and in other files
+        build_src_props = None
+        if immudb_metadata['source_type'] == 'git':
+            build_src_props = GitSourceProperties(
+               git_url=immudb_metadata['git_url'],
+               git_commit=immudb_metadata['git_url'],
+               git_ref=immudb_metadata['git_url'],
+               git_commit_immudb_hash=immudb_metadata['alma_commit_sbom_hash'],
+            )
+        elif immudb_metadata['source_type'] == 'srpm':
+            build_src_props = SrpmSourceProperties(
+               srpm_url=immudb_metadata['srpm_url'],
+               srpm_checksum=immudb_metadata['srpm_sha256'],
+               srpm_nevra=immudb_metadata['srpm_nevra'],
+            )
+        else:
+            raise ValueError(f"Unknown source_type: {immudb_metadata['source_type']}")
+        build_props = BuildProperties(
+            target_arch=immudb_metadata['build_arch'],
+            package_type='rpm',
+            build_id=immudb_metadata['build_id'],
+            #build_url=f'{albs_url}/build/{immudb_metadata["build_id"]}',
+            build_url='https://dummy.almalinux.org',  ### dummy
+            author=immudb_metadata['built_by'],
+            source=build_src_props,
+        )
+
+        sbom_props = SBOMProperties(immudb_hash=immudb_info['Hash'])
+
+        return pkg_props, build_props, sbom_props
 
