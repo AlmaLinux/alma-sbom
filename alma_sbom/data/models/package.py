@@ -1,6 +1,9 @@
 from dataclasses import dataclass
+from logging import getLogger
 
-from ..attributes.property import PackageProperties, BuildProperties, SBOMProperties
+from ..attributes.property import Property, PackageProperties, BuildProperties, SBOMProperties
+
+_logger = getLogger(__name__)
 
 @dataclass
 class PackageNevra:
@@ -93,3 +96,9 @@ class Package:
             f'{purl_epoch_part}{purl_upstream_part}'
         )
         return purl
+
+    def get_properties(self) -> list[Property]:
+        return (self.package_properties.to_properties() if self.package_properties is not None else []) + \
+               (self.build_properties.to_properties() if self.build_properties is not None else []) + \
+               (self.sbom_properties.to_properties() if self.sbom_properties is not None else [])
+

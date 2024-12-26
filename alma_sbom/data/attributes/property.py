@@ -1,21 +1,44 @@
 from dataclasses import dataclass
+from typing import ClassVar
 
 @dataclass
 class Property:
     name: str
     value: str
 
-@dataclass
-class BuildSourceProperties():
-    source_type: str
+class PropertyMixin:
+    """Mixin for providing common functionality for property conversion"""
+    PROPERTY_KEYS: ClassVar[dict[str, str]] = {}
 
-    def to_properties(self) -> list[Property]:
+    def _create_properties(self) -> list[Property]:
+        """Create a property list from instance variables"""
         return [
-            Property("almalinux:albs:build:source:type", self.source_type)
+            Property(self.PROPERTY_KEYS[attr], getattr(self, attr))
+            for attr in self.PROPERTY_KEYS
+            if getattr(self, attr) is not None
         ]
 
 @dataclass
+class BuildSourceProperties(PropertyMixin):
+    PROPERTY_KEYS: ClassVar[dict[str, str]] = {
+        "source_type": "almalinux:albs:build:source:type"
+    }
+
+    source_type: str
+
+    def to_properties(self) -> list[Property]:
+        return self._create_properties()
+
+@dataclass
 class GitSourceProperties(BuildSourceProperties):
+    PROPERTY_KEYS: ClassVar[dict[str, str]] = {
+        **BuildSourceProperties.PROPERTY_KEYS,
+        "git_commit": "almalinux:albs:build:source:gitCommit",
+        "git_commit_immudb_hash": "almalinux:albs:build:source:gitCommitImmudbHash",
+        "git_ref": "almalinux:albs:build:source:gitRef",
+        "git_url": "almalinux:albs:build:source:gitURL"
+    }
+
     git_url: str
     git_commit: str
     git_ref: str
@@ -29,15 +52,17 @@ class GitSourceProperties(BuildSourceProperties):
         self.git_commit_immudb_hash = git_commit_immudb_hash
 
     def to_properties(self) -> list[Property]:
-        return super().to_properties() + [
-            Property("almalinux:albs:build:source:gitCommit", self.git_commit),
-            Property("almalinux:albs:build:source:gitCommitImmudbHash", self.git_commit_immudb_hash),
-            Property("almalinux:albs:build:source:gitRef", self.git_ref),
-            Property("almalinux:albs:build:source:gitURL", self.git_url),
-        ]
+        return self._create_properties()
 
 @dataclass
 class SrpmSourceProperties(BuildSourceProperties):
+    PROPERTY_KEYS: ClassVar[dict[str, str]] = {
+        **BuildSourceProperties.PROPERTY_KEYS,
+        "srpm_url": "almalinux:albs:build:source:srpmURL",
+        "srpm_checksum": "almalinux:albs:build:source:srpmChecksum",
+        "srpm_nevra": "almalinux:albs:build:source:srpmNEVRA"
+    }
+
     srpm_url: str
     srpm_checksum: str
     srpm_nevra: str
@@ -49,14 +74,18 @@ class SrpmSourceProperties(BuildSourceProperties):
         self.srpm_nevra = srpm_nevra
 
     def to_properties(self) -> list[Property]:
-        return super().to_properties() + [
-            Property("almalinux:albs:build:source:srpmURL", self.srpm_url),
-            Property("almalinux:albs:build:source:srpmChecksum", self.srpm_checksum),
-            Property("almalinux:albs:build:source:srpmNEVRA", self.srpm_nevra),
-        ]
+        return self._create_properties()
 
 @dataclass
-class BuildProperties:
+class BuildProperties(PropertyMixin):
+    PROPERTY_KEYS: ClassVar[dict[str, str]] = {
+        "build_id": "almalinux:albs:build:ID",
+        "build_url": "almalinux:albs:build:URL",
+        "author": "almalinux:albs:build:author",
+        "package_type": "almalinux:albs:build:packageType",
+        "target_arch": "almalinux:albs:build:targetArch"
+    }
+
     target_arch: str
     package_type: str
     build_id: str
@@ -65,16 +94,20 @@ class BuildProperties:
     source: BuildSourceProperties
 
     def to_properties(self) -> list[Property]:
-        return [
-            Property("almalinux:albs:build:ID", self.build_id),
-            Property("almalinux:albs:build:URL", self.build_url),
-            Property("almalinux:albs:build:author", self.author),
-            Property("almalinux:albs:build:packageType", self.package_type),
-            Property("almalinux:albs:build:targetArch", self.target_arch),
-        ] + self.source.to_properties()
+        return self._create_properties() + (self.source.to_properties() if self.source is not None else [])
 
 @dataclass
-class PackageProperties:
+class PackageProperties(PropertyMixin):
+    PROPERTY_KEYS: ClassVar[dict[str, str]] = {
+        "arch": "almalinux:package:arch",
+        "buildhost": "almalinux:package:buildhost",
+        "epoch": "almalinux:package:epoch",
+        "release": "almalinux:package:release",
+        "sourcerpm": "almalinux:package:sourcerpm",
+        "timestamp": "almalinux:package:timestamp",
+        "version": "almalinux:package:version"
+    }
+
     epoch: str
     version: str
     release: str
@@ -84,22 +117,16 @@ class PackageProperties:
     timestamp: str
 
     def to_properties(self) -> list[Property]:
-        return [
-            Property("almalinux:package:epoch", self.epoch),
-            Property("almalinux:package:version", self.version),
-            Property("almalinux:package:release", self.release),
-            Property("almalinux:package:arch", self.arch),
-            Property("almalinux:package:buildhost", self.buildhost),
-            Property("almalinux:package:sourcerpm", self.sourcerpm),
-            Property("almalinux:package:timestamp", self.timestamp),
-        ]
+        return self._create_properties()
 
 @dataclass
-class SBOMProperties:
+class SBOMProperties(PropertyMixin):
+    PROPERTY_KEYS: ClassVar[dict[str, str]] = {
+        "immudb_hash": "almalinux:sbom:immudbHash"
+    }
+
     immudb_hash: str
 
     def to_properties(self) -> list[Property]:
-        return [
-            Property("almalinux:sbom:immudbHash", self.immudb_hash),
-        ]
+        return self._create_properties()
 

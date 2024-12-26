@@ -52,7 +52,7 @@ class ImmudbCollector:
             raise ValueError('Immudb metadata is malformed, API version cannot be detected')
 
         package_nevra = PackageNevra(
-            epoch = None,
+            epoch=immudb_metadata['epoch'],
             name = immudb_metadata['name'],
             version = immudb_metadata['version'],
             release = immudb_metadata['release'],
