@@ -121,7 +121,7 @@ class ImmudbCollector:
             build_src_props = GitSourceProperties(
                git_url=immudb_metadata['git_url'],
                git_commit=immudb_metadata['git_url'],
-               git_ref=immudb_metadata['git_url'],
+               git_ref=immudb_metadata['git_ref'],
                git_commit_immudb_hash=immudb_metadata['alma_commit_sbom_hash'],
             )
         elif immudb_metadata['source_type'] == 'srpm':
