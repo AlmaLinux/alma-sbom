@@ -1,7 +1,13 @@
 from datetime import datetime
+from logging import getLogger
 from spdx_tools.spdx.model import (
+    Actor,
+    ActorType,
+    Annotation,
+    AnnotationType,
     Checksum,
     ChecksumAlgorithm,
+    Document,
     ExternalPackageRef,
     ExternalPackageRefCategory,
     Package as PackageComponent,
@@ -11,6 +17,19 @@ from spdx_tools.spdx.model import (
 from spdx_tools.spdx.model.spdx_no_assertion import SpdxNoAssertion
 
 from alma_sbom.data.models import Package, Build
+from alma_sbom.data.attributes.property import Property
+
+_logger = getLogger(__name__)
+
+def set_package_component(document: Document, package: Package, pkgid: int) -> None:
+    pkg, rel = component_from_package(package, pkgid)
+    document.packages += [pkg]
+    document.relationships += [rel]
+
+    for prop in package.get_properties():
+        if prop is not None and prop.value is not None:
+            note = _make_annotation(prop, pkgid)
+            document.annotations += [note]
 
 def component_from_package(package: Package, pkgid: int) -> tuple[PackageComponent, Relationship]:
     pkg = PackageComponent(
@@ -44,3 +63,22 @@ def component_from_package(package: Package, pkgid: int) -> tuple[PackageCompone
     pkg.files_analyzed = False
 
     return pkg, rel
+
+def _make_comment_from_property(prop: Property) -> str:
+    return f'{prop.name}={prop.value}'
+
+def _make_annotation(prop: Property, spdxid: int) -> Annotation:
+    ### TODO:
+    # This is test actor. need to be rewrite correct one.
+    actor = Actor(
+        actor_type=ActorType.TOOL,
+        name=f"test annotator",
+    )
+    return Annotation(
+        spdx_id=spdxid,
+        annotation_type=AnnotationType.OTHER,
+        annotator=actor,
+        annotation_date=datetime.now(),
+        annotation_comment=_make_comment_from_property(prop),
+    )
+

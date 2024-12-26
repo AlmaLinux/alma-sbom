@@ -16,7 +16,7 @@ from alma_sbom import constants
 from alma_sbom.data.models import Package, Build
 from alma_sbom.config.config import CommonConfig, SbomFileFormatType
 from ..document import Document as AlmasbomDocument
-from .component import component_from_package
+from .component import component_from_package, set_package_component
 
 _logger = getLogger(__name__)
 
@@ -65,9 +65,7 @@ class SPDXDocument(AlmasbomDocument):
     def from_package(cls, package: Package, config: CommonConfig) -> "SPDXDocument":
         doc_name = package.get_doc_name()
         doc = cls(config, doc_name)
-
         doc._add_each_package_component(package)
-
         return doc
 
     @classmethod
@@ -94,7 +92,5 @@ class SPDXDocument(AlmasbomDocument):
         return f"SPDXRef-{cur_id}"
 
     def _add_each_package_component(self, package: Package) -> None:
-        pkg, rel = component_from_package(package, self.get_next_package_id())
-        self.document.packages += [pkg]
-        self.document.relationships += [rel]
+        set_package_component(self.document, package, self.get_next_package_id())
 
