@@ -1,6 +1,11 @@
-
+from logging import getLogger
+from cyclonedx.model.component import Property as CDXProperty
 from cyclonedx.model.component import Component, ComponentType
+
 from alma_sbom.data.models import Package, Build
+from alma_sbom.data.attributes.property import Property
+
+_logger = getLogger(__name__)
 
 def component_from_package(package: Package) -> Component:
     return Component(
@@ -11,8 +16,12 @@ def component_from_package(package: Package) -> Component:
         #hashes=[self.__generate_hash(h) for h in comp['hashes']],
         cpe=package.package_nevra.get_cpe23(),
         purl=package.get_purl(),
-        #properties=[
-        #    self.__generate_prop(prop) for prop in comp['properties']
-        #],
+        properties=[
+            _make_property(prop) for prop in package.get_properties()
+        ],
     )
 
+def _make_property(prop: Property) -> CDXProperty:
+    # See Property spec:
+    # https://cyclonedx.org/docs/1.4/json/#components_items_properties_items_value
+    return CDXProperty(name=prop.name, value=f'{prop.value}')
