@@ -1,9 +1,26 @@
 from dataclasses import dataclass
+from enum import Enum
 from logging import getLogger
 
 from ..attributes.property import Property, PackageProperties, BuildProperties, SBOMProperties
 
 _logger = getLogger(__name__)
+
+### See the pythondx-python-libs Document: https://cyclonedx-python-library.readthedocs.io/en/latest/autoapi/cyclonedx/model/index.html#cyclonedx.model.HashAlgorithm
+class Algorithms(Enum):
+    SHA_256 = 'SHA-256'
+
+    @classmethod
+    def from_str(cls, string: str) -> 'Algorithms':
+        for alg in cls:
+            if string == alg.value:
+                return alg
+        raise ValueError(f'Invalid Algorithms string: {string}')
+
+@dataclass
+class Hash:
+    algorithm: Algorithms
+    value: str
 
 @dataclass
 class PackageNevra:
@@ -62,7 +79,7 @@ class Package:
     source_rpm: str = None
     ### need to be rethink that 'package_timestamp' is actually nedded?
     package_timestamp: str  = None
-    hash: str = None
+    hashs: list[Hash] = None
 
     ### properties (got from database?? (or include package info))
     package_properties: PackageProperties = None

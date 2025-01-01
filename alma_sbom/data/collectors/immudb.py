@@ -2,7 +2,7 @@ import os
 from immudb_wrapper import ImmudbWrapper
 from logging import getLogger
 
-#from alma_sbom.data.models import Package, Build, PackageNevra
+from alma_sbom.data.models.package import Hash, Algorithms
 from alma_sbom.data import Package, Build, PackageNevra
 from ..attributes.property import (
     PackageProperties,
@@ -39,6 +39,7 @@ class ImmudbCollector:
 
         ### need to be rethink below
         hash = hash or immudb_info['Hash']
+        hashs = Hash(algorithm=Algorithms.SHA_256, value=hash)
 
         if 'Metadata' in immudb_info:
             immudb_metadata = immudb_info['Metadata']
@@ -63,7 +64,7 @@ class ImmudbCollector:
         package = Package(
             package_nevra = package_nevra,
             source_rpm = immudb_metadata['sourcerpm'],
-            hash = hash,
+            hashs = [hashs],
             package_timestamp = immudb_info['timestamp'],
             package_properties = pkg_props,
             build_properties = build_props,

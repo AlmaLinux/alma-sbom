@@ -16,10 +16,22 @@ from spdx_tools.spdx.model import (
 )
 from spdx_tools.spdx.model.spdx_no_assertion import SpdxNoAssertion
 
+from alma_sbom.data.models.package import Hash, Algorithms
 from alma_sbom.data.models import Package, Build
 from alma_sbom.data.attributes.property import Property
 
 _logger = getLogger(__name__)
+
+def _make_hash(hash: Hash) -> Checksum:
+    ALGO_MAP = {
+        "SHA-256": ChecksumAlgorithm.SHA256,
+    }
+    algo = hash.algorithm.value
+
+    if algo not in ALGO_MAP:
+        raise ValueError(f"Algorithm {algo} is not supported in SPDX")
+
+    return Checksum(ALGO_MAP[algo], hash.value)
 
 def set_package_component(document: Document, package: Package, pkgid: int) -> None:
     pkg, rel = component_from_package(package, pkgid)
@@ -43,9 +55,7 @@ def component_from_package(package: Package, pkgid: int) -> tuple[PackageCompone
         related_spdx_element_id=pkgid,
     )
 
-    ### TODO:
-    # need to be considered multiple hashs
-    pkg.checksums = [Checksum(ChecksumAlgorithm.SHA256, package.hash)]
+    pkg.checksums = [_make_hash(h) for h in package.hashs]
     pkg.version = package.package_nevra.get_EVR()
     pkg.external_references += [
         ExternalPackageRef(
