@@ -16,6 +16,7 @@ from spdx_tools.spdx.model import (
 )
 from spdx_tools.spdx.model.spdx_no_assertion import SpdxNoAssertion
 
+from alma_sbom import constants
 from alma_sbom.data.models.package import Hash, Algorithms
 from alma_sbom.data.models import Package, Build
 from alma_sbom.data.attributes.property import Property
@@ -57,6 +58,10 @@ def component_from_package(package: Package, pkgid: int) -> tuple[PackageCompone
 
     pkg.checksums = [_make_hash(h) for h in package.hashs]
     pkg.version = package.package_nevra.get_EVR()
+    pkg.supplier = Actor(
+        ActorType.ORGANIZATION,
+        constants.ALMAOS_VENDOR,
+    )
     pkg.external_references += [
         ExternalPackageRef(
             ExternalPackageRefCategory.SECURITY,
