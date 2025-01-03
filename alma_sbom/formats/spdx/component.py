@@ -1,8 +1,6 @@
 from datetime import datetime
 from logging import getLogger
 from spdx_tools.spdx.model import (
-    Actor,
-    ActorType,
     Annotation,
     AnnotationType,
     Checksum,
@@ -17,10 +15,12 @@ from spdx_tools.spdx.model import (
 from spdx_tools.spdx.model.spdx_no_assertion import SpdxNoAssertion
 
 from alma_sbom import constants
+from alma_sbom._version import __version__
 from alma_sbom.data.models.package import Hash, Algorithms
 from alma_sbom.data.models import Package, Build
 from alma_sbom.data.attributes.property import Property
-from alma_sbom._version import __version__
+
+from alma_sbom.formats.spdx import constants as spdx_consts
 
 _logger = getLogger(__name__)
 
@@ -59,10 +59,7 @@ def component_from_package(package: Package, pkgid: int) -> tuple[PackageCompone
 
     pkg.checksums = [_make_hash(h) for h in package.hashs]
     pkg.version = package.package_nevra.get_EVR()
-    pkg.supplier = Actor(
-        ActorType.ORGANIZATION,
-        constants.ALMAOS_VENDOR,
-    )
+    pkg.supplier = spdx_consts.AlmaActor
     pkg.external_references += [
         ExternalPackageRef(
             ExternalPackageRefCategory.SECURITY,
@@ -84,14 +81,10 @@ def _make_comment_from_property(prop: Property) -> str:
     return f'{prop.name}={prop.value}'
 
 def _make_annotation(prop: Property, spdxid: int) -> Annotation:
-    actor = Actor(
-        actor_type=ActorType.TOOL,
-        name=f"alma-sbom {__version__}",
-    )
     return Annotation(
         spdx_id=spdxid,
         annotation_type=AnnotationType.OTHER,
-        annotator=actor,
+        annotator=spdx_consts.AlmaSbomActor,
         annotation_date=datetime.now(),
         annotation_comment=_make_comment_from_property(prop),
     )
