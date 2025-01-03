@@ -2,11 +2,12 @@ from enum import Enum
 from typing import Callable
 from logging import getLogger
 
-from cyclonedx.model.bom import Bom
+from cyclonedx.model.bom import Bom, Tool
 from cyclonedx.output import BaseOutput
 from cyclonedx.output.json import JsonV1Dot4
 from cyclonedx.output.xml import XmlV1Dot4
 
+from alma_sbom import constants
 from alma_sbom.data.models import Package, Build
 from alma_sbom.config.config import CommonConfig, SbomFileFormatType
 from ..document import Document as AlmasbomDocument
@@ -59,7 +60,18 @@ class CDXDocument(AlmasbomDocument):
 
     def __init__(self, config: CommonConfig):
         self.bom = Bom()
+
+        ### TODO:
+        # These tool components, being specific to alma-sbom rather than part of the format,
+        # should perhaps be managed within each data class under data/models.
+        for tool in constants.TOOLS:
+            self.bom.metadata.tools.add(Tool(
+                vendor=tool['vendor'],
+                name=tool['name'],
+                version=tool['version'],
+            ))
         #self.bom.metadata.tools.components.add(cdx_lib_component())
+
         self.config = config
         self.formatter = CDXFormatter(self.config.sbom_type.file_format_type)
 
