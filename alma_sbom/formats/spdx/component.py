@@ -20,6 +20,7 @@ from alma_sbom import constants
 from alma_sbom.data.models.package import Hash, Algorithms
 from alma_sbom.data.models import Package, Build
 from alma_sbom.data.attributes.property import Property
+from alma_sbom._version import __version__
 
 _logger = getLogger(__name__)
 
@@ -83,11 +84,9 @@ def _make_comment_from_property(prop: Property) -> str:
     return f'{prop.name}={prop.value}'
 
 def _make_annotation(prop: Property, spdxid: int) -> Annotation:
-    ### TODO:
-    # This is test actor. need to be rewrite correct one.
     actor = Actor(
         actor_type=ActorType.TOOL,
-        name=f"test annotator",
+        name=f"alma-sbom {__version__}",
     )
     return Annotation(
         spdx_id=spdxid,
