@@ -1,7 +1,10 @@
 from spdx_tools.spdx.model import Actor, ActorType
 
 from alma_sbom import constants
+from alma_sbom.constants import ALMAOS_SBOMLICENSE
 from alma_sbom._version import __version__
+
+SPDX_ALMAOS_NAMESPACE = constants.ALMAOS_NAMESPACE + '/spdx'
 
 TOOLS_SPDX = [
     {

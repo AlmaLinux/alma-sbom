@@ -12,13 +12,12 @@ from spdx_tools.spdx.writer.tagvalue import tagvalue_writer
 from spdx_tools.spdx.writer.xml import xml_writer
 from spdx_tools.spdx.writer.yaml import yaml_writer
 
-from alma_sbom import constants
 from alma_sbom.data.models import Package, Build
 from alma_sbom.config.config import CommonConfig, SbomFileFormatType
 from ..document import Document as AlmasbomDocument
-from .component import component_from_package, set_package_component
 
-from alma_sbom.formats.spdx import constants as spdx_consts
+from . import constants as spdx_consts
+from .component import component_from_package, set_package_component
 
 _logger = getLogger(__name__)
 
@@ -36,11 +35,10 @@ class SPDXFormatter:
         self.formatter = self.FORMATTERS[file_format]
 
 class SPDXDocument(AlmasbomDocument):
-    SPDX_ALMAOS_NAMESPACE = constants.ALMAOS_NAMESPACE + '/spdx'
-
     document: Document
     config: CommonConfig
     formatter: SPDXFormatter
+    doc_name: str
     doc_uuid: str
     _next_id: int = 0
 
@@ -48,13 +46,14 @@ class SPDXDocument(AlmasbomDocument):
         ### TODO
         # This is test implementation
         # need to be fixed
+        self.doc_name = doc_name
         self.doc_uuid = uuid.uuid4()
         doc_info = CreationInfo(
             spdx_version="SPDX-2.3",
             spdx_id="SPDXRef-DOCUMENT",
             name=doc_name,
-            data_license=constants.ALMAOS_SBOMLICENSE,
-            document_namespace=f"{SPDXDocument.SPDX_ALMAOS_NAMESPACE}-{doc_name}-{self.doc_uuid}",
+            data_license=spdx_consts.ALMAOS_SBOMLICENSE,
+            document_namespace=self._get_document_namespace(),
             creators=spdx_consts.CREATORS,
             created=datetime.now(),
         )
@@ -83,7 +82,10 @@ class SPDXDocument(AlmasbomDocument):
             validate=False,  ### need to be fixed to 'True'
         )
 
-    def get_next_package_id(self) -> str:
+    def _get_document_namespace(self) -> str:
+        return f"{spdx_consts.SPDX_ALMAOS_NAMESPACE}-{self.doc_name}-{self.doc_uuid}"
+
+    def _get_next_package_id(self) -> str:
         """Return an identifier that can be assigned to a package in this document.
 
         Further reading:
@@ -94,5 +96,5 @@ class SPDXDocument(AlmasbomDocument):
         return f"SPDXRef-{cur_id}"
 
     def _add_each_package_component(self, package: Package) -> None:
-        set_package_component(self.document, package, self.get_next_package_id())
+        set_package_component(self.document, package, self._get_next_package_id())
 
