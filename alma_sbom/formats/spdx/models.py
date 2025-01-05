@@ -18,6 +18,8 @@ from alma_sbom.config.config import CommonConfig, SbomFileFormatType
 from ..document import Document as AlmasbomDocument
 from .component import component_from_package, set_package_component
 
+from alma_sbom.formats.spdx import constants as spdx_consts
+
 _logger = getLogger(__name__)
 
 
@@ -53,7 +55,7 @@ class SPDXDocument(AlmasbomDocument):
             name=doc_name,
             data_license=constants.ALMAOS_SBOMLICENSE,
             document_namespace=f"{SPDXDocument.SPDX_ALMAOS_NAMESPACE}-{doc_name}-{self.doc_uuid}",
-            creators=[],
+            creators=spdx_consts.CREATORS,
             created=datetime.now(),
         )
         self.document = Document(doc_info)
