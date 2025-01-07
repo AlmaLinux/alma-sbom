@@ -72,6 +72,31 @@ class PackageNevra:
         )
         return cpe
 
+    @classmethod
+    def from_str_has_epoch(package_name: str) -> 'PackageNevra':
+        raise NotImplementedError()
+
+    @classmethod
+    def from_str_nothas_epoch(cls, package_name: str) -> 'PackageNevra':
+        package_nevra = PackageNevra()
+
+        split_by_dot = package_name.replace('.rpm', '')[::-1].split('.', 1)
+        arch = split_by_dot[0][::-1]
+        split_by_hyphen = split_by_dot[1].split('-', 2)
+        release = split_by_hyphen[0][::-1]
+        version = split_by_hyphen[1][::-1]
+        name = split_by_hyphen[2][::-1]
+
+        return cls(
+            epoch = None,
+            name = name,
+            version = version,
+            release = release,
+            arch = arch,
+        )
+        #return package_nevra
+        #raise NotImplementedError()
+
 @dataclass
 class Package:
     ### info as package component of SBOM
