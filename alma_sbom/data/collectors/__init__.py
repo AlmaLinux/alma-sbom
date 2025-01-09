@@ -1,2 +1,2 @@
-from .immudb import ImmudbCollector
+from .immudb.collector import ImmudbCollector
 from .rpm import RpmCollector
