@@ -1,2 +1,1 @@
-from .immudb.collector import ImmudbCollector
-from .rpm import RpmCollector
+from .runner import CollectorRunner, collector_runner_factory
