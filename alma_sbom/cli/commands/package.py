@@ -2,22 +2,22 @@ import argparse
 from logging import getLogger
 
 from .commands import SubCommand
+from alma_sbom.data import DataCollector, data_collector_factory
 from alma_sbom.config.config import CommonConfig, SbomType
 from alma_sbom.config.models.package import PackageConfig
 from alma_sbom.formats.document import Document
 from alma_sbom.formats import document_factory
-
-from alma_sbom.data.collectors import CollectorRunner, collector_runner_factory
 
 _logger = getLogger(__name__)
 
 class PackageCommand(SubCommand):
     config: PackageConfig
     doc: Document
-    collector_runner: CollectorRunner
+    collector: DataCollector
 
     def __init__(self, base: CommonConfig, args: argparse.Namespace) -> None:
         self.config = self._get_PackageConfig_from_args(base, args)
+        self.collector = data_collector_factory(self.config)
 
     @staticmethod
     def add_arguments(parser: argparse._SubParsersAction) -> None:
@@ -35,8 +35,7 @@ class PackageCommand(SubCommand):
         )
 
     def run(self) -> int:
-        collector_runner = collector_runner_factory(self.config)
-        package = collector_runner.run()
+        package = self.collector.run()
 
         document_class = document_factory(self.config.sbom_type.record_type)
         self.doc = document_class.from_package(package, self.config)
