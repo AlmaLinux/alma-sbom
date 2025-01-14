@@ -102,8 +102,9 @@ class Package:
     ### info as package component of SBOM
     package_nevra: PackageNevra = None
     source_rpm: str = None
-    ### need to be rethink that 'package_timestamp' is actually nedded?
-    package_timestamp: str  = None
+    ###TODO: need to be rethink that 'package_timestamp' is actually nedded?
+    ###TODO: need to rethink the 'type' of package_timestamp
+    package_timestamp: int  = None
     hashs: list[Hash] = None
 
     ### properties (got from database?? (or include package info))
