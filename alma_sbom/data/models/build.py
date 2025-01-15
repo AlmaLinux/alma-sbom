@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from .package import Package
 from ..attributes.property import Property, BuildProperties
@@ -7,7 +7,7 @@ from ..attributes.property import Property, BuildProperties
 class Build:
     build_id: str
     author: str
-    packages: list[Package]
+    packages: list[Package] = field(default_factory=list)
 
     build_properties: BuildProperties = None
 
@@ -16,4 +16,7 @@ class Build:
 
     def get_properties(self) -> list[Property]:
         return (self.build_properties.to_properties() if self.build_properties is not None else [])
+
+    def append_package(self, package: Package) -> None:
+        self.packages.append(package)
 

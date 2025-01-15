@@ -1,17 +1,23 @@
 import argparse
 from logging import getLogger
 
+from alma_sbom.data import DataCollector, data_collector_factory
+from alma_sbom.config.config import CommonConfig
+from alma_sbom.config.models.build import BuildConfig
+from alma_sbom.formats.document import Document
+from alma_sbom.formats import document_factory
 from .commands import SubCommand
-from ...config.config import CommonConfig
-from ...config.models.build import BuildConfig
 
 _logger = getLogger(__name__)
 
 class BuildCommand(SubCommand):
     config: BuildConfig
+    doc: Document
+    collector: DataCollector
 
     def __init__(self, base: CommonConfig, args: argparse.Namespace) -> None:
         self.config = self._get_BuildConfig_from_args(base, args)
+        self.collector = data_collector_factory(self.config)
 
     @staticmethod
     def add_arguments(parser: argparse._SubParsersAction) -> None:
@@ -24,6 +30,10 @@ class BuildCommand(SubCommand):
         )
 
     def run(self) -> int:
+        build = self.collector.run()
+        document_class = document_factory(self.config.sbom_type.record_type)
+        self.doc = document_class.from_build(build, self.config)
+        self.doc.write()
         return 0
 
     @staticmethod
