@@ -11,7 +11,7 @@ from alma_sbom import constants
 from alma_sbom.data.models import Package, Build
 from alma_sbom.config.config import CommonConfig, SbomFileFormatType
 from ..document import Document as AlmasbomDocument
-from .component import component_from_package
+from .component import component_from_package, component_from_build
 
 _logger = getLogger(__name__)
 
@@ -82,8 +82,13 @@ class CDXDocument(AlmasbomDocument):
         return doc
 
     @classmethod
-    def from_build(cls, build: Build, Commonconfig) -> "CDXDocument":
+    def from_build(cls, build: Build, config: CommonConfig) -> "CDXDocument":
         doc = cls(config)
+
+        doc.bom.metadata.component = component_from_build(build)
+        for pkg in build.packages:
+            doc.bom.components.add(component_from_package(pkg))
+
         return doc
 
     ###TODO:

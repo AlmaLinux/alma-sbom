@@ -24,6 +24,16 @@ def component_from_package(package: Package) -> Component:
         ],
     )
 
+def component_from_build(build: Build) -> Component:
+    return Component(
+        component_type=ComponentType('library'),
+        name=build.get_doc_name(),
+        author=build.author,
+        properties=[
+            _make_property(prop) for prop in build.get_properties()
+        ],
+    )
+
 def _make_hash(hash: Hash) -> HashType:
     return HashType(
         algorithm=HashAlgorithm(hash.algorithm.value),
