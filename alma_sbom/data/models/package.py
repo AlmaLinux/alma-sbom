@@ -2,7 +2,12 @@ from dataclasses import dataclass
 from enum import Enum
 from logging import getLogger
 
-from ..attributes.property import Property, PackageProperties, BuildProperties, SBOMProperties
+from ..attributes.property import (
+    Property,
+    PackageProperties,
+    BuildPropertiesForPackage as BuildProperties,
+    SBOMProperties,
+)
 
 _logger = getLogger(__name__)
 

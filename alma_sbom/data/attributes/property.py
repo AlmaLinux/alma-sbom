@@ -77,24 +77,46 @@ class SrpmSourceProperties(BuildSourceProperties):
         return self._create_properties()
 
 @dataclass
-class BuildProperties(PropertyMixin):
+class BuildPropertiesBase(PropertyMixin):
     PROPERTY_KEYS: ClassVar[dict[str, str]] = {
         "build_id": "almalinux:albs:build:ID",
         "build_url": "almalinux:albs:build:URL",
+    }
+
+    build_id: str
+    build_url: str
+
+    def to_properties(self) -> list[Property]:
+        return self._create_properties()
+
+@dataclass
+class BuildPropertiesForPackage(BuildPropertiesBase):
+    PROPERTY_KEYS: ClassVar[dict[str, str]] = {
+        **BuildPropertiesBase.PROPERTY_KEYS,
         "author": "almalinux:albs:build:author",
         "package_type": "almalinux:albs:build:packageType",
         "target_arch": "almalinux:albs:build:targetArch"
     }
 
-    target_arch: str
-    package_type: str
-    build_id: str
-    build_url: str
     author: str
+    package_type: str
+    target_arch: str
     source: BuildSourceProperties
 
     def to_properties(self) -> list[Property]:
         return self._create_properties() + (self.source.to_properties() if self.source is not None else [])
+
+@dataclass
+class BuildPropertiesForBuild(BuildPropertiesBase):
+    PROPERTY_KEYS: ClassVar[dict[str, str]] = {
+        **BuildPropertiesBase.PROPERTY_KEYS,
+        "timestamp": "almalinux:albs:build:timestamp"
+    }
+
+    timestamp: str
+
+    def to_properties(self) -> list[Property]:
+        return self._create_properties()
 
 @dataclass
 class PackageProperties(PropertyMixin):

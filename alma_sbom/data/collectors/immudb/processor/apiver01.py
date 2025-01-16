@@ -7,7 +7,7 @@ from alma_sbom.data.attributes.property import (
     BuildSourceProperties,
     GitSourceProperties,
     SrpmSourceProperties,
-    BuildProperties,
+    BuildPropertiesForPackage as BuildProperties,
     SBOMProperties,
 )
 

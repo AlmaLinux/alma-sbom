@@ -3,7 +3,7 @@ from logging import getLogger
 from typing import Union, ClassVar
 
 from alma_sbom.data import Package, Build, PackageNevra
-from alma_sbom.data.attributes.property import BuildProperties
+from alma_sbom.data.attributes.property import BuildPropertiesForBuild as BuildProperties
 
 _logger = getLogger(__name__)
 
@@ -48,14 +48,9 @@ class AlbsCollector:
 
     def _make_BuildProperties_from_build_info(self, build_info: dict) -> BuildProperties:
         return BuildProperties(
-            target_arch = None,
-            package_type = None,
             build_id = str(build_info['id']),
             build_url = f"{self._get_build_base_url()}/{build_info['id']}",
-            author = None,
-            source = None,
-            ##### There is no timestamp field in BuildProperties
-            # timestamp = .......
+            timestamp = build_info['created_at'],
         )
 
     def _get_albs_builds_endpoint(self) -> str:

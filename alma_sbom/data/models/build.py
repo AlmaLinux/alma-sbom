@@ -1,7 +1,10 @@
 from dataclasses import dataclass, field
 
 from .package import Package
-from ..attributes.property import Property, BuildProperties
+from ..attributes.property import (
+    Property,
+    BuildPropertiesForBuild as BuildProperties,
+)
 
 @dataclass
 class Build:
