@@ -1,7 +1,7 @@
 from typing import Callable
 
 from alma_sbom.data import Package
-from alma_sbom.data.collectors.immudb.collector import ImmudbCollector
+from alma_sbom.data.collectors import ImmudbCollector
 
 from alma_sbom.config.models.package import PackageConfig
 from .runner import CollectorRunner

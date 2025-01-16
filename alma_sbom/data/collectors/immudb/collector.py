@@ -4,14 +4,6 @@ from logging import getLogger
 
 from alma_sbom.data.models.package import Hash, Algorithms
 from alma_sbom.data import Package, Build, PackageNevra
-from alma_sbom.data.attributes.property import (
-    PackageProperties,
-    BuildSourceProperties,
-    GitSourceProperties,
-    SrpmSourceProperties,
-    BuildProperties,
-    SBOMProperties,
-)
 
 from .processor import DataProcessor, processor_factory
 
