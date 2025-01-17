@@ -1,22 +1,23 @@
 import argparse
 from logging import getLogger
+from typing import Callable
 
-from .commands import SubCommand
-from alma_sbom.data import DataCollector, data_collector_factory
+from alma_sbom.data import Package, ImmudbCollector
 from alma_sbom.config.config import CommonConfig
 from alma_sbom.config.models.package import PackageConfig
 from alma_sbom.formats import Document, document_factory
+from .commands import SubCommand
 
 _logger = getLogger(__name__)
 
 class PackageCommand(SubCommand):
     config: PackageConfig
     doc: Document
-    collector: DataCollector
+    collector_runner: Callable
 
     def __init__(self, base: CommonConfig, args: argparse.Namespace) -> None:
         self.config = self._get_PackageConfig_from_args(base, args)
-        self.collector = data_collector_factory(self.config)
+        self._select_runner()
 
     @staticmethod
     def add_arguments(parser: argparse._SubParsersAction) -> None:
@@ -34,7 +35,7 @@ class PackageCommand(SubCommand):
         )
 
     def run(self) -> int:
-        package = self.collector.run()
+        package = self.collector_runner()
 
         document_class = document_factory(self.config.sbom_type.record_type)
         self.doc = document_class.from_package(package, self.config.sbom_type.file_format_type)
@@ -45,4 +46,19 @@ class PackageCommand(SubCommand):
     @staticmethod
     def _get_PackageConfig_from_args(base: CommonConfig, args: argparse.Namespace) -> PackageConfig:
         return PackageConfig.from_base(base, args.rpm_package_hash, args.rpm_package)
+
+    def _select_runner(self) -> None:
+        if self.config.rpm_package_hash:
+            self.collector_runner = self._runner_with_rpm_package_hash
+        elif self.config.rpm_package:
+            self.collector_runner = self._runner_with_rpm_package
+        else:
+            raise RuntimeError('Unexpected situation has occurred')
+
+    def _runner_with_rpm_package_hash(self) -> Package:
+        immudb_collector = ImmudbCollector()
+        return immudb_collector.collect_package_by_hash(self.config.rpm_package_hash)
+
+    def _runner_with_rpm_package(self) -> Package:
+        raise NotImplementedError()
 
