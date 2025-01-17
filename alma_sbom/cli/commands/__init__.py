@@ -4,7 +4,7 @@ from .commands import SubCommand
 from .package import PackageCommand
 from .build import BuildCommand
 
-from ...config.config import CommonConfig
+from ..config.config import CommonConfig
 
 
 command_classes: dict[str, type[SubCommand]] = {

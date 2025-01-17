@@ -12,8 +12,8 @@ from spdx_tools.spdx.writer.tagvalue import tagvalue_writer
 from spdx_tools.spdx.writer.xml import xml_writer
 from spdx_tools.spdx.writer.yaml import yaml_writer
 
+from alma_sbom.type import SbomFileFormatType
 from alma_sbom.data.models import Package, Build
-from alma_sbom.config.config import SbomFileFormatType
 from ..document import Document as AlmasbomDocument
 
 from . import constants as spdx_consts

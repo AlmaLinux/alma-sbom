@@ -4,7 +4,8 @@ from logging import DEBUG, INFO, WARNING, getLogger, Logger
 
 from .logging import Logging
 from .commands import SubCommand, setup_subparsers, command_factory
-from ..config.config import CommonConfig, SbomType
+from alma_sbom.type import SbomType
+from .config.config import CommonConfig
 
 _logger = getLogger(__name__)
 

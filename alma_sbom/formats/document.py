@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from alma_sbom.data.models import Package, Build
-from alma_sbom.config.config import SbomFileFormatType
+from alma_sbom.type import SbomFileFormatType
 
 class Document(ABC):
     @classmethod

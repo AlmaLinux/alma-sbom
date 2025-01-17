@@ -3,10 +3,10 @@ from logging import getLogger
 from typing import Callable
 
 from alma_sbom.data import Build, ImmudbCollector, AlbsCollector
-from alma_sbom.config.config import CommonConfig
-from alma_sbom.config.models.build import BuildConfig
 from alma_sbom.formats import Document, document_factory
 from .commands import SubCommand
+from ..config.config import CommonConfig
+from ..config.models.build import BuildConfig
 
 _logger = getLogger(__name__)
 

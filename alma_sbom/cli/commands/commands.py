@@ -2,7 +2,7 @@ import argparse
 from abc import ABC, abstractmethod
 from typing import Callable
 
-from alma_sbom.config.config import CommonConfig
+from ..config.config import CommonConfig
 from alma_sbom.formats.document import Document
 
 class SubCommand(ABC):

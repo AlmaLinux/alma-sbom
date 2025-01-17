@@ -1,5 +1,5 @@
 
-from alma_sbom.config.config import SbomRecordType
+from alma_sbom.type import SbomRecordType
 from .document import Document
 from .spdx.models import SPDXDocument
 from .cyclonedx.models import CDXDocument
