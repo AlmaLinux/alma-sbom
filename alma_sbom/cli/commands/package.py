@@ -37,8 +37,8 @@ class PackageCommand(SubCommand):
         package = self.collector.run()
 
         document_class = document_factory(self.config.sbom_type.record_type)
-        self.doc = document_class.from_package(package, self.config)
-        self.doc.write()
+        self.doc = document_class.from_package(package, self.config.sbom_type.file_format_type)
+        self.doc.write(self.config.output_file)
 
         return 0
 

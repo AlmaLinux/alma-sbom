@@ -9,7 +9,7 @@ from cyclonedx.output.xml import XmlV1Dot4
 
 from alma_sbom import constants
 from alma_sbom.data.models import Package, Build
-from alma_sbom.config.config import CommonConfig, SbomFileFormatType
+from alma_sbom.config.config import SbomFileFormatType
 from ..document import Document as AlmasbomDocument
 from .component import component_from_package, component_from_build
 
@@ -55,10 +55,9 @@ class CDXFormatter:
 
 class CDXDocument(AlmasbomDocument):
     bom: Bom
-    config: CommonConfig
     formatter: CDXFormatter
 
-    def __init__(self, config: CommonConfig):
+    def __init__(self, file_format_type: SbomFileFormatType):
         self.bom = Bom()
 
         ### TODO:
@@ -72,18 +71,17 @@ class CDXDocument(AlmasbomDocument):
             ))
         #self.bom.metadata.tools.components.add(cdx_lib_component())
 
-        self.config = config
-        self.formatter = CDXFormatter(self.config.sbom_type.file_format_type)
+        self.formatter = CDXFormatter(file_format_type)
 
     @classmethod
-    def from_package(cls, package: Package, config: CommonConfig) -> "CDXDocument":
-        doc = cls(config)
+    def from_package(cls, package: Package, file_format_type: SbomFileFormatType) -> "CDXDocument":
+        doc = cls(file_format_type)
         doc.bom.metadata.component = component_from_package(package)
         return doc
 
     @classmethod
-    def from_build(cls, build: Build, config: CommonConfig) -> "CDXDocument":
-        doc = cls(config)
+    def from_build(cls, build: Build, file_format_type: SbomFileFormatType) -> "CDXDocument":
+        doc = cls(file_format_type)
 
         doc.bom.metadata.component = component_from_build(build)
         for pkg in build.packages:
@@ -93,8 +91,8 @@ class CDXDocument(AlmasbomDocument):
 
     ###TODO:
     # need to be rewriten after library update.
-    def write(self) -> None:
+    def write(self, output_file: str) -> None:
         pretty_output = self.formatter.writer(self.bom)
-        with open(self.config.output_file, 'w') as fd:
+        with open(output_file, 'w') as fd:
             fd.write(pretty_output)
 

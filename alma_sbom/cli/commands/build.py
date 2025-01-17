@@ -31,8 +31,8 @@ class BuildCommand(SubCommand):
     def run(self) -> int:
         build = self.collector.run()
         document_class = document_factory(self.config.sbom_type.record_type)
-        self.doc = document_class.from_build(build, self.config)
-        self.doc.write()
+        self.doc = document_class.from_build(build, self.config.sbom_type.file_format_type)
+        self.doc.write(self.config.output_file)
         return 0
 
     @staticmethod

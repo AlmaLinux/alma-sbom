@@ -13,7 +13,7 @@ from spdx_tools.spdx.writer.xml import xml_writer
 from spdx_tools.spdx.writer.yaml import yaml_writer
 
 from alma_sbom.data.models import Package, Build
-from alma_sbom.config.config import CommonConfig, SbomFileFormatType
+from alma_sbom.config.config import SbomFileFormatType
 from ..document import Document as AlmasbomDocument
 
 from . import constants as spdx_consts
@@ -36,13 +36,12 @@ class SPDXFormatter:
 
 class SPDXDocument(AlmasbomDocument):
     document: Document
-    config: CommonConfig
     formatter: SPDXFormatter
     doc_name: str
     doc_uuid: str
     _next_id: int = 0
 
-    def __init__(self, config: CommonConfig, doc_name: str) -> None:
+    def __init__(self, file_format_type: SbomFileFormatType, doc_name: str) -> None:
         ### TODO
         # This is test implementation
         # need to be fixed
@@ -58,21 +57,20 @@ class SPDXDocument(AlmasbomDocument):
             created=datetime.now(),
         )
         self.document = Document(doc_info)
-        self.config = config
-        self.formatter = SPDXFormatter(self.config.sbom_type.file_format_type)
+        self.formatter = SPDXFormatter(file_format_type)
         self._next_id = 0
 
     @classmethod
-    def from_package(cls, package: Package, config: CommonConfig) -> "SPDXDocument":
+    def from_package(cls, package: Package, file_format_type: SbomFileFormatType) -> "SPDXDocument":
         doc_name = package.get_doc_name()
-        doc = cls(config, doc_name)
+        doc = cls(file_format_type, doc_name)
         doc._add_each_package_component(package)
         return doc
 
     @classmethod
-    def from_build(cls, build: Build, config: CommonConfig) -> "SPDXDocument":
+    def from_build(cls, build: Build, file_format_type: SbomFileFormatType) -> "SPDXDocument":
         doc_name = build.get_doc_name()
-        doc = cls(config, doc_name)
+        doc = cls(file_format_type, doc_name)
 
         set_build_component(doc.document, build, doc.document.creation_info.spdx_id)
 
@@ -81,10 +79,10 @@ class SPDXDocument(AlmasbomDocument):
 
         return doc
 
-    def write(self) -> None:
+    def write(self, output_file: str) -> None:
         self.formatter.formatter.write_document_to_file(
             self.document,
-            self.config.output_file,
+            output_file,
             validate=False,  ### need to be fixed to 'True'
         )
 
