@@ -23,7 +23,16 @@ class Main:
         self.command = command_factory(self.config, self.args)
 
     def _get_CommonConfig_from_args(self, args: argparse.Namespace) -> CommonConfig:
-        return CommonConfig.from_str(args.output_file, args.file_format)
+        return CommonConfig.from_str(
+            args.output_file,
+            args.file_format,
+            args.albs_url,
+            args.immudb_username,
+            args.immudb_password,
+            args.immudb_database,
+            args.immudb_address,
+            args.immudb_public_key_file,
+        )
 
     def run(self) -> int:
         _logger.debug('Hello from Main.run')
@@ -33,7 +42,7 @@ class Main:
 def create_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description='alma-sbom')
 
-    ### outpout related settings ###
+    ### output related settings ###
     parser.add_argument(
         '--output-file',
         type=str,
@@ -46,7 +55,7 @@ def create_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         '--file-format',
-        default=SbomType(),
+        default=str(SbomType()),
         const=SbomType(),
         nargs='?',
         choices=SbomType.choices(),
@@ -54,75 +63,56 @@ def create_parser() -> argparse.ArgumentParser:
         help='Generate SBOM in one of format mode (default: %(default)s)',
     )
 
-    # ### ALBS/immudb settings ###
-    # parser.add_argument(
-    #     '--albs-url',
-    #     type=str,
-    #     help='Override ALBS url',
-    # )
-    # parser.add_argument(
-    #     '--immudb-username',
-    #     type=str,
-    #     help=(
-    #         'Provide your immudb username if not set as '
-    #         'an environmental variable'
-    #     ),
-    #     required=False,
-    # )
-    # parser.add_argument(
-    #     '--immudb-password',
-    #     type=str,
-    #     help=(
-    #         'Provide your immudb password if not set as '
-    #         'an environmental variable'
-    #     ),
-    #     required=False,
-    # )
-    # parser.add_argument(
-    #     '--immudb-database',
-    #     type=str,
-    #     help=(
-    #         'Provide your immudb database if not set as '
-    #         'an environmental variable'
-    #     ),
-    #     required=False,
-    # )
-    # parser.add_argument(
-    #     '--immudb-address',
-    #     type=str,
-    #     help=(
-    #         'Provide your immudb address if not set as '
-    #         'an environmental variable'
-    #     ),
-    #     required=False,
-    # )
-    # parser.add_argument(
-    #     '--immudb-public-key-file',
-    #     type=str,
-    #     help=(
-    #         'Provide your immudb public key file if not set as '
-    #         'an environmental variable'
-    #     ),
-    #     required=False,
-    # )
-
-    ### logging settings ###
+    ### ALBS/immudb settings ###
     parser.add_argument(
-        '--verbose',
-        help=(
-            'Print verbose output'
-        ),
-        required=False,
-        default=WARNING,
-        action='store_const', dest='loglevel', const=INFO,
+        '--albs-url',
+        type=str,
+        help='Override ALBS url',
     )
     parser.add_argument(
-        '--debug',
+        '--immudb-username',
+        type=str,
         help=(
-            'Print debug log'
+            'Provide your immudb username if not set as '
+            'an environmental variable'
         ),
         required=False,
-        action='store_const', dest='loglevel', const=DEBUG,
+    )
+    parser.add_argument(
+        '--immudb-password',
+        type=str,
+        help=(
+            'Provide your immudb password if not set as '
+            'an environmental variable'
+        ),
+        required=False,
+    )
+    parser.add_argument(
+        '--immudb-database',
+        type=str,
+        help=(
+            'Provide your immudb database if not set as '
+            'an environmental variable'
+        ),
+        required=False,
+    )
+    parser.add_argument(
+        '--immudb-address',
+        type=str,
+        help=(
+            'Provide your immudb address if not set as '
+            'an environmental variable'
+        ),
+        required=False,
+    )
+    parser.add_argument(
+        '--immudb-public-key-file',
+        type=str,
+        help=(
+            'Provide your immudb public key file if not set as '
+            'an environmental variable'
+        ),
+        required=False,
     )
 
     # ### extra fields options ###
@@ -172,6 +162,25 @@ def create_parser() -> argparse.ArgumentParser:
     #     required=False,
     #     default=[],
     # )
+
+    ### logging settings ###
+    parser.add_argument(
+        '--verbose',
+        help=(
+            'Print verbose output'
+        ),
+        required=False,
+        default=WARNING,
+        action='store_const', dest='loglevel', const=INFO,
+    )
+    parser.add_argument(
+        '--debug',
+        help=(
+            'Print debug log'
+        ),
+        required=False,
+        action='store_const', dest='loglevel', const=DEBUG,
+    )
 
     ### subcommand settings using setup_subparsers ###
     subparsers = parser.add_subparsers(dest='command', required=True)

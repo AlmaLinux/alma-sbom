@@ -1,7 +1,5 @@
 from logging import DEBUG, INFO, WARNING, basicConfig, getLogger, Logger
 
-APPNAME = 'alma-sbom'
-
 class Logging():
     FORMAT: str = '%(asctime)s %(name)s: [%(levelname)s] %(message)s'
     DATEFMT: str = '%b %d %H:%M:%S'
