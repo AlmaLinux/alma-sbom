@@ -20,7 +20,7 @@ from alma_sbom.data.models.package import Hash, Algorithms
 from alma_sbom.data.models import Package, Build
 from alma_sbom.data.attributes.property import Property
 
-from alma_sbom.formats.spdx import constants as spdx_consts
+from . import constants as spdx_consts
 
 _logger = getLogger(__name__)
 

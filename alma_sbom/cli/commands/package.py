@@ -5,8 +5,7 @@ from .commands import SubCommand
 from alma_sbom.data import DataCollector, data_collector_factory
 from alma_sbom.config.config import CommonConfig
 from alma_sbom.config.models.package import PackageConfig
-from alma_sbom.formats.document import Document
-from alma_sbom.formats import document_factory
+from alma_sbom.formats import Document, document_factory
 
 _logger = getLogger(__name__)
 
