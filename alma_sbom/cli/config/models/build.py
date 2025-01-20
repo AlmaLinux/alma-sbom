@@ -1,3 +1,5 @@
+import argparse
+
 from dataclasses import dataclass
 from ..config import CommonConfig
 
@@ -14,3 +16,14 @@ class BuildConfig(CommonConfig):
     def from_base(cls, base: CommonConfig, build_id: str) -> 'BuildConfig':
         base_fields = vars(base)
         return cls(**base_fields, build_id=build_id)
+
+    @staticmethod
+    def add_arguments(parser: argparse._SubParsersAction) -> None:
+        build_parser = parser.add_parser('build', help='Generate build SBOM')
+        build_parser.add_argument(
+            '--build-id',
+            type=str,
+            help='SHA256 hash of an RPM package',
+            required=True,
+        )
+
