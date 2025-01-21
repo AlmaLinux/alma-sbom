@@ -8,15 +8,19 @@ from .commands import SubCommand
 from ..config.config import CommonConfig
 from ..config.models.build import BuildConfig
 
+from alma_sbom.cli.factory.collectors.factory import CollectorFactory
+
 _logger = getLogger(__name__)
 
 class BuildCommand(SubCommand):
     config: BuildConfig
+    collector_factory: CollectorFactory
     doc: Document
     collector_runner: Callable
 
     def __init__(self, base: CommonConfig, args: argparse.Namespace) -> None:
         self.config = self._get_BuildConfig_from_args(base, args)
+        self.collector_factory = CollectorFactory(self.config)
         self._select_runner()
 
     @staticmethod
@@ -50,7 +54,7 @@ class BuildCommand(SubCommand):
         albs_collector = AlbsCollector()
         build, package_hash_list = albs_collector.collect_build_by_id(build_id=self.config.build_id)
 
-        immudb_collector = ImmudbCollector()
+        immudb_collector = self.collector_factory.gen_immudb_collector()
         for hash in package_hash_list:
             pkg_comp = immudb_collector.collect_package_by_hash(hash)
             build.append_package(pkg_comp)

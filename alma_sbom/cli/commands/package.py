@@ -8,15 +8,19 @@ from .commands import SubCommand
 from ..config.config import CommonConfig
 from ..config.models.package import PackageConfig
 
+from alma_sbom.cli.factory.collectors.factory import CollectorFactory
+
 _logger = getLogger(__name__)
 
 class PackageCommand(SubCommand):
     config: PackageConfig
+    collector_factory: CollectorFactory
     doc: Document
     collector_runner: Callable
 
     def __init__(self, base: CommonConfig, args: argparse.Namespace) -> None:
         self.config = self._get_PackageConfig_from_args(base, args)
+        self.collector_factory = CollectorFactory(self.config)
         self._select_runner()
 
     @staticmethod
@@ -56,7 +60,7 @@ class PackageCommand(SubCommand):
             raise RuntimeError('Unexpected situation has occurred')
 
     def _runner_with_rpm_package_hash(self) -> Package:
-        immudb_collector = ImmudbCollector()
+        immudb_collector = self.collector_factory.gen_immudb_collector()
         return immudb_collector.collect_package_by_hash(self.config.rpm_package_hash)
 
     def _runner_with_rpm_package(self) -> Package:
