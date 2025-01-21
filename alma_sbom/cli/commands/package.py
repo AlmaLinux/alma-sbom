@@ -23,21 +23,6 @@ class PackageCommand(SubCommand):
         self.collector_factory = CollectorFactory(self.config)
         self._select_runner()
 
-    @staticmethod
-    def add_arguments(parser: argparse._SubParsersAction) -> None:
-        package_parser = parser.add_parser('package', help='Generate package SBOM')
-        object_id_group = package_parser.add_mutually_exclusive_group(required=True)
-        object_id_group.add_argument(
-            '--rpm-package-hash',
-            type=str,
-            help='SHA256 hash of an RPM package',
-        )
-        object_id_group.add_argument(
-            '--rpm-package',
-            type=str,
-            help='path to an RPM package',
-        )
-
     def run(self) -> int:
         package = self.collector_runner()
 

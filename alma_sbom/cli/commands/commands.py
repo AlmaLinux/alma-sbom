@@ -10,11 +10,6 @@ class SubCommand(ABC):
     doc: Document
     collector_runner: Callable
 
-    @staticmethod
-    @abstractmethod
-    def add_arguments(parser: argparse.ArgumentParser) -> None:
-        pass
-
     @abstractmethod
     def run(self, args: argparse.Namespace) -> int:
         pass

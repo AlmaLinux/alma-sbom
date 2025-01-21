@@ -23,16 +23,6 @@ class BuildCommand(SubCommand):
         self.collector_factory = CollectorFactory(self.config)
         self._select_runner()
 
-    @staticmethod
-    def add_arguments(parser: argparse._SubParsersAction) -> None:
-        build_parser = parser.add_parser('build', help='Generate build SBOM')
-        build_parser.add_argument(
-            '--build-id',
-            type=str,
-            help='SHA256 hash of an RPM package',
-            required=True,
-        )
-
     def run(self) -> int:
         build = self.collector_runner()
         document_class = document_factory(self.config.sbom_type.record_type)
