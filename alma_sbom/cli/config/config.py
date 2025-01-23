@@ -89,6 +89,19 @@ class CommonConfig:
             immudb_public_key_file,
         )
 
+    @classmethod
+    def from_args(cls, args: argparse.Namespace) -> 'CommonConfig':
+        return cls.from_str(
+            args.output_file,
+            args.file_format,
+            args.albs_url,
+            args.immudb_username,
+            args.immudb_password,
+            args.immudb_database,
+            args.immudb_address,
+            args.immudb_public_key_file,
+        )
+
     def __post_init__(self):
         pass
 

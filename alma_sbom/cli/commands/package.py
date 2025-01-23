@@ -19,7 +19,7 @@ class PackageCommand(SubCommand):
     collector_runner: Callable
 
     def __init__(self, base: CommonConfig, args: argparse.Namespace) -> None:
-        self.config = self._get_PackageConfig_from_args(base, args)
+        self.config = PackageConfig.from_base_args(base, args)
         self.collector_factory = CollectorFactory(self.config)
         self._select_runner()
 
@@ -31,10 +31,6 @@ class PackageCommand(SubCommand):
         self.doc.write(self.config.output_file)
 
         return 0
-
-    @staticmethod
-    def _get_PackageConfig_from_args(base: CommonConfig, args: argparse.Namespace) -> PackageConfig:
-        return PackageConfig.from_base(base, args.rpm_package_hash, args.rpm_package)
 
     def _select_runner(self) -> None:
         if self.config.rpm_package_hash:

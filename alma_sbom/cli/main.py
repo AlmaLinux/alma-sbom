@@ -21,20 +21,8 @@ class Main:
         parser = create_parser()
         self.args = parser.parse_args(args)
         logging = Logging(loglevel=self.args.loglevel)
-        self.config = self._get_CommonConfig_from_args(self.args)
+        self.config = CommonConfig.from_args(self.args)
         self.command = command_factory(self.config, self.args)
-
-    def _get_CommonConfig_from_args(self, args: argparse.Namespace) -> CommonConfig:
-        return CommonConfig.from_str(
-            args.output_file,
-            args.file_format,
-            args.albs_url,
-            args.immudb_username,
-            args.immudb_password,
-            args.immudb_database,
-            args.immudb_address,
-            args.immudb_public_key_file,
-        )
 
     def run(self) -> int:
         _logger.debug('Hello from Main.run')

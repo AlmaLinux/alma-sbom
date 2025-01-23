@@ -20,6 +20,11 @@ class PackageConfig(CommonConfig):
         base_fields = vars(base)
         return cls(**base_fields, rpm_package_hash=rpm_package_hash, rpm_package=rpm_package)
 
+
+    @classmethod
+    def from_base_args(cls, base: CommonConfig, args: argparse.Namespace) -> 'PackageConfig':
+        return cls.from_base(base, rpm_package_hash=args.rpm_package_hash, rpm_package=args.rpm_package)
+
     @staticmethod
     def add_arguments(parser: argparse._SubParsersAction) -> None:
         package_parser = parser.add_parser('package', help='Generate package SBOM')

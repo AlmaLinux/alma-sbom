@@ -19,7 +19,7 @@ class BuildCommand(SubCommand):
     collector_runner: Callable
 
     def __init__(self, base: CommonConfig, args: argparse.Namespace) -> None:
-        self.config = self._get_BuildConfig_from_args(base, args)
+        self.config = BuildConfig.from_base_args(base, args)
         self.collector_factory = CollectorFactory(self.config)
         self._select_runner()
 
@@ -29,10 +29,6 @@ class BuildCommand(SubCommand):
         self.doc = document_class.from_build(build, self.config.sbom_type.file_format_type)
         self.doc.write(self.config.output_file)
         return 0
-
-    @staticmethod
-    def _get_BuildConfig_from_args(base: CommonConfig, args: argparse.Namespace) -> BuildConfig:
-        return BuildConfig.from_base(base, build_id=args.build_id)
 
     def _select_runner(self) -> None:
         if self.config.build_id:

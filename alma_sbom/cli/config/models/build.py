@@ -17,6 +17,10 @@ class BuildConfig(CommonConfig):
         base_fields = vars(base)
         return cls(**base_fields, build_id=build_id)
 
+    @classmethod
+    def from_base_args(cls, base: CommonConfig, args: argparse.Namespace) -> 'BuildConfig':
+        return cls.from_base(base, build_id=args.build_id)
+
     @staticmethod
     def add_arguments(parser: argparse._SubParsersAction) -> None:
         build_parser = parser.add_parser('build', help='Generate build SBOM')
