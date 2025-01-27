@@ -2,10 +2,10 @@ import argparse
 import sys
 from logging import DEBUG, INFO, WARNING, getLogger, Logger
 
+from alma_sbom.type import SbomType
+
 from .logging import Logging
 from .commands import SubCommand, command_factory
-from alma_sbom.type import SbomType
-#from .config.config import CommonConfig
 from .config import CommonConfig, add_config_arguments
 
 _logger = getLogger(__name__)

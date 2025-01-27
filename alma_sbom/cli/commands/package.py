@@ -1,13 +1,14 @@
 import argparse
 from logging import getLogger
-from typing import Callable
+from typing import Callable, TYPE_CHECKING
 
-from alma_sbom.data import Package, ImmudbCollector
-from .commands import SubCommand
-from ..config.config import CommonConfig
-from ..config.models.package import PackageConfig
-
+from alma_sbom.cli.config import CommonConfig, PackageConfig
 from alma_sbom.cli.factory import CollectorFactory, DocumentFactory
+
+if TYPE_CHECKING:
+    from alma_sbom.data import Package
+
+from .commands import SubCommand
 
 _logger = getLogger(__name__)
 
@@ -37,10 +38,10 @@ class PackageCommand(SubCommand):
         else:
             raise RuntimeError('Unexpected situation has occurred')
 
-    def _runner_with_rpm_package_hash(self) -> Package:
+    def _runner_with_rpm_package_hash(self) -> 'Package':
         immudb_collector = self.collector_factory.gen_immudb_collector()
         return immudb_collector.collect_package_by_hash(self.config.rpm_package_hash)
 
-    def _runner_with_rpm_package(self) -> Package:
+    def _runner_with_rpm_package(self) -> 'Package':
         raise NotImplementedError()
 

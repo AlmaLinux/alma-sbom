@@ -1,13 +1,14 @@
 import argparse
 from logging import getLogger
-from typing import Callable
+from typing import Callable, TYPE_CHECKING
 
-from alma_sbom.data import Build, ImmudbCollector, AlbsCollector
-from .commands import SubCommand
-from ..config.config import CommonConfig
-from ..config.models.build import BuildConfig
-
+from alma_sbom.cli.config import CommonConfig, BuildConfig
 from alma_sbom.cli.factory import CollectorFactory, DocumentFactory
+
+from .commands import SubCommand
+
+if TYPE_CHECKING:
+    from alma_sbom.data import Build
 
 _logger = getLogger(__name__)
 
@@ -35,7 +36,7 @@ class BuildCommand(SubCommand):
         else:
             raise RuntimeError('Unexpected situation has occurred')
 
-    def _runner_with_build_id(self) -> Build:
+    def _runner_with_build_id(self) -> 'Build':
         albs_collector = self.collector_factory.gen_albs_collector()
         build, package_hash_list = albs_collector.collect_build_by_id(build_id=self.config.build_id)
 
