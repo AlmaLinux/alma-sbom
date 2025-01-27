@@ -14,8 +14,6 @@ class Main:
     command: SubCommand
     args: argparse.Namespace
     config: CommonConfig
-    #logging: Logging
-    #logger: Logger
 
     def __init__(self, args: list[str]) -> None:
         parser = create_parser()
@@ -25,8 +23,6 @@ class Main:
         self.command = command_factory(self.config, self.args)
 
     def run(self) -> int:
-        _logger.debug('Hello from Main.run')
-        _logger.debug(f'CommonConfig: {self.config}')
         return self.command.run()
 
 def create_parser() -> argparse.ArgumentParser:
