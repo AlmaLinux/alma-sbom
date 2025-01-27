@@ -2,13 +2,14 @@ import argparse
 from abc import ABC, abstractmethod
 from typing import Callable
 
-from ..config.config import CommonConfig
-from alma_sbom.formats.document import Document
+from alma_sbom.cli.config import CommonConfig
+from alma_sbom.cli.factory import CollectorFactory, DocumentFactory
 
 class SubCommand(ABC):
     config: CommonConfig
-    doc: Document
-    collector_runner: Callable
+    collector_factory: CollectorFactory
+    document_factory: DocumentFactory
+    runner: Callable
 
     @abstractmethod
     def run(self, args: argparse.Namespace) -> int:

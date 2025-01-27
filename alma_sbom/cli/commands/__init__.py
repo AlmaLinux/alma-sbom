@@ -1,11 +1,10 @@
 import argparse
 
+from alma_sbom.cli.config import CommonConfig
+
 from .commands import SubCommand
 from .package import PackageCommand
 from .build import BuildCommand
-
-from ..config.config import CommonConfig
-
 
 command_classes: dict[str, type[SubCommand]] = {
     'package': PackageCommand,

@@ -5,10 +5,10 @@ from typing import Callable, TYPE_CHECKING
 from alma_sbom.cli.config import CommonConfig, PackageConfig
 from alma_sbom.cli.factory import CollectorFactory, DocumentFactory
 
+from .commands import SubCommand
+
 if TYPE_CHECKING:
     from alma_sbom.data import Package
-
-from .commands import SubCommand
 
 _logger = getLogger(__name__)
 
