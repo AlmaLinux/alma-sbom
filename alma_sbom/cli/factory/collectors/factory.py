@@ -21,7 +21,9 @@ class CollectorFactory:
         )
 
     def gen_albs_collector(self) -> AlbsCollector:
-        raise NotImplementedError()
+        return AlbsCollector(
+            albs_url=self.config.albs_url,
+        )
 
     def gen_rpm_collector(self) -> RpmCollector:
         raise NotImplementedError()

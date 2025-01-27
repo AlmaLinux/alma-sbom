@@ -19,7 +19,7 @@ class CommonConfig:
     DEF_SBOM_TYPE_STR: ClassVar[str] = str(SbomType())
 
     ### ALBS defaults ###
-    DEF_ALBS_URL: ClassVar[str] = None ##########
+    DEF_ALBS_URL: ClassVar[str] = 'https://build.almalinux.org'
 
     ### immudb defaults ###
     DEF_IMMUDB_USERNAME: ClassVar[str] = os.getenv('IMMUDB_USERNAME') or ImmudbWrapper.read_only_username()
@@ -137,6 +137,7 @@ class CommonConfig:
             '--albs-url',
             type=str,
             help='Override ALBS url',
+            default=cls.DEF_ALBS_URL,
         )
 
     @classmethod

@@ -37,7 +37,7 @@ class BuildCommand(SubCommand):
             raise RuntimeError('Unexpected situation has occurred')
 
     def _runner_with_build_id(self) -> Build:
-        albs_collector = AlbsCollector()
+        albs_collector = self.collector_factory.gen_albs_collector()
         build, package_hash_list = albs_collector.collect_build_by_id(build_id=self.config.build_id)
 
         immudb_collector = self.collector_factory.gen_immudb_collector()
