@@ -16,7 +16,7 @@ class PackageCommand(SubCommand):
     config: PackageConfig
     collector_factory: CollectorFactory
     doc: Document
-    collector_runner: Callable
+    runner: Callable
 
     def __init__(self, base: CommonConfig, args: argparse.Namespace) -> None:
         self.config = PackageConfig.from_base_args(base, args)
@@ -24,7 +24,7 @@ class PackageCommand(SubCommand):
         self._select_runner()
 
     def run(self) -> int:
-        package = self.collector_runner()
+        package = self.runner()
 
         document_class = document_factory(self.config.sbom_type.record_type)
         self.doc = document_class.from_package(package, self.config.sbom_type.file_format_type)
@@ -34,9 +34,9 @@ class PackageCommand(SubCommand):
 
     def _select_runner(self) -> None:
         if self.config.rpm_package_hash:
-            self.collector_runner = self._runner_with_rpm_package_hash
+            self.runner = self._runner_with_rpm_package_hash
         elif self.config.rpm_package:
-            self.collector_runner = self._runner_with_rpm_package
+            self.runner = self._runner_with_rpm_package
         else:
             raise RuntimeError('Unexpected situation has occurred')
 
