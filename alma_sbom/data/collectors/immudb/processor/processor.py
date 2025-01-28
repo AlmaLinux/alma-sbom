@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 
-from alma_sbom.data import Package, Build
-from alma_sbom.data.models.package import Hash
+from alma_sbom.data import Package, Build, Hash
 
 class DataProcessor(ABC):
     immudb_info: dict
@@ -19,9 +18,5 @@ class DataProcessor(ABC):
 
     @abstractmethod
     def get_package(self) -> Package:
-        pass
-
-    @abstractmethod
-    def get_build(self) -> Build:
         pass
 

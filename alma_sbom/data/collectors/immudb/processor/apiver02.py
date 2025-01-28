@@ -1,7 +1,6 @@
 from .processor import DataProcessor
 
-from alma_sbom.data import Package, Build, PackageNevra
-from alma_sbom.data.models.package import Hash, Algorithms
+from alma_sbom.data import Package, Build, PackageNevra, Hash, Algorithms
 from alma_sbom.data.attributes.property import (
     PackageProperties,
     BuildSourceProperties,
@@ -38,9 +37,6 @@ class DataProcessor02(DataProcessor):
             build_properties = build_props,
             sbom_properties = sbom_props,
         )
-
-    def get_build(self) -> Build: ###?
-        raise NotImplementedError()
 
     def _properties_from_immudb_info_about_package(self) -> tuple[
                 PackageProperties,
@@ -87,6 +83,7 @@ class DataProcessor02(DataProcessor):
             build_id=self.immudb_metadata['build_id'],
             ### TODO:
             # set collect build_url
+            # How to get albs_url??
             #build_url=f'{albs_url}/build/{immudb_metadata["build_id"]}',
             build_url='https://dummy.almalinux.org',  ### dummy
             author=self.immudb_metadata['built_by'],

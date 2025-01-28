@@ -2,7 +2,7 @@ import requests
 from logging import getLogger
 from typing import Union, ClassVar
 
-from alma_sbom.data import Package, Build, PackageNevra
+from alma_sbom.data import Build
 from alma_sbom.data.attributes.property import BuildPropertiesForBuild as BuildProperties
 
 _logger = getLogger(__name__)

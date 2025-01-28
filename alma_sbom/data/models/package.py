@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from logging import getLogger
 
-from ..attributes.property import (
+from alma_sbom.data.attributes.property import (
     Property,
     PackageProperties,
     BuildPropertiesForPackage as BuildProperties,

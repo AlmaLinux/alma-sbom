@@ -2,11 +2,9 @@ import os
 from immudb_wrapper import ImmudbWrapper
 from logging import getLogger
 
-from alma_sbom.data.models.package import Hash, Algorithms
-from alma_sbom.data import Package, Build, PackageNevra
+from alma_sbom.data import Package, PackageNevra, Hash, Algorithms
 
 from .processor import DataProcessor, processor_factory
-
 
 _logger = getLogger(__name__)
 
@@ -14,10 +12,6 @@ class ImmudbCollector:
     client: ImmudbWrapper
     processor: DataProcessor
 
-    ### TODO:
-    # This method of setting default values for arguments will fail
-    # if both the specified argument and the environment variable are None.
-    # This should be changed to a method that sets default values at finally.
     def __init__(
          self,
          username: str,
@@ -42,9 +36,6 @@ class ImmudbCollector:
 
     def collect_package_by_package(self, rpm_package: str) -> Package:
         immudb_info = self._extract_immudb_info_about_package(rpm_package=rpm_package)
-        raise NotImplementedError()
-
-    def collect_build_by_id(self, build_id: str) -> Build:
         raise NotImplementedError()
 
     def _extract_immudb_info_about_package(self, hash: str = None, rpm_package: str = None) -> dict:

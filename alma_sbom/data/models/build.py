@@ -1,10 +1,11 @@
 from dataclasses import dataclass, field
 
-from .package import Package
-from ..attributes.property import (
+from alma_sbom.data.attributes.property import (
     Property,
     BuildPropertiesForBuild as BuildProperties,
 )
+
+from .package import Package
 
 @dataclass
 class Build:
