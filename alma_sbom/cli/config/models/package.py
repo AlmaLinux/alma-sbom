@@ -1,7 +1,7 @@
 import argparse
-
 from dataclasses import dataclass, asdict
-from ..config import CommonConfig
+
+from alma_sbom.cli.config import CommonConfig
 
 @dataclass
 class PackageConfig(CommonConfig):
@@ -9,6 +9,7 @@ class PackageConfig(CommonConfig):
     rpm_package: str = None
 
     def __post_init__(self) -> None:
+        ### TODO:
         # validation? need to be spalate?
         if (self.rpm_package_hash is None and self.rpm_package is None) or \
            (self.rpm_package_hash is not None and self.rpm_package is not None):
@@ -19,7 +20,6 @@ class PackageConfig(CommonConfig):
     def from_base(cls, base: CommonConfig, rpm_package_hash: str, rpm_package: str) -> 'PackageConfig':
         base_fields = vars(base)
         return cls(**base_fields, rpm_package_hash=rpm_package_hash, rpm_package=rpm_package)
-
 
     @classmethod
     def from_base_args(cls, base: CommonConfig, args: argparse.Namespace) -> 'PackageConfig':

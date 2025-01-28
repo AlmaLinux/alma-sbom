@@ -1,13 +1,11 @@
 import argparse
 import os
 from dataclasses import dataclass
-from enum import Enum
 from typing import Union, ClassVar
 from logging import getLogger
-
 from immudb_wrapper import ImmudbWrapper
 
-from alma_sbom.type import SbomRecordType, SbomFileFormatType, SbomType
+from alma_sbom.type import SbomType
 
 _logger = getLogger(__name__)
 
@@ -193,6 +191,9 @@ class CommonConfig:
             default=cls.DEF_IMMUDB_PUBLIC_KEY_FILE
         )
 
+    ### TODO:
+    # Implement creator options
+    # See: https://github.com/AlmaLinux/alma-sbom/pull/27
     #@classmethod
     #def _add_extra_field_arguments(cls, parser: argparse.ArgumentParser) -> None:
     #     parser.add_argument(

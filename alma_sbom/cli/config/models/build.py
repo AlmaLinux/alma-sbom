@@ -1,13 +1,15 @@
 import argparse
-
 from dataclasses import dataclass
-from ..config import CommonConfig
+
+from alma_sbom.cli.config import CommonConfig
 
 @dataclass
 class BuildConfig(CommonConfig):
     build_id: str = None
 
     def __post_init__(self):
+        ### TODO:
+        # validation? need to be spalate?
         if not self.build_id:
             raise ValueError("build_id must not be empty")
         super().__post_init__()
