@@ -10,7 +10,8 @@ from cyclonedx.output.xml import XmlV1Dot4
 from alma_sbom import constants
 from alma_sbom.data.models import Package, Build
 from alma_sbom.type import SbomFileFormatType
-from ..document import Document as AlmasbomDocument
+from alma_sbom.formats.document import Document as AlmasbomDocument
+
 from .component import component_from_package, component_from_build
 
 _logger = getLogger(__name__)

@@ -1,8 +1,8 @@
 
 from alma_sbom.type import SbomRecordType
 from .document import Document
-from .spdx.models import SPDXDocument
-from .cyclonedx.models import CDXDocument
+from .spdx.document import SPDXDocument
+from .cyclonedx.document import CDXDocument
 
 document_classes: dict[SbomRecordType, type[Document]] = {
     SbomRecordType.SPDX: SPDXDocument,
