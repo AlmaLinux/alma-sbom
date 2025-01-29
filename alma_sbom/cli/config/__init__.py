@@ -1,7 +1,7 @@
 import argparse
 
 from .config import CommonConfig
-from .models import (
+from .commands import (
     PackageConfig,
     BuildConfig,
     setup_subparsers,
