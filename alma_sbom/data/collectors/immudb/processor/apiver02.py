@@ -1,6 +1,7 @@
 from .processor import DataProcessor
 
-from alma_sbom.data import Package, Build, PackageNevra, Hash, Algorithms
+from alma_sbom.type import Hash, Algorithms
+from alma_sbom.data import Package, Build, PackageNevra
 from alma_sbom.data.attributes.property import (
     PackageProperties,
     BuildSourceProperties,

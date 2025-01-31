@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
-from alma_sbom.data import Package, Build, Hash
+from alma_sbom.type import Hash
+from alma_sbom.data import Package, Build
 
 class DataProcessor(ABC):
     immudb_info: dict

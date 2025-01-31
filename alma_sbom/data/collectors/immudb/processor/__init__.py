@@ -2,7 +2,7 @@ from .processor import DataProcessor
 from .apiver01 import DataProcessor01
 from .apiver02 import DataProcessor02
 
-from alma_sbom.data import Hash, Algorithms
+from alma_sbom.type import Hash, Algorithms
 
 processor_classes: dict[str, type[DataProcessor]] = {
     '0.1': DataProcessor01,

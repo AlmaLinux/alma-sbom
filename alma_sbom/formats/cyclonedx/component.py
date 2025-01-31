@@ -4,7 +4,10 @@ from cyclonedx.model.component import Property as CDXProperty
 from cyclonedx.model.component import Component, ComponentType
 
 from alma_sbom import constants
-from alma_sbom.data.models.package import Hash, Algorithms
+from alma_sbom.type import Hash, Algorithms
+
+### TODO:
+# Update import path
 from alma_sbom.data.models import Package, Build
 from alma_sbom.data.attributes.property import Property
 
