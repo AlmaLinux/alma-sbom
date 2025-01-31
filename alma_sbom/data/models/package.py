@@ -22,11 +22,15 @@ class Algorithms(Enum):
                 return alg
         raise ValueError(f'Invalid Algorithms string: {string}')
 
+### TODO:
+# It should be moved type.py?
 @dataclass
 class Hash:
     algorithm: Algorithms
     value: str
 
+### TODO:
+# It should be moved type.py?
 @dataclass
 class PackageNevra:
     name: str = None
@@ -35,8 +39,6 @@ class PackageNevra:
     release: str = None
     arch: str = None
 
-    ### TODO:
-    # rethink if self.epoch logic below 3 funcs
     def __repr__(self):
         if self.epoch is not None:
             return (
@@ -99,8 +101,6 @@ class PackageNevra:
             release = release,
             arch = arch,
         )
-        #return package_nevra
-        #raise NotImplementedError()
 
 @dataclass
 class Package:
@@ -117,8 +117,6 @@ class Package:
     build_properties: BuildProperties = None
     sbom_properties: SBOMProperties = None
 
-    ### TODO
-    # need to be defined in PackageNevra class??
     def get_doc_name(self) -> str:
         return self.package_nevra.get_NEVR()
 

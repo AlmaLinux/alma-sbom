@@ -45,14 +45,11 @@ def set_package_component(document: Document, package: Package, pkgid: int) -> N
             note = _make_annotation(prop, pkgid)
             document.annotations += [note]
 
-###TODO:
-# rethink where this func is implemented in
 def set_build_component(document: Document, build: Build, pkgid: int) -> None:
     for prop in build.get_properties():
         if prop is not None and prop.value is not None:
             note = _make_annotation(prop, pkgid)
             document.annotations += [note]
-
 
 def component_from_package(package: Package, pkgid: int) -> tuple[PackageComponent, Relationship]:
     pkg = PackageComponent(

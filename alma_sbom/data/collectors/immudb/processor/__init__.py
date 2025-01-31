@@ -22,7 +22,6 @@ def processor_factory(immudb_info: dict, hash: str) -> DataProcessor:
         raise ValueError('Immudb metadata is malformed, API version cannot be detected')
 
     if hash is not None and hash != immudb_info['Hash']:
-        ### TODO: message!!
         raise ValueError('malformed hash value')
     hash = hash or immudb_info['Hash']
     hashs = Hash(algorithm=Algorithms.SHA_256, value=hash)

@@ -38,7 +38,7 @@ class CDXFormatter:
         self.formatter = self.FORMATTERS[file_format]
         self.writer = getattr(self, self.WRITERS[file_format])
 
-    ###TODO:
+    ### TODO:
     # writer functions are likely renmove after library update.
     def _write_json(self, bom: Bom) -> str:
         import json
@@ -64,12 +64,16 @@ class CDXDocument(AlmasbomDocument):
         ### TODO:
         # These tool components, being specific to alma-sbom rather than part of the format,
         # should perhaps be managed within each data class under data/models.
+        # Add tools info of alma-sbom related tools
         for tool in constants.TOOLS:
             self.bom.metadata.tools.add(Tool(
                 vendor=tool['vendor'],
                 name=tool['name'],
                 version=tool['version'],
             ))
+        ### TODO:
+        # More recent cyclonedx-python-libs require the addition of their own tool information explicitly.
+        # Currently, this is done automatically.
         #self.bom.metadata.tools.components.add(cdx_lib_component())
 
         self.formatter = CDXFormatter(file_format_type)

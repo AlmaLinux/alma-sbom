@@ -9,9 +9,6 @@ _logger = getLogger(__name__)
 
 class AlbsCollector:
     albs_url: str
-    ### TODO:
-    # Think that Should we set build_id as a instance variable
-    # build_id: str
 
     def __init__(self, albs_url) -> None:
         self.albs_url = albs_url

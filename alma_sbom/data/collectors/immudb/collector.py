@@ -34,6 +34,8 @@ class ImmudbCollector:
         self.processor = processor_factory(immudb_info, hash)
         return self.processor.get_package()
 
+    ### TODO:
+    # Implement below function
     def collect_package_by_package(self, rpm_package: str) -> Package:
         immudb_info = self._extract_immudb_info_about_package(rpm_package=rpm_package)
         raise NotImplementedError()

@@ -14,7 +14,7 @@ from spdx_tools.spdx.writer.yaml import yaml_writer
 
 from alma_sbom.type import SbomFileFormatType
 from alma_sbom.data.models import Package, Build
-from ..document import Document as AlmasbomDocument
+from alma_sbom.formats.document import Document as AlmasbomDocument
 
 from . import constants as spdx_consts
 from .component import set_package_component, set_build_component
