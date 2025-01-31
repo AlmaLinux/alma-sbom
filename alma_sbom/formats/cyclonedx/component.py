@@ -5,11 +5,7 @@ from cyclonedx.model.component import Component, ComponentType
 
 from alma_sbom import constants
 from alma_sbom.type import Hash, Algorithms
-
-### TODO:
-# Update import path
-from alma_sbom.data.models import Package, Build
-from alma_sbom.data.attributes.property import Property
+from alma_sbom.data import Package, Build, Property
 
 _logger = getLogger(__name__)
 

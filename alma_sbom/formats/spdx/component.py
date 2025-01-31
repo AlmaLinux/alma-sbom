@@ -17,11 +17,7 @@ from spdx_tools.spdx.model.spdx_no_assertion import SpdxNoAssertion
 from alma_sbom import constants
 from alma_sbom._version import __version__
 from alma_sbom.type import Hash, Algorithms
-
-### TODO:
-# Update update path
-from alma_sbom.data.models import Package, Build
-from alma_sbom.data.attributes.property import Property
+from alma_sbom.data import Package, Build, Property
 
 from . import constants as spdx_consts
 
