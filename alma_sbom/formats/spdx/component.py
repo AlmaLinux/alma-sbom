@@ -69,7 +69,7 @@ def component_from_package(package: Package, pkgid: int) -> tuple[PackageCompone
         ExternalPackageRef(
             ExternalPackageRefCategory.SECURITY,
             'cpe23Type',
-            package.package_nevra.get_cpe23(),
+            package.get_cpe23(),
         ),
         ExternalPackageRef(
             ExternalPackageRefCategory.PACKAGE_MANAGER,

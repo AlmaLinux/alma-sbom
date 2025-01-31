@@ -30,6 +30,9 @@ class Package:
     def get_doc_name(self) -> str:
         return self.package_nevra.get_NEVR()
 
+    def get_cpe23(self) -> str:
+        return self.package_nevra.get_cpe23()
+
     ### TODO
     ## item 1
     # need to be implemented out of Package class??

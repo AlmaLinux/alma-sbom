@@ -16,7 +16,7 @@ def component_from_package(package: Package) -> Component:
         version=package.package_nevra.get_EVR(),
         publisher=constants.ALMAOS_VENDOR,
         hashes=[_make_hash(h) for h in package.hashs],
-        cpe=package.package_nevra.get_cpe23(),
+        cpe=package.get_cpe23(),
         purl=package.get_purl(),
         properties=[
             _make_property(prop) for prop in package.get_properties()
