@@ -7,12 +7,16 @@ from alma_sbom.cli.config import CommonConfig
 class BuildConfig(CommonConfig):
     build_id: str = None
 
-    def __post_init__(self):
-        ### TODO:
-        # validation? need to be spalate?
-        if not self.build_id:
-            raise ValueError("build_id must not be empty")
+    def __post_init__(self) -> None:
+        self._validate()
         super().__post_init__()
+
+    def _validate(self) -> None:
+        if not self.build_id:
+            raise ValueError(
+                'Unexpected situation has occurred'
+                'build_id must not be empty'
+            )
 
     @classmethod
     def from_base(cls, base: CommonConfig, build_id: str) -> 'BuildConfig':

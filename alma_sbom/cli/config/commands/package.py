@@ -9,12 +9,16 @@ class PackageConfig(CommonConfig):
     rpm_package: str = None
 
     def __post_init__(self) -> None:
-        ### TODO:
-        # validation? need to be spalate?
+        self._validate()
+        super().__post_init__()
+
+    def _validate(self) -> None:
         if (self.rpm_package_hash is None and self.rpm_package is None) or \
            (self.rpm_package_hash is not None and self.rpm_package is not None):
-            raise ValueError("Either rpm_package_hash or rpm_package must be specified")
-        super().__post_init__()
+            raise ValueError(
+                'Unexpected situation has occurred'
+                'Either rpm_package_hash or rpm_package must be specified'
+            )
 
     @classmethod
     def from_base(cls, base: CommonConfig, rpm_package_hash: str, rpm_package: str) -> 'PackageConfig':
