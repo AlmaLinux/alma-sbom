@@ -149,9 +149,6 @@ class PackageNevra:
         return f'{self.version}-{self.release}'
 
     ### TODO:
-    ## item 1
-    # need to be implemented out of PackageNevra or more outer ??
-    ## item 2
     # need to be applied fix of normalize_epoch_in_cpe
     # -> this need to be corvered by PackageNevra.epoch=='None'(str) ??
     def get_cpe23(self) -> str:
@@ -165,6 +162,21 @@ class PackageNevra:
             f'{self.version}-{self.release}:*:*:*:*:*:*:*'
         )
         return cpe
+
+    ### TODO
+    # need to be applied fix of normalize_epoch_in_purl
+    # -> this need to be corvered by PackageNevra.epoch=='None'(str) ??
+    def get_purl(self) -> str:
+        # https://github.com/AlmaLinux/build-system-rfes/commit/a132ececa1d7901fe42348022ce954d475578920
+        if self.epoch:
+            purl_epoch_part = f'&epoch={self.epoch}'
+        else:
+            purl_epoch_part = ''
+        purl = (
+            f'pkg:rpm/almalinux/{self.name}@{self.version}-'
+            f'{self.release}?arch={self.arch}{purl_epoch_part}'
+        )
+        return purl
 
     @classmethod
     def from_str_has_epoch(package_name: str) -> 'PackageNevra':

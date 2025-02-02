@@ -33,28 +33,13 @@ class Package:
     def get_cpe23(self) -> str:
         return self.package_nevra.get_cpe23()
 
-    ### TODO
-    ## item 1
-    # need to be implemented out of Package class??
-    ## item 2
-    # need to be applied fix of normalize_epoch_in_purl
-    # -> this need to be corvered by PackageNevra.epoch=='None'(str) ??
     def get_purl(self) -> str:
-        # https://github.com/AlmaLinux/build-system-rfes/commit/a132ececa1d7901fe42348022ce954d475578920
-        if self.package_nevra.epoch:
-            purl_epoch_part = f'&epoch={self.package_nevra.epoch}'
-        else:
-            purl_epoch_part = ''
+        base_part = self.package_nevra.get_purl()
+        qualifier_part = ''
         if self.source_rpm:
-            purl_upstream_part = f'&upstream={self.source_rpm}'
-        else:
-            purl_upstream_part = ''
-        purl = (
-            f'pkg:rpm/almalinux/{self.package_nevra.name}@{self.package_nevra.version}-'
-            f'{self.package_nevra.release}?arch={self.package_nevra.arch}'
-            f'{purl_epoch_part}{purl_upstream_part}'
-        )
-        return purl
+            qualifier_part += f'&upstream={self.source_rpm}'
+
+        return f'{base_part}{qualifier_part}'
 
     def get_properties(self) -> list[Property]:
         return (self.package_properties.to_properties() if self.package_properties is not None else []) + \
