@@ -42,8 +42,7 @@ class PackageCommand(SubCommand):
         immudb_collector = self.collector_factory.gen_immudb_collector()
         return immudb_collector.collect_package_by_hash(self.config.rpm_package_hash)
 
-    ### TODO:
-    # Implement below
     def _runner_with_rpm_package(self) -> 'Package':
-        raise NotImplementedError()
+        immudb_collector = self.collector_factory.gen_immudb_collector()
+        return immudb_collector.collect_package_by_package(self.config.rpm_package)
 

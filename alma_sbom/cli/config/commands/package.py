@@ -1,4 +1,5 @@
 import argparse
+import os
 from dataclasses import dataclass, asdict
 
 from alma_sbom.cli.config import CommonConfig
@@ -19,6 +20,8 @@ class PackageConfig(CommonConfig):
                 'Unexpected situation has occurred'
                 'Either rpm_package_hash or rpm_package must be specified'
             )
+        if not os.path.exists(self.rpm_package):
+            raise FileNotFoundError(f"File '{self.rpm_package}' not found")
 
     @classmethod
     def from_base(cls, base: CommonConfig, rpm_package_hash: str, rpm_package: str) -> 'PackageConfig':
