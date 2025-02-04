@@ -20,7 +20,7 @@ class PackageConfig(CommonConfig):
                 'Unexpected situation has occurred'
                 'Either rpm_package_hash or rpm_package must be specified'
             )
-        if not os.path.exists(self.rpm_package):
+        if self.rpm_package and not os.path.exists(self.rpm_package):
             raise FileNotFoundError(f"File '{self.rpm_package}' not found")
 
     @classmethod
