@@ -1,6 +1,7 @@
 import argparse
 from dataclasses import dataclass
 from enum import Enum
+from typing import Optional
 
 class SbomRecordType(Enum):
     SPDX = 'spdx'
@@ -120,11 +121,11 @@ class Hash:
 
 @dataclass
 class PackageNevra:
-    name: str = None
-    epoch: str = None
-    version: str = None
-    release: str = None
-    arch: str = None
+    name: str
+    epoch: Optional[int]
+    version: str
+    release: str
+    arch: str
 
     def __repr__(self):
         if self.epoch is not None:
@@ -148,12 +149,8 @@ class PackageNevra:
             )
         return f'{self.version}-{self.release}'
 
-    ### TODO:
-    # need to be applied fix of normalize_epoch_in_cpe
-    # -> this need to be corvered by PackageNevra.epoch=='None'(str) ??
     def get_cpe23(self) -> str:
         cpe_version = '2.3'
-
         cpe_epoch_part = f'{self.epoch if self.epoch else ""}'
         cpe_epoch_part += '\\:' if cpe_epoch_part else ""
         cpe = (
@@ -163,9 +160,6 @@ class PackageNevra:
         )
         return cpe
 
-    ### TODO
-    # need to be applied fix of normalize_epoch_in_purl
-    # -> this need to be corvered by PackageNevra.epoch=='None'(str) ??
     def get_purl(self) -> str:
         # https://github.com/AlmaLinux/build-system-rfes/commit/a132ececa1d7901fe42348022ce954d475578920
         if self.epoch:

@@ -10,6 +10,7 @@ from alma_sbom.data.attributes.property import (
     BuildPropertiesForPackage as BuildProperties,
     SBOMProperties,
 )
+from .utils import normalize_epoch
 
 class DataProcessor02(DataProcessor):
     immudb_info: dict
@@ -21,7 +22,10 @@ class DataProcessor02(DataProcessor):
 
     def get_package(self) -> Package:
         package_nevra = PackageNevra(
-            epoch = self.immudb_metadata['epoch'],
+            ### NOTE:
+            # In alma-sbom, null epoch is represented as 0
+            # Please see normalize_epoch implementation for more details
+            epoch = normalize_epoch(self.immudb_metadata['epoch']),
             name = self.immudb_metadata['name'],
             version = self.immudb_metadata['version'],
             release = self.immudb_metadata['release'],
@@ -45,13 +49,10 @@ class DataProcessor02(DataProcessor):
                 SBOMProperties,
         ]:
         pkg_props = PackageProperties(
-            ### TODO:
-            # need to rethink what is 'epoch=None'
-            # In api_ver==0.1, the record for epoch does not exist, so it will be None.
-            # In api_ver==0.2, the record for epoch exist,
-            # if immudb_metadata['epoch']==None, then what should we do?
-            # According to the RPM specification, is it acceptable to consider None as equivalent to 0?
-            epoch=self.immudb_metadata['epoch'],
+            ### NOTE:
+            # In alma-sbom, null epoch is represented as 0
+            # Please see normalize_epoch implementation for more details
+            epoch=normalize_epoch(self.immudb_metadata['epoch']),
             version=self.immudb_metadata['version'],
             release=self.immudb_metadata['release'],
             arch=self.immudb_metadata['arch'],
@@ -60,8 +61,6 @@ class DataProcessor02(DataProcessor):
             timestamp=self.immudb_info['timestamp'],
         )
 
-        ### TODO:
-        # rewrite as other func or/and in other files
         build_src_props = None
         if self.immudb_metadata['source_type'] == 'git':
             build_src_props = GitSourceProperties(

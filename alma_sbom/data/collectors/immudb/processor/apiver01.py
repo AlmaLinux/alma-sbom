@@ -40,12 +40,6 @@ class DataProcessor01(DataProcessor):
                 SBOMProperties,
         ]:
         pkg_props = PackageProperties(
-            ### TODO:
-            # need to rethink what is 'epoch=None'
-            # In api_ver==0.1, the record for epoch does not exist, so it will be None.
-            # In api_ver==0.2, the record for epoch exist,
-            # if immudb_metadata['epoch']==None, then what should we do?
-            # According to the RPM specification, is it acceptable to consider None as equivalent to 0?
             epoch=None,
             version=package_nevra.version,
             release=package_nevra.release,
@@ -55,8 +49,6 @@ class DataProcessor01(DataProcessor):
             timestamp=self.immudb_info['timestamp'],
         )
 
-        ### TODO:
-        # rewrite as other func or/and in other files
         build_src_props = None
         if self.immudb_metadata['source_type'] == 'git':
             build_src_props = GitSourceProperties(
