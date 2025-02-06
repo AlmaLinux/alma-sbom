@@ -116,8 +116,8 @@ class Algorithms(Enum):
 
 @dataclass
 class Hash:
-    algorithm: Algorithms
     value: str
+    algorithm: Algorithms = Algorithms.SHA_256
 
 @dataclass
 class PackageNevra:
