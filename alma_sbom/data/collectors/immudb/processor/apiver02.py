@@ -80,15 +80,13 @@ class DataProcessor02(DataProcessor):
             )
         else:
             raise ValueError(f'Unknown source_type: {source_type}')
+
         build_props = BuildProperties(
             target_arch=self.immudb_metadata.get('build_arch'),
             package_type='rpm',
             build_id=self.immudb_metadata.get('build_id'),
-            ### TODO:
-            # set collect build_url
-            # How to get albs_url??
-            #build_url=f'{albs_url}/build/{immudb_metadata["build_id"]}',
-            build_url='https://dummy.almalinux.org',  ### dummy
+            ### Please See https://github.com/AlmaLinux/build-system/issues/425 why build_url=None
+            build_url=None,
             author=self.immudb_metadata.get('built_by'),
             source=build_src_props,
         )
