@@ -13,13 +13,11 @@ def processor_factory(immudb_info: dict, hash: str) -> DataProcessor:
     if 'Metadata' in immudb_info:
             immudb_metadata = immudb_info['Metadata']
     else:
-        raise ValueError('Immudb info is malformed, not has Metadata field')
+        raise KeyError('Immudb info is malformed, not has Metadata field')
 
-    api_ver = immudb_metadata.get('sbom_api_ver')
+    api_ver = immudb_metadata.get('sbom_api_ver') or immudb_metadata.get('sbom_api')
     if not api_ver:
-        api_ver = immudb_metadata.get('sbom_api')
-    if not api_ver:
-        raise ValueError('Immudb metadata is malformed, API version cannot be detected')
+        raise KeyError('Immudb metadata is malformed, API version cannot be detected')
 
     if hash is not None and hash != immudb_info['Hash']:
         raise ValueError('malformed hash value')

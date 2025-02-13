@@ -77,8 +77,35 @@ def component_from_package(package: Package, pkgid: int) -> tuple[PackageCompone
             package.get_purl(),
         ),
     ]
-    pkg.built_date = datetime.fromtimestamp(package.package_timestamp)
+    ### TODO:
+    ## item1
+    # need to rethink below
+    pkg.built_date = datetime.fromtimestamp(package.package_timestamp) if package.package_timestamp else None
     pkg.files_analyzed = False
+
+    if package.licenses:
+        pkg.license_concluded = SpdxNoAssertion()
+        if package.licenses.expression:
+            pkg.license_comment = package.licenses.expression
+
+    ### NOTE
+    ##  license_info_frpm_files needs file_analyzed = True.
+    ##  Now pending implementation as it is unclear if this value can be set.
+    ##  See https://spdx.github.io/spdx-spec/v2.3/package-information/#714-all-licenses-information-from-files-field
+    #     if 'ids' in component['licenses'] and component['licenses']['ids']:
+    #         l = []
+    #         for lid in component['licenses']['ids']:
+    #             try:
+    #                 le = Licensing().parse(lid, validate=False)
+    #                 l.append(le)
+    #             except ExpressionError as err:
+    #                 pass
+    #         pkg.license_info_from_files = l
+
+    if package.summary:
+        pkg.summary = package.summary
+    if package.description:
+        pkg.description = package.description
 
     return pkg, rel
 

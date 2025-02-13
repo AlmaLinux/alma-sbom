@@ -26,5 +26,5 @@ class CollectorFactory:
         )
 
     def gen_rpm_collector(self) -> RpmCollector:
-        raise NotImplementedError()
+        return RpmCollector()
 

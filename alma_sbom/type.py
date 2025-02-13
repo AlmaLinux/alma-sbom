@@ -194,3 +194,9 @@ class PackageNevra:
             release = release,
             arch = arch,
         )
+
+@dataclass
+class Licenses:
+    ids: list[str]
+    expression: str
+
