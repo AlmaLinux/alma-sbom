@@ -1,4 +1,5 @@
 import argparse
+import re
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
@@ -155,8 +156,9 @@ class PackageNevra:
         cpe_epoch_part += '\\:' if cpe_epoch_part else ""
         cpe = (
             f'cpe:{cpe_version}:a:almalinux:'
-            f'{self.name}:{cpe_epoch_part}'
-            f'{self.version}-{self.release}:*:*:*:*:*:*:*'
+            f'{self._escape_encode_cpe_part(self.name)}:{cpe_epoch_part}'
+            f'{self._escape_encode_cpe_part(self.version)}-'
+            f'{self._escape_encode_cpe_part(self.release)}:*:*:*:*:*:*:*'
         )
         return cpe
 
@@ -194,6 +196,19 @@ class PackageNevra:
             release = release,
             arch = arch,
         )
+
+    @staticmethod
+    def _escape_encode_cpe_part(cpe: str) -> str:
+        """Escape special characters in cpe each part in accordance with the spdx-tools validation"""
+        allowed_chars = r'a-zA-Z0-9\-\._'
+        escape_chars = r'\\*?!"#$%&\'()+,/:;<=>@[]^`{|}~'
+
+        def encode_char(match):
+            char = match.group(0)
+            if char in escape_chars:
+                return '\\' + char
+
+        return re.sub(f'[^{allowed_chars}]', encode_char, cpe)
 
 @dataclass
 class Licenses:

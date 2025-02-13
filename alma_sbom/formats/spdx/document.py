@@ -83,7 +83,7 @@ class SPDXDocument(AlmasbomDocument):
         self.formatter.formatter.write_document_to_file(
             self.document,
             output_file,
-            validate=False,  ### need to be fixed to 'True'
+            validate=True,
         )
 
     def _get_document_namespace(self) -> str:
