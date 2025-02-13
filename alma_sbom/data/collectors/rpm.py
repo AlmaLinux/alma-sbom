@@ -36,8 +36,14 @@ class RpmCollector:
             package_nevra = package_nevra,
             source_rpm = hdr[rpm.RPMTAG_SOURCERPM],
             hashs = [Hash(value=hash_file(rpm_package))],
-            ########## timestamp!!!! check!!!!! ############
-            #package_timestamp = self.immudb_info['timestamp'],
+            ### NOTE:
+            ##  There are little bit difference of buildtime between immudb_metadata & rpm_package.
+            ##  So, now we don't set buildtime using rpm_package info.
+            ##  According to the specifications of extractimmudb_info_about_package, even if there is no timestamp
+            ##  info in immudb, None will be stored.
+            ##  Or, We should set it anymore? because whenever this code is executed, immudb_metadata is None or lacking.
+            ##  If you want do this, uncomment below block.
+            #package_timestamp = hdr[rpm.RPMTAG_BUILDTIME],
             ### NOTE:
             ## data from rpm package doesn't have propeties info
             #package_properties = None,

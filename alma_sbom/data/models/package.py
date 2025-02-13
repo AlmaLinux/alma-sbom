@@ -17,13 +17,11 @@ class Package:
     ### info as package component of SBOM
     package_nevra: PackageNevra = None
     source_rpm: str = None
-    ###TODO: need to be rethink that 'package_timestamp' is actually nedded?
     ###TODO: need to rethink the 'type' of package_timestamp
     package_timestamp: int  = None
     hashs: list[Hash] = None
 
     ### additional info (from package) as package componet of SBOM
-    ### TODO: define license type
     licenses: Licenses = None
     summary: str = None
     description: str = None

@@ -77,9 +77,6 @@ def component_from_package(package: Package, pkgid: int) -> tuple[PackageCompone
             package.get_purl(),
         ),
     ]
-    ### TODO:
-    ## item1
-    # need to rethink below
     pkg.built_date = datetime.fromtimestamp(package.package_timestamp) if package.package_timestamp else None
     pkg.files_analyzed = False
 
