@@ -180,8 +180,6 @@ class PackageNevra:
 
     @classmethod
     def from_str_nothas_epoch(cls, package_name: str) -> 'PackageNevra':
-        package_nevra = PackageNevra()
-
         split_by_dot = package_name.replace('.rpm', '')[::-1].split('.', 1)
         arch = split_by_dot[0][::-1]
         split_by_hyphen = split_by_dot[1].split('-', 2)
