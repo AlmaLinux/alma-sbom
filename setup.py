@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_namespace_packages
 
 from alma_sbom._version import __version__
 
@@ -18,9 +18,7 @@ setup(
         "GNU General Public License v3 or later (GPLv3+)",
         "Operating System :: OS Independent",
     ],
-    packages=[
-        'alma_sbom',
-    ],
+    packages=find_namespace_packages(include=['alma_sbom*']),
     install_requires=[
         'requests>=2.20.0',
         'cyclonedx-python-lib==2.7.1',
@@ -31,6 +29,11 @@ setup(
         'immudb_wrapper @ git+https://github.com/AlmaLinux/immudb-wrapper.git@0.1.5#egg=immudb_wrapper',
     ],
     python_requires=">=3.9",
+    entry_points={
+        'console_scripts': [
+            'alma-sbom=alma_sbom.cli.main:cli_main'
+        ],
+    },
 
     ### tests setting
     extras_require={
