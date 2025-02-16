@@ -1,4 +1,4 @@
-# AlmaLinux OS SBOM data management utilities
+# AlmaLinux SBOM data management utilities
 
 These utilities consist in:
 * __AlmaLinux SBOM CLI__: This utility is used to create SBOM records for artifacts created with the [AlmaLinux Build System](https://github.com/AlmaLinux/build-system). It generates SBOM records for Builds and Packages.
@@ -23,27 +23,47 @@ These utilities consist in:
 
 ## Using the AlmaLinux SBOM CLI
 
-The AlmaLinux OS SBOM CLI accepts the following arguments:
+The AlmaLinux SBOM CLI named __alma-sbom__ is provided as command line tool installed on your system or on your virtual environment(if you follow Getting Started).
+It has two subcommands. You can get two different types of SBOMs(Build and Package) by using these subcommands appropriately.
+
+You can use the following arguments for alma-sbom command:
 * __output-file__: The file you want to save the generated SBOM to. If not provided, the resulting SBOM is printed to stdout
-* __file-format__: The SBOM type and file format you want to generate. Either CycloneDX or SPDX, although right now we only support the CycloneDX format. The output format you want to use, either JSON or XML
-* __build-id__: The Build id you want to generate the SBOM for
-* __rpm-package-hash__: The Immudb hash of the package you want to generate the SBOM for
+* __file-format__: The SBOM type and file format you want to generate. Either CycloneDX or SPDX. The available file formats vary depending on the SBOM format. Currently, we support the following combinations: {spdx-json,spdx-xml,spdx-yaml,spdx-tagvalue,cyclonedx-json,cyclonedx-xml}
 * __albs-url__: The URL of the AlmaLinux Build System, if different from the production one, _https://build.almalinux.org_
 * __immudb-username__: The immudb username, could be provided either by setting the environmental variable or by using this option, by default uses value from ImmudbWrapper module
 * __immudb-password__: The immudb password, could be provided either by setting the environmental variable or by using this option, by default uses value from ImmudbWrapper module
 * __immudb-database__: The immudb database name, could be provided either by setting the environmental variable or by using this option, by default uses value from ImmudbWrapper module
 * __immudb-address__: The immudb host address, could be provided either by setting the environmental variable or by using this option, by default uses value from ImmudbWrapper module 
 * __immudb-public-key-file__: (Optional) Path of the public key to use for authenticating requests, must be provided either by setting the environmental variable or by using this option
+* __verbose__ or __debug__: You can get verbose or debug output
 
-Note that you have to either provide a _build-id_ or an _rpm-package-hash_
+### Creating an SBOM of a Build
 
-### Creating an SBOM of a Build in JSON format
+You can get SBOM of a Build using __build__ subcommand.
 
-`python alma_sbom.py --file-format cyclonedx-json --build-id 4372`
+You can use the following arguments for build subcommand:
+* __build-id__: The Build id you want to generate the SBOM for
+
+Note that you have to provide a _build-id_
+
+Example to make SBOM of a Build with build-id option in cyclonedx-json format:
+`$ alma-sbom --file-format cyclonedx-json --build-id 4372`
 
 ### Creating an SBOM of a package in XML format
 
-`python alma_sbom.py --file-format cyclonedx-xml --rpm-package-hash b00d871e204ca8cbcae72c37c53ab984fdadc3846c91fb35c315335adfe0699b`
+You can get SBOM of a Package using __package__ subcommand.
+
+You can use the following arguments for package subcommand:
+* __rpm-package-hash__: The Immudb hash of the package you want to generate the SBOM for
+* __rpm-package__: The path to RPM package you want to generate the SBOM for
+
+Note that you have to either provide a _rpm-package-hash_ or an _rpm-package_
+
+Example to make SBOM of a Package with rpm-package-hash option in cyclonedx-xml format with verbose output:
+`$ alma-sbom --verbose --file-format cyclonedx-xml --rpm-package-hash b00d871e204ca8cbcae72c37c53ab984fdadc3846c91fb35c315335adfe0699b`
+
+Example to make SBOM of a Package with rpm-package option in spdx-yaml format with debug output:
+`$ alma-sbom --debug --file-format spdx-yaml --rpm-package /path/to/package`
 
 ## Using the AlmaLinux Git Notarization Tool
 
