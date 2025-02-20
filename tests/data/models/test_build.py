@@ -1,5 +1,5 @@
 import unittest
-from alma_sbom.data.models import Build
+from alma_sbom.data.models import Package, Build
 
 class TestPackage(unittest.TestCase):
     def setUp(self):
@@ -9,5 +9,6 @@ class TestPackage(unittest.TestCase):
         pass
 
     def test_constructor(self):
-        p = Build()
+        p = Package()
+        b = Build(build_id=1111, author='test author', packages=[p])
 
