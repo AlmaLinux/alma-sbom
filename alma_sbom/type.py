@@ -168,9 +168,16 @@ class PackageNevra:
             purl_epoch_part = f'&epoch={self.epoch}'
         else:
             purl_epoch_part = ''
+
+        major_ver = self.get_major_version()
+        if major_ver:
+            purl_distro_part = f'&distro=almalinux-{major_ver}'
+        else:
+            purl_distro_part = ''
+
         purl = (
             f'pkg:rpm/almalinux/{self.name}@{self.version}-'
-            f'{self.release}?arch={self.arch}{purl_epoch_part}'
+            f'{self.release}?arch={self.arch}{purl_epoch_part}{purl_distro_part}'
         )
         return purl
 
@@ -207,6 +214,13 @@ class PackageNevra:
                 return '\\' + char
 
         return re.sub(f'[^{allowed_chars}]', encode_char, cpe)
+
+    def get_major_version(self) -> Optional[int]:
+        if self.release:
+            match = re.search(r'el(\d+)', self.release.lower())
+            if match:
+                return int(match.group(1))
+        return None
 
 @dataclass
 class Licenses:
