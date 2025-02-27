@@ -59,7 +59,7 @@ class RpmCollector:
 
 def _proc_licenses(licenses_str: str) -> Licenses:
     licensing = get_spdx_licensing()
-    licenses = Licenses(ids=None, expression=licenses_str)
+    licenses = Licenses(ids=[], expression=licenses_str)
     try:
         parsed = licensing.parse(licenses_str, validate=True)
     except ExpressionError as err:
