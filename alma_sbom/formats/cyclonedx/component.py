@@ -2,6 +2,7 @@ from logging import getLogger
 from cyclonedx.model import HashAlgorithm, HashType, LicenseChoice
 from cyclonedx.model.component import Property as CDXProperty
 from cyclonedx.model.component import Component, ComponentType
+from packageurl import PackageURL
 
 from alma_sbom import constants
 from alma_sbom.type import Hash, Algorithms, Licenses
@@ -17,7 +18,7 @@ def component_from_package(package: Package) -> Component:
         publisher=constants.ALMAOS_VENDOR,
         hashes=[_make_hash(h) for h in package.hashs],
         cpe=package.get_cpe23(),
-        purl=package.get_purl(),
+        purl=PackageURL.from_string(package.get_purl()),
         properties=[
             _make_property(prop) for prop in package.get_properties()
         ],
