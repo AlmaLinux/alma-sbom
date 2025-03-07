@@ -17,8 +17,8 @@ class PackageConfig(CommonConfig):
         if (self.rpm_package_hash is None and self.rpm_package is None) or \
            (self.rpm_package_hash is not None and self.rpm_package is not None):
             raise ValueError(
-                'Unexpected situation has occurred'
-                'Either rpm_package_hash or rpm_package must be specified'
+                'Unexpected situation has occurred. '
+                'Either rpm_package_hash or rpm_package must be specified.'
             )
         if self.rpm_package and not os.path.exists(self.rpm_package):
             raise FileNotFoundError(f"File '{self.rpm_package}' not found")
