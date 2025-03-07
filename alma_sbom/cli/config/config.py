@@ -191,55 +191,5 @@ class CommonConfig:
             default=cls.DEF_IMMUDB_PUBLIC_KEY_FILE
         )
 
-    ### TODO:
-    # Implement creator options
-    # See: https://github.com/AlmaLinux/alma-sbom/pull/27
-    #@classmethod
-    #def _add_extra_field_arguments(cls, parser: argparse.ArgumentParser) -> None:
-    #     parser.add_argument(
-    #         '--creator-name-person',
-    #         type=str,
-    #         action='append',
-    #         help=(
-    #             'The person(s) who create SBOM'
-    #         ),
-    #         required=False,
-    #         default=[],
-    #     )
-    #     parser.add_argument(
-    #         '--creator-email-person',
-    #         type=str,
-    #         action='append',
-    #         help=(
-    #             'The email address of SBOM creator. '
-    #             'This option is only required if --creator-name-personal is provided. '
-    #             'The combination of name and email address depends on the order specified. '
-    #             'If an extra email address is specified, it will be ignored'
-    #         ),
-    #         required=False,
-    #         default=[],
-    #     )
-    #     parser.add_argument(
-    #         '--creator-name-org',
-    #         type=str,
-    #         action='append',
-    #         help=(
-    #             'The organization(s) who create SBOM'
-    #         ),
-    #         required=False,
-    #         default=[],
-    #     )
-    #     parser.add_argument(
-    #         '--creator-email-org',
-    #         type=str,
-    #         action='append',
-    #         help=(
-    #             'The email address of SBOM creator. '
-    #             'This option is only required if --creator-name-org is provided. '
-    #             'The combination of name and email address depends on the order specified. '
-    #             'If an extra email address is specified, it will be ignored.'
-    #         ),
-    #         required=False,
-    #         default=[],
-    #     )
+    # TODO: Implement creator options, see: https://github.com/AlmaLinux/alma-sbom/issues/52
 
