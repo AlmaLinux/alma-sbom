@@ -41,44 +41,31 @@ class CommonConfig:
     immudb_public_key_file: str
 
     @classmethod
-    def from_each_str(
-        cls,
-        output_file: str,
-        sbom_record_type: str,
-        sbom_file_format_type: str,
-        albs_url: str,
-        immudb_username: str,
-        immudb_password: str,
-        immudb_database: str,
-        immudb_address: str,
-        immudb_public_key_file: str,
-    ) -> 'CommonConfig':
-        return cls(
-            output_file,
-            SbomType.from_each_str(sbom_record_type, sbom_file_format_type),
-            albs_url,
-            immudb_username,
-            immudb_password,
-            immudb_database,
-            immudb_address,
-            immudb_public_key_file,
-        )
-
-    @classmethod
     def from_str(
         cls,
         output_file: str,
-        sbom_type_str: str,
         albs_url: str,
         immudb_username: str,
         immudb_password: str,
         immudb_database: str,
         immudb_address: str,
         immudb_public_key_file: str,
+        sbom_type_str: str = None,
+        sbom_record_type: str = None,
+        sbom_file_format_type: str = None,
     ) -> 'CommonConfig':
+        if sbom_type_str:
+            sbom_type = SbomType.from_str(sbom_type_str)
+        elif sbom_record_type and sbom_file_format:
+            sbom_type = SbomType.from_each_str(sbom_record_type, sbom_file_format_type)
+        else:
+            raise RuntimeError(
+                'Unexpected situation has occurred. '
+                'sbom_type info is not provided correctly.'
+            )
         return cls(
             output_file,
-            SbomType.from_str(sbom_type_str),
+            sbom_type,
             albs_url,
             immudb_username,
             immudb_password,
@@ -91,13 +78,13 @@ class CommonConfig:
     def from_args(cls, args: argparse.Namespace) -> 'CommonConfig':
         return cls.from_str(
             args.output_file,
-            args.file_format,
             args.albs_url,
             args.immudb_username,
             args.immudb_password,
             args.immudb_database,
             args.immudb_address,
             args.immudb_public_key_file,
+            sbom_type_str = args.file_format,
         )
 
     def __post_init__(self):
