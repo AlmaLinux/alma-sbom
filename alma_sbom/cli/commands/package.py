@@ -39,7 +39,10 @@ class PackageCommand(SubCommand):
         elif self.config.rpm_package:
             self.runner = self._runner_with_rpm_package
         else:
-            raise RuntimeError('Unexpected situation has occurred')
+            raise RuntimeError(
+                'Unexpected situation has occurred. '
+                'Required info to generate SBOM of package has not been provided.'
+            )
 
     def _runner_with_rpm_package_hash(self) -> 'Package':
         immudb_collector = self.collector_factory.gen_immudb_collector()

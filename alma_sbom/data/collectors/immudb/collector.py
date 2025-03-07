@@ -46,7 +46,10 @@ class ImmudbCollector:
         elif rpm_package != None :
             response = self.client.authenticate_file(rpm_package)
         else:
-            raise RuntimeError('Unexpected situation has occurred')
+            raise RuntimeError(
+                'Unexpected situation has occurred. '
+                'Required info to to extract immudb info has not been provided.'
+            )
 
         result = response.get('value', {})
         result['timestamp'] = response.get('timestamp')

@@ -16,7 +16,12 @@ class AlbsCollector:
     def collect_build_by_id(self, build_id: str) -> Union[Build, list[str]]:
         build_info = self._extract_build_info_by_id(build_id)
         if build_id != str(build_info['id']):
-            raise RuntimeError('Unexpected situation has occurred')
+            raise RuntimeError(
+                'Unexpected situation has occurred. '
+                'build_id retrieved from albs differs provided build_id. '
+                f'provided build_id: {build_id}, '
+                f"build_id retrieved from albs: {str(build_info['id'])}"
+            )
         build = Build(
             build_id = build_id,
             author = f"{build_info['owner']['username']} <{build_info['owner']['email']}>",

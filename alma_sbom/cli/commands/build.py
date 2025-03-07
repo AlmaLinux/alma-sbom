@@ -34,7 +34,10 @@ class BuildCommand(SubCommand):
         if self.config.build_id:
             self.runner = self._runner_with_build_id
         else:
-            raise RuntimeError('Unexpected situation has occurred')
+            raise RuntimeError(
+                'Unexpected situation has occurred. '
+                'Required info to generate SBOM of build has not been provided.'
+            )
 
     def _runner_with_build_id(self) -> 'Build':
         albs_collector = self.collector_factory.gen_albs_collector()
