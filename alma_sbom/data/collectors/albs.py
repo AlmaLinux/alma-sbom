@@ -1,6 +1,6 @@
 import requests
 from logging import getLogger
-from typing import Union, ClassVar
+from typing import ClassVar, Iterator
 
 from alma_sbom.data import Build
 from alma_sbom.data.attributes.property import BuildPropertiesForBuild as BuildProperties
@@ -9,11 +9,13 @@ _logger = getLogger(__name__)
 
 class AlbsCollector:
     albs_url: str
+    package_hash_list: list[str]
 
     def __init__(self, albs_url) -> None:
         self.albs_url = albs_url
+        self.package_hash_list = None
 
-    def collect_build_by_id(self, build_id: str) -> Union[Build, list[str]]:
+    def collect_build_by_id(self, build_id: str) -> Build:
         build_info = self._extract_build_info_by_id(build_id)
         if build_id != str(build_info['id']):
             raise RuntimeError(
@@ -28,14 +30,25 @@ class AlbsCollector:
             build_properties = self._make_BuildProperties_from_build_info(build_info),
         )
 
-        package_hash_list = list()
+        self.package_hash_list = list()
         for task in build_info['tasks']:
             for artifact in task['artifacts']:
                 if artifact['type'] != 'rpm':
                     continue
-                package_hash_list.append(artifact['cas_hash'])
+                self.package_hash_list.append(artifact['cas_hash'])
 
-        return build, package_hash_list
+        return build
+
+    def iter_package_hash(self) -> Iterator[str]:
+        try:
+            for pkg_hash in self.package_hash_list:
+                yield pkg_hash
+        except TypeError as e:
+            raise RuntimeError(
+                'Unexpected situation has occurred. '
+                'You need to call AlbsCollector.collect_build_by_id() '
+                'prior to call AlbsCollector.iter_package_hash()'
+            )
 
     def _extract_build_info_by_id(self, build_id: str) -> dict:
         response = requests.get(

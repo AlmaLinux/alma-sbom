@@ -32,12 +32,13 @@ class BuildCommand(SubCommand):
 
     def _runner_with_build_id(self) -> 'Build':
         albs_collector = self.collector_factory.gen_albs_collector()
-        build, package_hash_list = albs_collector.collect_build_by_id(build_id=self.config.build_id)
+        build = albs_collector.collect_build_by_id(build_id=self.config.build_id)
 
         immudb_collector = self.collector_factory.gen_immudb_collector()
-        for hash in package_hash_list:
-            pkg_comp = immudb_collector.collect_package_by_hash(hash)
-            build.append_package(pkg_comp)
+
+        for pkg_hash in albs_collector.iter_package_hash():
+            pkg = immudb_collector.collect_package_by_hash(pkg_hash)
+            build.append_package(pkg)
 
         return build
 
