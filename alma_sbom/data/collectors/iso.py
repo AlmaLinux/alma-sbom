@@ -23,7 +23,7 @@ class IsoCollector:
         memfd = os.memfd_create('package', flags=0)
         self.memfd_path = f'/proc/self/fd/{memfd}'
 
-    def collect_iso_by_file(self, iso_image: str) -> Iso: ### Path にすべきかも
+    def collect_iso_by_file(self, iso_image: str) -> Iso:
         self._read_iso(iso_image)
         self._check_almalinux_iso()
 
