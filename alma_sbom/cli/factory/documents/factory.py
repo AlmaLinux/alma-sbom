@@ -20,3 +20,6 @@ class DocumentFactory:
     def gen_from_build(self, build: Any) -> Document:
         return self.document_class.from_build(build, self.config.sbom_type.file_format_type)
 
+    def gen_from_iso(self, iso: Any) -> Document:
+        return self.document_class.from_iso(iso, self.config.sbom_type.file_format_type)
+
