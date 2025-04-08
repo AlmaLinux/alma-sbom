@@ -13,11 +13,11 @@ from spdx_tools.spdx.writer.xml import xml_writer
 from spdx_tools.spdx.writer.yaml import yaml_writer
 
 from alma_sbom.type import SbomFileFormatType
-from alma_sbom.data.models import Package, Build
+from alma_sbom.data.models import Package, Build, Iso
 from alma_sbom.formats.document import Document as AlmasbomDocument
 
 from . import constants as spdx_consts
-from .component import set_package_component, set_build_component
+from .component import set_package_component, set_build_component, set_iso_component
 
 _logger = getLogger(__name__)
 
@@ -75,6 +75,18 @@ class SPDXDocument(AlmasbomDocument):
         set_build_component(doc.document, build, doc.document.creation_info.spdx_id)
 
         for pkg in build.packages:
+            doc._add_each_package_component(pkg)
+
+        return doc
+
+    @classmethod
+    def from_iso(cls, iso: Iso, file_format_type: SbomFileFormatType) -> "SPDXDocument":
+        doc_name = iso.get_doc_name()
+        doc = cls(file_format_type, doc_name)
+
+        set_iso_component(doc.document, iso, doc.document.creation_info.spdx_id)
+
+        for pkg in iso.packages:
             doc._add_each_package_component(pkg)
 
         return doc

@@ -17,7 +17,7 @@ from spdx_tools.spdx.model.spdx_no_assertion import SpdxNoAssertion
 from alma_sbom import constants
 from alma_sbom._version import __version__
 from alma_sbom.type import Hash, Algorithms
-from alma_sbom.data import Package, Build, Property
+from alma_sbom.data import Package, Build, Iso, Property
 
 from . import constants as spdx_consts
 
@@ -49,6 +49,9 @@ def set_build_component(document: Document, build: Build, pkgid: int) -> None:
         if prop is not None and prop.value is not None:
             note = _make_annotation(prop, pkgid)
             document.annotations += [note]
+
+def set_iso_component(document: Document, iso: Iso, pkgid: int) -> None:
+    pass
 
 def component_from_package(package: Package, pkgid: int) -> tuple[PackageComponent, Relationship]:
     pkg = PackageComponent(
