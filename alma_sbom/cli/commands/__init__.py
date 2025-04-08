@@ -5,10 +5,12 @@ from alma_sbom.cli.config import CommonConfig
 from .commands import SubCommand
 from .package import PackageCommand
 from .build import BuildCommand
+from .iso import IsoCommand
 
 command_classes: dict[str, type[SubCommand]] = {
     'package': PackageCommand,
-    'build': BuildCommand
+    'build': BuildCommand,
+    'iso': IsoCommand,
 }
 
 def command_factory(base: CommonConfig, args: argparse.Namespace) -> SubCommand:
