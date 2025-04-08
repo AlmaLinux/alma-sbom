@@ -3,6 +3,7 @@ from alma_sbom.data import (
     ImmudbCollector,
     AlbsCollector,
     RpmCollector,
+    IsoCollector,
 )
 
 class CollectorFactory:
@@ -27,4 +28,7 @@ class CollectorFactory:
 
     def gen_rpm_collector(self) -> RpmCollector:
         return RpmCollector()
+
+    def gen_iso_collector(self) -> IsoCollector:
+        return IsoCollector()
 
