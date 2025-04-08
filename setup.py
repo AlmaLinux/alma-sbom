@@ -12,6 +12,7 @@ def get_install_requires():
         'packageurl-python==0.16.0',
         'GitPython==3.1.29',
         'immudb_wrapper @ git+https://github.com/AlmaLinux/immudb-wrapper.git@0.1.5#egg=immudb_wrapper',
+        'pycdlib==1.14.0',
     ]
 
     is_venv = sys.prefix != sys.base_prefix
