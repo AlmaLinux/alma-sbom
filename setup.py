@@ -6,10 +6,10 @@ from alma_sbom._version import __version__
 def get_install_requires():
     requires=[
         'requests>=2.20.0',
-        'cyclonedx-python-lib==2.7.1',
+        'cyclonedx-python-lib==9.0.0',
         'spdx-tools==0.8',
         'urllib3<2.0',
-        'packageurl-python==0.10.3',
+        'packageurl-python==0.16.0',
         'GitPython==3.1.29',
         'immudb_wrapper @ git+https://github.com/AlmaLinux/immudb-wrapper.git@0.1.5#egg=immudb_wrapper',
     ]
