@@ -1,11 +1,10 @@
 from immudb_wrapper import ImmudbWrapper
 
-from version import __version__
+from alma_sbom._version import __version__
 
 ALMAOS_VENDOR = 'AlmaLinux OS Foundation'
-ALMAOS_EMAIL = 'cloud-infra@almalinux.org'
 ALMAOS_SBOMLICENSE = 'CC0-1.0'
-ALMAOS_NAMESPACE = 'https://security.almalinux.org/spdx'
+ALMAOS_NAMESPACE = 'https://security.almalinux.org'
 
 TOOLS = [
     {
@@ -23,11 +22,4 @@ TOOLS = [
         "name": "Immudb Wrapper",
         "version": ImmudbWrapper.get_version(),
     },
-]
-TOOLS_SPDX = [
-    {
-        "vendor": ALMAOS_VENDOR,
-        "name": "spdx-tools",
-        "version": "0.8",
-    }
 ]

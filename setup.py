@@ -1,9 +1,29 @@
-from setuptools import setup
+import sys
+from setuptools import setup, find_namespace_packages
 
-from version import __version__
+from alma_sbom._version import __version__
+
+def get_install_requires():
+    requires=[
+        'requests>=2.20.0',
+        'cyclonedx-python-lib==2.7.1',
+        'spdx-tools==0.8',
+        'urllib3<2.0',
+        'packageurl-python==0.10.3',
+        'GitPython==3.1.29',
+        'immudb_wrapper @ git+https://github.com/AlmaLinux/immudb-wrapper.git@0.1.5#egg=immudb_wrapper',
+    ]
+
+    is_venv = sys.prefix != sys.base_prefix
+    if is_venv:
+        requires.append('rpm==0.3.1')
+    else: # not is_venv
+        requires.append('rpm>=4.14')
+
+    return requires
 
 setup(
-    name="alma_sbom",
+    name="alma-sbom",
     version=__version__,
     author="Stepan Oksanichenko",
     author_email="soksanichenko@almalinux.org",
@@ -18,16 +38,20 @@ setup(
         "GNU General Public License v3 or later (GPLv3+)",
         "Operating System :: OS Independent",
     ],
-    py_modules=['alma_sbom'],
-    scripts=['alma_sbom.py'],
-    install_requires=[
-        'requests>=2.20.0',
-        'cyclonedx-python-lib==2.7.1',
-        'spdx-tools==0.8',
-        'urllib3<2.0',
-        'packageurl-python==0.10.3',
-        'GitPython==3.1.29',
-        'immudb_wrapper @ git+https://github.com/AlmaLinux/immudb-wrapper.git@0.1.5#egg=immudb_wrapper',
-    ],
+    packages=find_namespace_packages(include=['alma_sbom*']),
+    install_requires=get_install_requires(),
     python_requires=">=3.9",
+    entry_points={
+        'console_scripts': [
+            'alma-sbom=alma_sbom.cli.main:cli_main'
+        ],
+    },
+
+    ### tests setting
+    extras_require={
+        'dev': [
+            'pytest',
+            'pytest-cov',
+        ],
+    },
 )
