@@ -1,5 +1,6 @@
 from logging import getLogger
-from cyclonedx.model import HashAlgorithm, HashType, LicenseChoice
+from cyclonedx.factory.license import LicenseFactory
+from cyclonedx.model import HashAlgorithm, HashType
 from cyclonedx.model.component import Property as CDXProperty
 from cyclonedx.model.component import Component, ComponentType
 from packageurl import PackageURL
@@ -9,10 +10,11 @@ from alma_sbom.type import Hash, Algorithms, Licenses
 from alma_sbom.data import Package, Build, Property
 
 _logger = getLogger(__name__)
+lc_factory = LicenseFactory()
 
 def component_from_package(package: Package) -> Component:
     return Component(
-        component_type=ComponentType('library'),
+        type=ComponentType.LIBRARY,
         name=package.package_nevra.name,
         version=package.package_nevra.get_EVR(),
         publisher=constants.ALMAOS_VENDOR,
@@ -30,7 +32,7 @@ def component_from_package(package: Package) -> Component:
 
 def component_from_build(build: Build) -> Component:
     return Component(
-        component_type=ComponentType('library'),
+        type=ComponentType.DATA,
         name=build.get_doc_name(),
         author=build.author,
         properties=[
@@ -40,8 +42,8 @@ def component_from_build(build: Build) -> Component:
 
 def _make_hash(hash: Hash) -> HashType:
     return HashType(
-        algorithm=HashAlgorithm(hash.algorithm.value),
-        hash_value=hash.value,
+        alg=HashAlgorithm(hash.algorithm.value),
+        content=hash.value,
     )
 
 def _make_property(prop: Property) -> CDXProperty:
@@ -53,7 +55,7 @@ def _make_licenses(licenses: Licenses) -> list:
     l = []
     if licenses.ids:
         for lid in licenses.ids:
-            l.append(LicenseChoice(license_=lid))
+            l.append(lc_factory.make_from_string(lid))
     elif licenses.expression:
-        l.append(LicenseChoice(license_expression=licenses.expression))
+        l.append(lc_factory.make_from_string(licenses.expression))
     return l
