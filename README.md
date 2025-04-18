@@ -21,6 +21,18 @@ These utilities consist in:
 2. Activate the Virtual Environment: `source env/bin/activate`
 3. Install dependencies: `pip install .`
 
+## Getting started with pipx - easier way
+
+[pipx](https://pipx.pypa.io/stable/) is tool to install and run python allplication in isolated environments.
+You can use a python-based command line tool easier with it. Ofcourse alma-sbom too.
+pipx package is released in epel(https://docs.fedoraproject.org/en-US/epel/), so you can install it easily in AlmaLinux.
+
+Install alma-sbom with pipx:
+`pipx install .`
+
+or you can install alma-sbom using github link directly:
+`pipx install git+https://github.com/AlmaLinux/alma-sbom.git`
+
 ## Using the AlmaLinux SBOM CLI
 
 The AlmaLinux SBOM CLI named __alma-sbom__ is provided as command line tool installed on your system or on your virtual environment(if you follow Getting Started).
