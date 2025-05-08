@@ -1,11 +1,15 @@
 from enum import Enum
-from typing import Callable
+from typing import TYPE_CHECKING
 from logging import getLogger
 
-from cyclonedx.model.bom import Bom, Tool
-from cyclonedx.output import BaseOutput
-from cyclonedx.output.json import JsonV1Dot4
-from cyclonedx.output.xml import XmlV1Dot4
+from cyclonedx.builder.this import this_component as cdx_lib_component
+from cyclonedx.model.bom import Bom
+from cyclonedx.model.component import Component
+from cyclonedx.output import make_outputter
+from cyclonedx.schema import OutputFormat, SchemaVersion
+
+if TYPE_CHECKING:
+    from cyclonedx.output import BaseOutput
 
 from alma_sbom import constants
 from alma_sbom.data.models import Package, Build
@@ -18,41 +22,25 @@ _logger = getLogger(__name__)
 
 
 class CDXFormatter:
-    FORMATTERS = {
-        SbomFileFormatType.JSON: JsonV1Dot4,
-        SbomFileFormatType.XML: XmlV1Dot4,
+    FORMATS_MAP = {
+        SbomFileFormatType.JSON: OutputFormat.JSON,
+        SbomFileFormatType.XML: OutputFormat.XML,
     }
-    formatter: BaseOutput
+    SCHEMA_VERSION: SchemaVersion = SchemaVersion.V1_6
 
-    ### TODO:
-    # Current writer in cyclonedx-python-libs(==2.7.1) doesn't have indent and pretty option.
-    # So, we need to implement writer using basic library.
-    # The newer cyclonedx-python-libs has that. These are likely rewirte after library update.
-    WRITERS = {
-        SbomFileFormatType.JSON: '_write_json',
-        SbomFileFormatType.XML: '_write_xml',
-    }
-    writer: Callable
+    output_format_type: OutputFormat
 
     def __init__(self, file_format: SbomFileFormatType) -> None:
-        self.formatter = self.FORMATTERS[file_format]
-        self.writer = getattr(self, self.WRITERS[file_format])
+        self.output_format_type = self.FORMATS_MAP[file_format]
 
-    ### TODO:
-    # writer functions are likely renmove after library update.
-    def _write_json(self, bom: Bom) -> str:
-        import json
-        formatter = self.formatter(bom)
-        output_str = formatter.output_as_string()
-        json_output = json.loads(output_str)
-        return json.dumps(json_output, indent=4)
-
-    def _write_xml(self, bom: Bom) -> str:
-        import xml.dom.minidom
-        formatter = self.formatter(bom)
-        output_str = formatter.output_as_string()
-        xml_output = xml.dom.minidom.parseString(output_str)
-        return xml_output.toprettyxml()
+    def write(self, bom: Bom) -> str:
+        outputter: BaseOutput = make_outputter(
+            bom,
+            self.output_format_type,
+            self.SCHEMA_VERSION,
+        )
+        output = outputter.output_as_string(indent=4)
+        return output
 
 class CDXDocument(AlmasbomDocument):
     bom: Bom
@@ -61,20 +49,16 @@ class CDXDocument(AlmasbomDocument):
     def __init__(self, file_format_type: SbomFileFormatType):
         self.bom = Bom()
 
-        ### TODO:
-        # These tool components, being specific to alma-sbom rather than part of the format,
-        # should perhaps be managed within each data class under data/models.
-        # Add tools info of alma-sbom related tools
         for tool in constants.TOOLS:
-            self.bom.metadata.tools.add(Tool(
-                vendor=tool['vendor'],
+            self.bom.metadata.tools.components.add(Component(
                 name=tool['name'],
+                ### NOTE:
+                # Use group attribute as vendor
+                group=tool['vendor'],
                 version=tool['version'],
+                type=None,
             ))
-        ### TODO:
-        # More recent cyclonedx-python-libs require the addition of their own tool information explicitly.
-        # Currently, this is done automatically.
-        #self.bom.metadata.tools.components.add(cdx_lib_component())
+        self.bom.metadata.tools.components.add(cdx_lib_component())
 
         self.formatter = CDXFormatter(file_format_type)
 
@@ -94,10 +78,8 @@ class CDXDocument(AlmasbomDocument):
 
         return doc
 
-    ###TODO:
-    # need to be rewriten after library update.
     def write(self, output_file: str) -> None:
-        pretty_output = self.formatter.writer(self.bom)
+        pretty_output = self.formatter.write(self.bom)
         with open(output_file, 'w') as fd:
             fd.write(pretty_output)
 
