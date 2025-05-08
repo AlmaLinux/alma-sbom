@@ -32,7 +32,7 @@ def component_from_package(package: Package) -> Component:
 
 def component_from_build(build: Build) -> Component:
     return Component(
-        type=ComponentType.DATA,
+        type=ComponentType.FRAMEWORK,
         name=build.get_doc_name(),
         author=build.author,
         properties=[
