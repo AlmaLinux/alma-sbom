@@ -8,11 +8,11 @@ from cyclonedx.output.json import JsonV1Dot4
 from cyclonedx.output.xml import XmlV1Dot4
 
 from alma_sbom import constants
-from alma_sbom.data.models import Package, Build
+from alma_sbom.data.models import Package, Build, Iso
 from alma_sbom.type import SbomFileFormatType
 from alma_sbom.formats.document import Document as AlmasbomDocument
 
-from .component import component_from_package, component_from_build
+from .component import component_from_package, component_from_build, component_from_iso
 
 _logger = getLogger(__name__)
 
@@ -90,6 +90,16 @@ class CDXDocument(AlmasbomDocument):
 
         doc.bom.metadata.component = component_from_build(build)
         for pkg in build.packages:
+            doc.bom.components.add(component_from_package(pkg))
+
+        return doc
+
+    @classmethod
+    def from_iso(cls, iso: Iso, file_format_type: SbomFileFormatType) -> "CDXDocument":
+        doc = cls(file_format_type)
+
+        doc.bom.metadata.component = component_from_iso(iso)
+        for pkg in iso.packages:
             doc.bom.components.add(component_from_package(pkg))
 
         return doc
