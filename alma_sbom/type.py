@@ -3,6 +3,10 @@ import re
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
+from alma_sbom import logger
+
+logger.info("type.py module loaded")
+
 
 class SbomRecordType(Enum):
     SPDX = 'spdx'
@@ -226,4 +230,5 @@ class PackageNevra:
 class Licenses:
     ids: list[str]
     expression: str
+
 
