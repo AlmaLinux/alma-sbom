@@ -5,8 +5,7 @@ from typing import ClassVar, TYPE_CHECKING
 
 from alma_sbom.cli.config import CommonConfig, IsoConfig
 
-### TODO:
-##  We should avoid importing modules from outside the CLI layer except for TYPE_CHECKING
+### TODO: https://github.com/AlmaLinux/alma-sbom/issues/59
 from alma_sbom.data import NullPackage
 
 from .commands import SubCommand
