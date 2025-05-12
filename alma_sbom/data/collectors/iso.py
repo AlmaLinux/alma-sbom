@@ -3,25 +3,26 @@ import io
 import os
 import pycdlib
 import tempfile
+from pathlib import Path
 from typing import ClassVar, Iterator
 
 from alma_sbom.data import Iso
 
 class IsoCollector:
-    PATH_TO_TREEINFO: ClassVar[str] = '/.treeinfo'
+    PATH_TO_TREEINFO: ClassVar[str] = Path('/.treeinfo')
     DVD_REPO_LIST: ClassVar[list[str]] = ['AppStream', 'BaseOS']
     MINIMAL_REPO_LIST: ClassVar[list[str]] = ['Minimal']
 
     iso: pycdlib.PyCdlib
     config: configparser.ConfigParser
-    memfd_path: int
+    memfd_path: Path
     repositories_info: dict
 
     def __init__(self):
         self.iso = pycdlib.PyCdlib()
         self.config = configparser.ConfigParser()
         memfd = os.memfd_create('package', flags=0)
-        self.memfd_path = f'/proc/self/fd/{memfd}'
+        self.memfd_path = Path(f'/proc/self/fd/{memfd}')
 
     def collect_iso_by_file(self, iso_image: str) -> Iso:
         self._read_iso(iso_image)
@@ -38,8 +39,8 @@ class IsoCollector:
             packages=[],
         )
 
-    def get_fd_path(self) -> int:
-        return self.memfd_path
+    def get_fd_path(self) -> str:
+        return str(self.memfd_path)
 
     def iter_packages(self) -> Iterator[None]:
         for variant_packages_repo in self.repositories_info.values():
@@ -49,7 +50,7 @@ class IsoCollector:
     def _read_iso(self, iso_image: str) -> None:
         self.iso.open(iso_image)
         with tempfile.NamedTemporaryFile(delete=True) as tmp:
-            self.iso.get_file_from_iso(local_path=tmp.name, rr_path=self.PATH_TO_TREEINFO)
+            self.iso.get_file_from_iso(local_path=tmp.name, rr_path=str(self.PATH_TO_TREEINFO))
             self.config.read(tmp.name)
 
     def _check_almalinux_iso(self) -> None:
@@ -90,15 +91,15 @@ class IsoCollector:
         raise KeyError('Cat not detect image type.')
 
     def _iter_packages_per_repo(self, variant_packages_repo: str) -> Iterator[None]:
-        variant_path = os.path.join('/', variant_packages_repo)
-        variant_entry = self.iso.get_record(iso_path=variant_path)
+        variant_path = Path('/') / variant_packages_repo
+        variant_entry = self.iso.get_record(iso_path=str(variant_path))
         for child in variant_entry.children:
             pkg_name = child.rock_ridge.name().decode('utf8')
             if pkg_name.endswith('.rpm'):
-                full_rr_path = os.path.join(variant_path, pkg_name)
+                full_rr_path = variant_path / pkg_name
                 self.iso.get_file_from_iso(
                     local_path=self.memfd_path,
-                    rr_path=full_rr_path,
+                    rr_path=str(full_rr_path),
                 )
                 yield
 
