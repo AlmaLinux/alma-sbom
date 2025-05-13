@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 from alma_sbom.data.models import Package, Build, Iso
 from alma_sbom.type import SbomFileFormatType
@@ -20,6 +21,6 @@ class Document(ABC):
         pass
 
     @abstractmethod
-    def write(self, output_file: str) -> None:
+    def write(self, output_file: Path) -> None:
         pass
 

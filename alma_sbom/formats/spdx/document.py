@@ -3,6 +3,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Callable
 from logging import getLogger
+from pathlib import Path
 from spdx_tools.spdx.model import (
     CreationInfo,
     Document,
@@ -93,7 +94,7 @@ class SPDXDocument(AlmasbomDocument):
 
         return doc
 
-    def write(self, output_file: str) -> None:
+    def write(self, output_file: Path) -> None:
         self.formatter.formatter.write_document_to_file(
             self.document,
             output_file,
