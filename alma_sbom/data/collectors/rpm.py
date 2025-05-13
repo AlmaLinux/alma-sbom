@@ -1,6 +1,8 @@
 import hashlib
 import rpm
 from license_expression import get_spdx_licensing, ExpressionError
+from pathlib import Path
+from typing import Union
 
 from alma_sbom.type import Hash, Licenses
 from alma_sbom.data.models import Package, PackageNevra
@@ -11,7 +13,7 @@ class RpmCollector:
     def __init__(self):
         self.ts = rpm.TransactionSet()
 
-    def collect_package_from_file(self, rpm_package: str) -> Package:
+    def collect_package_from_file(self, rpm_package: Path) -> Package:
         try:
             with open(rpm_package) as fd:
                 hdr = self.ts.hdrFromFdno(fd)
@@ -70,7 +72,7 @@ def _proc_licenses(licenses_str: str) -> Licenses:
             licenses.ids.append(str(sym))
     return licenses
 
-def hash_file(file_path: str, buff_size: int = 1048576) -> str:
+def hash_file(file_path: Union[str, Path], buff_size: int = 1048576) -> str:
     """
     Returns SHA256 checksum (hexadecimal digest) of the file.
 

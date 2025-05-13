@@ -1,11 +1,12 @@
 import argparse
 from dataclasses import dataclass
+from pathlib import Path
 
 from alma_sbom.cli.config import CommonConfig
 
 @dataclass
 class IsoConfig(CommonConfig):
-    iso_image: str = None
+    iso_image: Path = None
 
     def __post_init__(self) -> None:
         self._validate()
@@ -19,13 +20,13 @@ class IsoConfig(CommonConfig):
             )
 
     @classmethod
-    def from_base(cls, base: CommonConfig, iso_image: str) -> 'BuildConfig':
+    def from_base(cls, base: CommonConfig, iso_image: Path) -> 'BuildConfig':
         base_fields = vars(base)
         return cls(**base_fields, iso_image=iso_image)
 
     @classmethod
     def from_base_args(cls, base: CommonConfig, args: argparse.Namespace) -> 'BuildConfig':
-        return cls.from_base(base, iso_image=args.iso_image)
+        return cls.from_base(base, iso_image=Path(args.iso_image))
 
     @staticmethod
     def add_arguments(parser: argparse._SubParsersAction) -> None:

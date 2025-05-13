@@ -3,6 +3,7 @@ import os
 from dataclasses import dataclass
 from typing import Union, ClassVar
 from logging import getLogger
+from pathlib import Path
 from immudb_wrapper import ImmudbWrapper
 
 from alma_sbom.type import SbomType
@@ -27,7 +28,7 @@ class CommonConfig:
     DEF_IMMUDB_PUBLIC_KEY_FILE: ClassVar[str] = os.getenv('IMMUDB_PUBLIC_KEY_FILE')
 
     ### output related settings ###
-    output_file: str
+    output_file: Path
     sbom_type: SbomType
 
     ### ALBS settings ###
@@ -64,7 +65,7 @@ class CommonConfig:
                 'sbom_type info is not provided correctly.'
             )
         return cls(
-            output_file,
+            Path(output_file),
             sbom_type,
             albs_url,
             immudb_username,

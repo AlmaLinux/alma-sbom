@@ -1,13 +1,14 @@
 import argparse
 import os
 from dataclasses import dataclass, asdict
+from pathlib import Path
 
 from alma_sbom.cli.config import CommonConfig
 
 @dataclass
 class PackageConfig(CommonConfig):
     rpm_package_hash: str = None
-    rpm_package: str = None
+    rpm_package: Path = None
 
     def __post_init__(self) -> None:
         self._validate()
@@ -20,17 +21,17 @@ class PackageConfig(CommonConfig):
                 'Unexpected situation has occurred. '
                 'Either rpm_package_hash or rpm_package must be specified.'
             )
-        if self.rpm_package and not os.path.exists(self.rpm_package):
+        if self.rpm_package and not self.rpm_package.exists():
             raise FileNotFoundError(f"File '{self.rpm_package}' not found")
 
     @classmethod
-    def from_base(cls, base: CommonConfig, rpm_package_hash: str, rpm_package: str) -> 'PackageConfig':
+    def from_base(cls, base: CommonConfig, rpm_package_hash: str, rpm_package: Path) -> 'PackageConfig':
         base_fields = vars(base)
         return cls(**base_fields, rpm_package_hash=rpm_package_hash, rpm_package=rpm_package)
 
     @classmethod
     def from_base_args(cls, base: CommonConfig, args: argparse.Namespace) -> 'PackageConfig':
-        return cls.from_base(base, rpm_package_hash=args.rpm_package_hash, rpm_package=args.rpm_package)
+        return cls.from_base(base, rpm_package_hash=args.rpm_package_hash, rpm_package=Path(args.rpm_package))
 
     @staticmethod
     def add_arguments(parser: argparse._SubParsersAction) -> None:

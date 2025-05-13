@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import TYPE_CHECKING
 from logging import getLogger
+from pathlib import Path
 
 from cyclonedx.builder.this import this_component as cdx_lib_component
 from cyclonedx.model.bom import Bom
@@ -88,7 +89,7 @@ class CDXDocument(AlmasbomDocument):
 
         return doc
 
-    def write(self, output_file: str) -> None:
+    def write(self, output_file: Path) -> None:
         pretty_output = self.formatter.write(self.bom)
         with open(output_file, 'w') as fd:
             fd.write(pretty_output)
