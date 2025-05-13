@@ -7,7 +7,7 @@ from packageurl import PackageURL
 
 from alma_sbom import constants
 from alma_sbom.type import Hash, Algorithms, Licenses
-from alma_sbom.data import Package, Build, Property
+from alma_sbom.data import Package, Build, Iso, Property
 
 _logger = getLogger(__name__)
 lc_factory = LicenseFactory()
@@ -38,6 +38,12 @@ def component_from_build(build: Build) -> Component:
         properties=[
             _make_property(prop) for prop in build.get_properties()
         ],
+    )
+
+def component_from_iso(iso: Iso) -> Component:
+    return Component(
+        component_type=ComponentType('operating-system'),
+        name=iso.get_doc_name(),
     )
 
 def _make_hash(hash: Hash) -> HashType:
