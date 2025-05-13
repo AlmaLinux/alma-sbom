@@ -1,14 +1,14 @@
+# alma_sbom/cli/main.py
+
 import argparse
 import sys
-from logging import getLogger
 
 from alma_sbom.type import SbomType
-
-from .logging import Logging, add_logging_arguments
+from .logging import Logging, add_logging_arguments, setup_logger
 from .commands import SubCommand, command_factory
 from .config import CommonConfig, add_config_arguments
 
-_logger = getLogger(__name__)
+logger = setup_logger(__name__)
 
 class Main:
     command: SubCommand
@@ -21,6 +21,7 @@ class Main:
         logging = Logging(loglevel=self.args.loglevel)
         self.config = CommonConfig.from_args(self.args)
         self.command = command_factory(self.config, self.args)
+        logger.debug("Main initialized")
 
     def run(self) -> int:
         return self.command.run()
@@ -36,3 +37,4 @@ def cli_main():
     args = sys.argv[1:]
     _main = Main(args)
     return _main.run()
+
