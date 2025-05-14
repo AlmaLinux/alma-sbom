@@ -1,3 +1,5 @@
+# alma_sbom/cli/logging.py
+
 import argparse
 import logging
 from logging import DEBUG, INFO, WARNING, basicConfig
@@ -37,18 +39,4 @@ class Logging():
 
 def add_logging_arguments(parser: argparse.ArgumentParser) -> None:
     Logging.add_arguments(parser)
-
-# ✅ ここから追加
-def setup_logger(name: str = None) -> logging.Logger:
-    logger = logging.getLogger(name)
-    if not logger.handlers:
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter(
-            '%(asctime)s %(name)s: [%(levelname)s] %(message)s',
-            datefmt='%b %d %H:%M:%S'
-        )
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-        logger.setLevel(logging.INFO)
-    return logger
 

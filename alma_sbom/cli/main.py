@@ -2,13 +2,14 @@
 
 import argparse
 import sys
+from logging import getLogger
 
 from alma_sbom.type import SbomType
-from .logging import Logging, add_logging_arguments, setup_logger
+from .logging import Logging, add_logging_arguments
 from .commands import SubCommand, command_factory
 from .config import CommonConfig, add_config_arguments
 
-logger = setup_logger(__name__)
+logger = getLogger(__name__)
 
 class Main:
     command: SubCommand
