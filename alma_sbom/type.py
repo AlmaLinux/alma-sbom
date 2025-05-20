@@ -20,6 +20,7 @@ class SbomFileFormatType(Enum):
     TAGVALUE = 'tagvalue'
     XML = 'xml'
     YAML = 'yaml'
+    RDF = 'rdf'
 
     @classmethod
     def from_str(cls, string: str) -> 'SbomFileFormatType':
@@ -35,6 +36,7 @@ class SbomType:
             SbomFileFormatType.XML,
             SbomFileFormatType.YAML,
             SbomFileFormatType.TAGVALUE,
+            SbomFileFormatType.RDF,
         ],
         SbomRecordType.CYCLONEDX: [
             SbomFileFormatType.JSON,

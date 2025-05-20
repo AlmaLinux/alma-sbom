@@ -11,6 +11,7 @@ from spdx_tools.spdx.writer.json import json_writer
 from spdx_tools.spdx.writer.tagvalue import tagvalue_writer
 from spdx_tools.spdx.writer.xml import xml_writer
 from spdx_tools.spdx.writer.yaml import yaml_writer
+from spdx_tools.spdx.writer.rdf import rdf_writer
 
 from alma_sbom.type import SbomFileFormatType
 from alma_sbom.data.models import Package, Build
@@ -28,6 +29,7 @@ class SPDXFormatter:
         SbomFileFormatType.TAGVALUE: tagvalue_writer,
         SbomFileFormatType.XML: xml_writer,
         SbomFileFormatType.YAML: yaml_writer,
+        SbomFileFormatType.RDF: rdf_writer,
     }
     formatter: Callable
 
