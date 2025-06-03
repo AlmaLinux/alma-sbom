@@ -28,7 +28,7 @@ It has two subcommands. You can get two different types of SBOMs(Build and Packa
 
 You can use the following arguments for alma-sbom command:
 * __output-file__: The file you want to save the generated SBOM to. If not provided, the resulting SBOM is printed to stdout
-* __file-format__: The SBOM type and file format you want to generate. Either CycloneDX or SPDX. The available file formats vary depending on the SBOM format. Currently, we support the following combinations: {spdx-json,spdx-xml,spdx-yaml,spdx-tagvalue,cyclonedx-json,cyclonedx-xml}
+* __file-format__: The SBOM type and file format you want to generate. Either CycloneDX or SPDX. The available file formats vary depending on the SBOM format. Currently, we support the following combinations: {spdx-json,spdx-xml,spdx-yaml,spdx-tagvalue,spdx-rdf,cyclonedx-json,cyclonedx-xml}
 * __albs-url__: The URL of the AlmaLinux Build System, if different from the production one, _https://build.almalinux.org_
 * __immudb-username__: The immudb username, could be provided either by setting the environmental variable or by using this option, by default uses value from ImmudbWrapper module
 * __immudb-password__: The immudb password, could be provided either by setting the environmental variable or by using this option, by default uses value from ImmudbWrapper module
