@@ -1,3 +1,3 @@
-from .models import Package, NullPackage, Build, PackageNevra
-from .collectors import ImmudbCollector, AlbsCollector, RpmCollector
+from .models import Package, NullPackage, Build, PackageNevra, Iso
+from .collectors import ImmudbCollector, AlbsCollector, RpmCollector, IsoCollector
 from .attributes import Property

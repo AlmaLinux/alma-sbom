@@ -4,6 +4,7 @@ from .config import CommonConfig
 from .commands import (
     PackageConfig,
     BuildConfig,
+    IsoConfig,
     setup_subparsers,
 )
 
