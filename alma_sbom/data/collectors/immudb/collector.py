@@ -1,6 +1,7 @@
 import os
 from immudb_wrapper import ImmudbWrapper
 from logging import getLogger
+from pathlib import Path
 
 from alma_sbom.data import Package, PackageNevra
 
@@ -34,8 +35,8 @@ class ImmudbCollector:
         self.processor = processor_factory(immudb_info, hash)
         return self.processor.get_package()
 
-    def collect_package_by_package(self, rpm_package: str) -> Package:
-        immudb_info = self._extract_immudb_info_about_package(rpm_package=rpm_package)
+    def collect_package_by_package(self, rpm_package: Path) -> Package:
+        immudb_info = self._extract_immudb_info_about_package(rpm_package=str(rpm_package))
         self.processor = processor_factory(immudb_info, hash=None)
         return self.processor.get_package()
 

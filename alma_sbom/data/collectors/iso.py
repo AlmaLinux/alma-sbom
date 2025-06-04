@@ -24,7 +24,7 @@ class IsoCollector:
         memfd = os.memfd_create('package', flags=0)
         self.memfd_path = Path(f'/proc/self/fd/{memfd}')
 
-    def collect_iso_by_file(self, iso_image: str) -> Iso:
+    def collect_iso_by_file(self, iso_image: Path) -> Iso:
         self._read_iso(iso_image)
         self._check_almalinux_iso()
 
@@ -39,15 +39,15 @@ class IsoCollector:
             packages=[],
         )
 
-    def get_fd_path(self) -> str:
-        return str(self.memfd_path)
+    def get_fd_path(self) -> Path:
+        return self.memfd_path
 
     def iter_packages(self) -> Iterator[None]:
         for variant_packages_repo in self.repositories_info.values():
             for _ in self._iter_packages_per_repo(variant_packages_repo):
                 yield
 
-    def _read_iso(self, iso_image: str) -> None:
+    def _read_iso(self, iso_image: Path) -> None:
         self.iso.open(iso_image)
         with tempfile.NamedTemporaryFile(delete=True) as tmp:
             self.iso.get_file_from_iso(local_path=tmp.name, rr_path=str(self.PATH_TO_TREEINFO))
