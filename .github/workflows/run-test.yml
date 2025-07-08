@@ -28,4 +28,4 @@ jobs:
           python -m pip install -e .[dev]
       - name: Run pytest
         run: |
-          pytest tests/
+          pytest tests/pytest/
