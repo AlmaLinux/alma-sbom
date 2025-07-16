@@ -47,9 +47,9 @@ You can use the following arguments for build subcommand:
 Note that you have to provide a _build-id_
 
 Example to make SBOM of a Build with build-id option in cyclonedx-json format:
-`$ alma-sbom --file-format cyclonedx-json --build-id 4372`
+`$ alma-sbom --file-format cyclonedx-json build --build-id 4372`
 
-### Creating an SBOM of a package in XML format
+### Creating an SBOM of a package in other formats
 
 You can get SBOM of a Package using __package__ subcommand.
 
@@ -60,10 +60,20 @@ You can use the following arguments for package subcommand:
 Note that you have to either provide a _rpm-package-hash_ or an _rpm-package_
 
 Example to make SBOM of a Package with rpm-package-hash option in cyclonedx-xml format with verbose output:
-`$ alma-sbom --verbose --file-format cyclonedx-xml --rpm-package-hash b00d871e204ca8cbcae72c37c53ab984fdadc3846c91fb35c315335adfe0699b`
+`$ alma-sbom --verbose --file-format cyclonedx-xml package --rpm-package-hash b00d871e204ca8cbcae72c37c53ab984fdadc3846c91fb35c315335adfe0699b`
 
 Example to make SBOM of a Package with rpm-package option in spdx-yaml format with debug output:
-`$ alma-sbom --debug --file-format spdx-yaml --rpm-package /path/to/package`
+`$ alma-sbom --debug --file-format spdx-yaml package --rpm-package /path/to/package`
+
+### Creating an SBOM of a ISO image in default(=SPDX-json) format
+
+You can use the following arguments for build subcommand:
+* __iso-image__: Path to `AlmaLinux installer ISO image` you want to generate the SBOM for
+
+Note that you have to provide a _iso-image_
+
+Example to make SBOM of a Package with rpm-package with default(=spdx-json) format:
+`$ alma-sbom iso --iso-image /path/to/isoimage`
 
 ## Using the AlmaLinux Git Notarization Tool
 
