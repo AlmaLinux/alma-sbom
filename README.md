@@ -23,15 +23,13 @@ These utilities consist in:
 
 ## Getting started with pipx - easier way
 
-[pipx](https://pipx.pypa.io/stable/) is tool to install and run python allplication in isolated environments.
-You can use a python-based command line tool easier with it. Ofcourse alma-sbom too.
-pipx package is released in epel(https://docs.fedoraproject.org/en-US/epel/), so you can install it easily in AlmaLinux.
+[pipx](https://pipx.pypa.io/stable/) is a tool to install and run python applications in isolated environments.
+With pipx you can install python-based command line tools easier, such as alma-sbom.
+The pipx package is released in [Fedora EPEL](https://docs.fedoraproject.org/en-US/epel/), so you can install it easily in AlmaLinux by running `dnf install pipx`.
 
-Install alma-sbom with pipx:
-`pipx install .`
-
-or you can install alma-sbom using github link directly:
-`pipx install git+https://github.com/AlmaLinux/alma-sbom.git`
+To install alma-sbom with pipx you can either:
+* Clone the alma-sbom git repository and run `pipx install .` inside the cloned repository.
+* Install alma-sbom directly using the github link by running `pipx install git+https://github.com/AlmaLinux/alma-sbom.git`
 
 ## Using the AlmaLinux SBOM CLI
 
@@ -49,27 +47,23 @@ You can use the following arguments for alma-sbom command:
 * __immudb-public-key-file__: (Optional) Path of the public key to use for authenticating requests, must be provided either by setting the environmental variable or by using this option
 * __verbose__ or __debug__: You can get verbose or debug output
 
-### Creating an SBOM of a Build
+### Creating the SBOM of a Build
 
-You can get SBOM of a Build using __build__ subcommand.
-
-You can use the following arguments for build subcommand:
+You can get the SBOM of a Build using the __build__ subcommand, and providing the following argument:
 * __build-id__: The Build id you want to generate the SBOM for
 
-Note that you have to provide a _build-id_
+Note that you have to provide the _build-id_ argument
 
 Example to make SBOM of a Build with build-id option in cyclonedx-json format:
 `$ alma-sbom --file-format cyclonedx-json build --build-id 4372`
 
-### Creating an SBOM of a package in other formats
+### Creating the SBOM of a Package in other formats
 
-You can get SBOM of a Package using __package__ subcommand.
-
-You can use the following arguments for package subcommand:
+You can get the SBOM of a Package using the __package__ subcommand, and providing the following argument:
 * __rpm-package-hash__: The Immudb hash of the package you want to generate the SBOM for
 * __rpm-package__: The path to RPM package you want to generate the SBOM for
 
-Note that you have to either provide a _rpm-package-hash_ or an _rpm-package_
+Note that you have to either provide the _rpm-package-hash_ or the _rpm-package_ argument
 
 Example to make SBOM of a Package with rpm-package-hash option in cyclonedx-xml format with verbose output:
 `$ alma-sbom --verbose --file-format cyclonedx-xml package --rpm-package-hash b00d871e204ca8cbcae72c37c53ab984fdadc3846c91fb35c315335adfe0699b`
@@ -77,14 +71,14 @@ Example to make SBOM of a Package with rpm-package-hash option in cyclonedx-xml 
 Example to make SBOM of a Package with rpm-package option in spdx-yaml format with debug output:
 `$ alma-sbom --debug --file-format spdx-yaml package --rpm-package /path/to/package`
 
-### Creating an SBOM of a ISO image in default(=SPDX-json) format
+### Creating the SBOM of an ISO image in the default format (`SPDX-json`)
 
-You can use the following arguments for build subcommand:
-* __iso-image__: Path to `AlmaLinux installer ISO image` you want to generate the SBOM for
+You can get the SBOM of an ISO image using the __iso__ subcommand, and providing the following argument:
+* __iso-image__: Path to the `AlmaLinux installer ISO image` that you want to generate the SBOM for
 
-Note that you have to provide a _iso-image_
+Note that you have to provide the _iso-image_ argument
 
-Example to make SBOM of a Package with rpm-package with default(=spdx-json) format:
+Example to make an SBOM of an ISO image in the default format (`SPDX-json`):
 `$ alma-sbom iso --iso-image /path/to/isoimage`
 
 ## Using the AlmaLinux Git Notarization Tool
