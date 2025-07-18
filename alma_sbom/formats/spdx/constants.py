@@ -18,14 +18,14 @@ TOOLS_SPDX = [
 ToolsActors = [
     Actor(
         actor_type=ActorType.TOOL,
-        name=f"{tool['name']} {tool['version']}",
+        name=f"{tool['name']} \u2010 {tool['version']}",
     )
     for tool in constants.TOOLS
 ]
 ToolsSpdxActors = [
     Actor(
         actor_type=ActorType.TOOL,
-        name=f"{tool['name']} {tool['version']}",
+        name=f"{tool['name']} \u2010 {tool['version']}",
     )
     for tool in TOOLS_SPDX
 ]
@@ -37,6 +37,6 @@ CREATORS = [AlmaActor] + ToolsActors + ToolsSpdxActors
 
 AlmaSbomActor = Actor(
     actor_type=ActorType.TOOL,
-    name=f"alma-sbom {__version__}",
+    name=f"alma-sbom \u2010 {__version__}",
 )
 
