@@ -76,7 +76,6 @@ Example to make SBOM of a Package with rpm-package option in spdx-yaml format wi
 You can get the SBOM of an ISO image using the __iso__ subcommand, and providing the following argument:
 * __iso-image__: Path to the `AlmaLinux installer ISO image` that you want to generate the SBOM for
 
-Note that you have to provide the _iso-image_ argument
 
 Example to make an SBOM of an ISO image in the default format (`SPDX-json`):
 `$ alma-sbom iso --iso-image /path/to/isoimage`
