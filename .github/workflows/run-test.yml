@@ -1,0 +1,31 @@
+name: Run tests
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: almalinux:9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install git
+        run: |
+          dnf update -y
+          dnf install -y git
+      ### TODO: https://github.com/AlmaLinux/alma-sbom/issues/64
+      - name: Create and activate venv
+        run: |
+          python3.9 -m venv /tmp/env
+          source /tmp/env/bin/activate
+          ### NOTE: https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#setting-an-environment-variable
+          echo PATH=$PATH >> $GITHUB_ENV
+      - name: Setup environment
+        run: |
+          python -m pip install -e .[dev]
+      - name: Run pytest
+        run: |
+          pytest tests/pytest/
