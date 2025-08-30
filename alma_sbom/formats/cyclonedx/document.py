@@ -1,5 +1,6 @@
+from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 from logging import getLogger
 from pathlib import Path
 
@@ -22,17 +23,20 @@ from .component import component_from_package, component_from_build, component_f
 _logger = getLogger(__name__)
 
 
+@dataclass
 class CDXFormatter:
-    FORMATS_MAP = {
+    FORMATS_MAP: ClassVar[dict] = {
         SbomFileFormatType.JSON: OutputFormat.JSON,
         SbomFileFormatType.XML: OutputFormat.XML,
     }
-    SCHEMA_VERSION: SchemaVersion = SchemaVersion.V1_6
+    SCHEMA_VERSION: ClassVar[SchemaVersion] = SchemaVersion.V1_6
 
     output_format_type: OutputFormat
 
-    def __init__(self, file_format: SbomFileFormatType) -> None:
-        self.output_format_type = self.FORMATS_MAP[file_format]
+    @classmethod
+    def from_format_type(cls, file_format: SbomFileFormatType) -> 'CDXFormatter':
+        output_format_type = cls.FORMATS_MAP[file_format]
+        return cls(output_format_type=output_format_type)
 
     def write(self, bom: Bom) -> str:
         outputter: BaseOutput = make_outputter(
@@ -43,15 +47,16 @@ class CDXFormatter:
         output = outputter.output_as_string(indent=4)
         return output
 
+@dataclass
 class CDXDocument(AlmasbomDocument):
     bom: Bom
     formatter: CDXFormatter
 
-    def __init__(self, file_format_type: SbomFileFormatType):
-        self.bom = Bom()
-
+    @classmethod
+    def _construct(cls, file_format_type: SbomFileFormatType) -> 'CDXDocument':
+        bom = Bom()
         for tool in constants.TOOLS:
-            self.bom.metadata.tools.components.add(Component(
+            bom.metadata.tools.components.add(Component(
                 name=tool['name'],
                 ### NOTE:
                 # Use group attribute as vendor
@@ -59,20 +64,22 @@ class CDXDocument(AlmasbomDocument):
                 version=tool['version'],
                 type=None,
             ))
-        self.bom.metadata.tools.components.add(cdx_lib_component())
-
-        self.formatter = CDXFormatter(file_format_type)
+        bom.metadata.tools.components.add(cdx_lib_component())
+        formatter = CDXFormatter.from_format_type(file_format_type)
+        return cls(
+            bom=bom,
+            formatter=formatter,
+        )
 
     @classmethod
-    def from_package(cls, package: Package, file_format_type: SbomFileFormatType) -> "CDXDocument":
-        doc = cls(file_format_type)
+    def from_package(cls, package: Package, file_format_type: SbomFileFormatType) -> 'CDXDocument':
+        doc = cls._construct(file_format_type)
         doc.bom.metadata.component = component_from_package(package)
         return doc
 
     @classmethod
-    def from_build(cls, build: Build, file_format_type: SbomFileFormatType) -> "CDXDocument":
-        doc = cls(file_format_type)
-
+    def from_build(cls, build: Build, file_format_type: SbomFileFormatType) -> 'CDXDocument':
+        doc = cls._construct(file_format_type)
         doc.bom.metadata.component = component_from_build(build)
         for pkg in build.packages:
             doc.bom.components.add(component_from_package(pkg))
@@ -80,9 +87,8 @@ class CDXDocument(AlmasbomDocument):
         return doc
 
     @classmethod
-    def from_iso(cls, iso: Iso, file_format_type: SbomFileFormatType) -> "CDXDocument":
-        doc = cls(file_format_type)
-
+    def from_iso(cls, iso: Iso, file_format_type: SbomFileFormatType) -> 'CDXDocument':
+        doc = cls._construct(file_format_type)
         doc.bom.metadata.component = component_from_iso(iso)
         for pkg in iso.packages:
             doc.bom.components.add(component_from_package(pkg))
