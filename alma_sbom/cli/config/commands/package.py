@@ -31,7 +31,11 @@ class PackageConfig(CommonConfig):
 
     @classmethod
     def from_base_args(cls, base: CommonConfig, args: argparse.Namespace) -> 'PackageConfig':
-        return cls.from_base(base, rpm_package_hash=args.rpm_package_hash, rpm_package=Path(args.rpm_package))
+        return cls.from_base(
+            base,
+            rpm_package_hash=args.rpm_package_hash,
+            rpm_package=args.rpm_package and Path(args.rpm_package)
+        )
 
     @staticmethod
     def add_arguments(parser: argparse._SubParsersAction) -> None:
