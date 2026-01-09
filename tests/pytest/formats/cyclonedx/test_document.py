@@ -400,6 +400,7 @@ def diff_CDXDocument(doc1: CDXDocument, doc2: CDXDocument) -> None:
 
     assert doc1.bom.metadata.component == doc2.bom.metadata.component
 
+    assert doc1.bom.metadata == doc2.bom.metadata
     assert doc1.bom.dependencies == doc2.bom.dependencies
     assert doc1.bom.vulnerabilities == doc2.bom.vulnerabilities
     assert doc1.bom.properties == doc2.bom.properties
@@ -409,12 +410,10 @@ def diff_CDXDocument(doc1: CDXDocument, doc2: CDXDocument) -> None:
     assert doc1.bom.serial_number == doc2.bom.serial_number
     assert doc1.bom.version == doc2.bom.version
     assert doc1.bom.components == doc2.bom.components
-    assert doc1.bom.metadata == doc2.bom.metadata
 
     assert doc1.formatter == doc2.formatter
     assert doc1.bom == doc2.bom
 
-    ### NOTE: We can't use Bom.__eq__() directly
     assert doc1 == doc2
 
 
