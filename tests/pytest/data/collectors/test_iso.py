@@ -26,7 +26,7 @@ def iso_collector_instance() -> IsoCollector:
 
 
 def test_get_fd_path(iso_collector_instance: IsoCollector) -> None:
-    expected_fd_path = f'{iso_collector_instance.memfd_path}'
+    expected_fd_path = iso_collector_instance.memfd_path
     assert iso_collector_instance.get_fd_path() == expected_fd_path
 
 
