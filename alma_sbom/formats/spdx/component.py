@@ -58,6 +58,7 @@ def component_from_package(package: Package, pkgid: int) -> tuple[PackageCompone
         spdx_id=pkgid,
         name=package.package_nevra.name,
         download_location=SpdxNoAssertion(),
+        copyright_text=SpdxNoAssertion(),
     )
     rel = Relationship(
         spdx_element_id="SPDXRef-DOCUMENT",
