@@ -42,7 +42,7 @@ def component_from_build(build: Build) -> Component:
 
 def component_from_iso(iso: Iso) -> Component:
     return Component(
-        component_type=ComponentType('operating-system'),
+        type=ComponentType.OPERATING_SYSTEM,
         name=iso.get_doc_name(),
     )
 

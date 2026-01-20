@@ -1,0 +1,88 @@
+{
+    "dependencies": [
+        {
+            "ref": "BomRef.123456789012345.12345678901234567"
+        }
+    ],
+    "metadata": {
+        "component": {
+            "bom-ref": "BomRef.123456789012345.12345678901234567",
+            "name": "bash",
+            "type": "library"
+        },
+        "timestamp": "2023-04-05T06:07:08.123456+00:00",
+        "tools": {
+            "components": [
+                {
+                    "description": "Python library for CycloneDX",
+                    "externalReferences": [
+                        {
+                            "type": "build-system",
+                            "url": "https://github.com/CycloneDX/cyclonedx-python-lib/actions"
+                        },
+                        {
+                            "type": "distribution",
+                            "url": "https://pypi.org/project/cyclonedx-python-lib/"
+                        },
+                        {
+                            "type": "documentation",
+                            "url": "https://cyclonedx-python-library.readthedocs.io/"
+                        },
+                        {
+                            "type": "issue-tracker",
+                            "url": "https://github.com/CycloneDX/cyclonedx-python-lib/issues"
+                        },
+                        {
+                            "type": "license",
+                            "url": "https://github.com/CycloneDX/cyclonedx-python-lib/blob/main/LICENSE"
+                        },
+                        {
+                            "type": "release-notes",
+                            "url": "https://github.com/CycloneDX/cyclonedx-python-lib/blob/main/CHANGELOG.md"
+                        },
+                        {
+                            "type": "vcs",
+                            "url": "https://github.com/CycloneDX/cyclonedx-python-lib"
+                        },
+                        {
+                            "type": "website",
+                            "url": "https://github.com/CycloneDX/cyclonedx-python-lib/#readme"
+                        }
+                    ],
+                    "group": "CycloneDX",
+                    "licenses": [
+                        {
+                            "license": {
+                                "acknowledgement": "declared",
+                                "id": "Apache-2.0"
+                            }
+                        }
+                    ],
+                    "name": "cyclonedx-python-lib",
+                    "type": "library",
+                    "version": "9.0.0"
+                },
+                {
+                    "group": "AlmaLinux OS Foundation",
+                    "name": "AlmaLinux Build System",
+                    "version": "0.1"
+                },
+                {
+                    "group": "AlmaLinux OS Foundation",
+                    "name": "Immudb Wrapper",
+                    "version": "0.1.2"
+                },
+                {
+                    "group": "AlmaLinux OS Foundation",
+                    "name": "alma-sbom",
+                    "version": "0.0.2"
+                }
+            ]
+        }
+    },
+    "serialNumber": "urn:uuid:12345678-1234-5678-9abc-123456789abc",
+    "version": 1,
+    "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.6"
+}
