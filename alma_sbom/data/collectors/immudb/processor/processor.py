@@ -13,6 +13,17 @@ class DataProcessor(ABC):
         self.immudb_metadata = immudb_metadata
         self.hash = hash
 
+    def _resolve_arch(self) -> str:
+        """Return corrected arch for source RPMs.
+
+        immudb metadata may store the builder machine arch (e.g. x86_64)
+        instead of 'src' for SRPMs.  Use build_arch and the Name field
+        as authoritative signals to fix this.
+        """
+        if self.immudb_metadata.get('build_arch') == 'src' or self.immudb_info.get('Name', '').endswith('.src.rpm'):
+            return 'src'
+        return self.immudb_metadata.get('arch')
+
     @abstractmethod
     def get_api_ver(self) -> str:
         pass

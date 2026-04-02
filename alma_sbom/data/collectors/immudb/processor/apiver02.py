@@ -30,7 +30,7 @@ class DataProcessor02(DataProcessor):
             name = self.immudb_metadata.get('name'),
             version = self.immudb_metadata.get('version'),
             release = self.immudb_metadata.get('release'),
-            arch = self.immudb_metadata.get('arch'),
+            arch = self._resolve_arch(),
         )
         pkg_props, build_props, sbom_props = self._properties_from_immudb_info_about_package()
 
@@ -57,7 +57,7 @@ class DataProcessor02(DataProcessor):
             epoch = normalize_epoch(self.immudb_metadata['epoch']) if 'epoch' in self.immudb_metadata else None,
             version=self.immudb_metadata.get('version'),
             release=self.immudb_metadata.get('release'),
-            arch=self.immudb_metadata.get('arch'),
+            arch=self._resolve_arch(),
             buildhost=self.immudb_metadata.get('build_host'),
             sourcerpm=self.immudb_metadata.get('sourcerpm'),
             timestamp=self.immudb_info.get('timestamp'),
