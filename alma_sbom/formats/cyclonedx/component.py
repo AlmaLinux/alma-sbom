@@ -13,14 +13,11 @@ _logger = getLogger(__name__)
 lc_factory = LicenseFactory()
 
 def component_from_package(package: Package) -> Component:
-    return Component(
+    pkg_comp = Component(
         type=ComponentType.LIBRARY,
         name=package.package_nevra.name,
         version=package.package_nevra.get_EVR(),
-        publisher=constants.ALMAOS_VENDOR,
         hashes=[_make_hash(h) for h in package.hashs],
-        cpe=package.get_cpe23(),
-        purl=PackageURL.from_string(package.get_purl()),
         properties=[
             _make_property(prop) for prop in package.get_properties()
         ],
@@ -29,6 +26,8 @@ def component_from_package(package: Package) -> Component:
         description=package.description
             if package.description else None ,
     )
+    _make_alma_specific_fields(package, pkg_comp)
+    return pkg_comp
 
 def component_from_build(build: Build) -> Component:
     return Component(
@@ -45,6 +44,16 @@ def component_from_iso(iso: Iso) -> Component:
         type=ComponentType.OPERATING_SYSTEM,
         name=iso.get_doc_name(),
     )
+
+def _make_alma_specific_fields(package: Package, pkg_comp: Component) -> None:
+    if package.is_alma_pkg():
+        pkg_comp.publisher=constants.ALMAOS_VENDOR
+        pkg_comp.cpe=package.get_cpe23()
+        pkg_comp.purl=PackageURL.from_string(package.get_purl())
+    else:
+        _logger.warning(f'Package \"{package.get_doc_name()}\" is not AlmaLinux package.')
+        _logger.warning(f'So, This SBOM donsn\'t have following info:')
+        _logger.warning('\tcpe, purl, publisher')
 
 def _make_hash(hash: Hash) -> HashType:
     return HashType(

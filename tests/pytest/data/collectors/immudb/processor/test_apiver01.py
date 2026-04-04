@@ -80,7 +80,8 @@ EXPECTED_PACKAGE = Package(
     ),
     sbom_properties=SBOMProperties(
         immudb_hash='aeb7b7d638ebad749c8ef2ec7c8b699201e176101f129a49dcb5781158e95632'
-    )
+    ),
+    alma_pkg=True,
 )
 
 

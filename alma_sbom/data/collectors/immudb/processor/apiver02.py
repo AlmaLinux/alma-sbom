@@ -42,6 +42,7 @@ class DataProcessor02(DataProcessor):
             package_properties = pkg_props,
             build_properties = build_props,
             sbom_properties = sbom_props,
+            alma_pkg = True,
         )
 
     def _properties_from_immudb_info_about_package(self) -> tuple[

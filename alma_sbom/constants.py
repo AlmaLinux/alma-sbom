@@ -3,6 +3,7 @@ from immudb_wrapper import ImmudbWrapper
 from alma_sbom._version import __version__
 
 ALMAOS_VENDOR = 'AlmaLinux OS Foundation'
+ALMAOS_PKG_VENDOR_NAME = 'AlmaLinux'
 ALMAOS_SBOMLICENSE = 'CC0-1.0'
 ALMAOS_NAMESPACE = 'https://security.almalinux.org'
 

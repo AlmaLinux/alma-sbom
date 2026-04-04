@@ -4,6 +4,7 @@ from license_expression import get_spdx_licensing, ExpressionError
 from pathlib import Path
 from typing import Union
 
+from alma_sbom.constants import ALMAOS_PKG_VENDOR_NAME
 from alma_sbom.type import Hash, Licenses
 from alma_sbom.data.models import Package, PackageNevra
 
@@ -53,6 +54,7 @@ class RpmCollector:
             #sbom_properties = None,
         )
 
+        pkg.alma_pkg = _proc_is_alma_pkg(hdr[rpm.RPMTAG_VENDOR])
         pkg.licenses = _proc_licenses(hdr[rpm.RPMTAG_LICENSE])
         pkg.summary = hdr[rpm.RPMTAG_SUMMARY]
         pkg.description = hdr[rpm.RPMTAG_DESCRIPTION]
@@ -71,6 +73,9 @@ def _proc_licenses(licenses_str: str) -> Licenses:
         for sym in symbols:
             licenses.ids.append(str(sym))
     return licenses
+
+def _proc_is_alma_pkg(vendor_str: str) -> bool:
+    return vendor_str == ALMAOS_PKG_VENDOR_NAME
 
 def hash_file(file_path: Union[str, Path], buff_size: int = 1048576) -> str:
     """

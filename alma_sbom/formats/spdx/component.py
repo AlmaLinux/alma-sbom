@@ -67,21 +67,10 @@ def component_from_package(package: Package, pkgid: int) -> tuple[PackageCompone
 
     pkg.checksums = [_make_hash(h) for h in package.hashs]
     pkg.version = package.package_nevra.get_EVR()
-    pkg.supplier = spdx_consts.AlmaActor
-    pkg.external_references += [
-        ExternalPackageRef(
-            ExternalPackageRefCategory.SECURITY,
-            'cpe23Type',
-            package.get_cpe23(),
-        ),
-        ExternalPackageRef(
-            ExternalPackageRefCategory.PACKAGE_MANAGER,
-            'purl',
-            package.get_purl(),
-        ),
-    ]
     pkg.built_date = datetime.fromtimestamp(package.package_timestamp) if package.package_timestamp else None
     pkg.files_analyzed = False
+
+    _make_alma_specific_fields(package, pkg)
 
     if package.licenses:
         pkg.license_concluded = SpdxNoAssertion()
@@ -108,6 +97,27 @@ def component_from_package(package: Package, pkgid: int) -> tuple[PackageCompone
         pkg.description = package.description
 
     return pkg, rel
+
+def _make_alma_specific_fields(package: Package, pkg: PackageComponent) -> None:
+    if package.is_alma_pkg():
+        pkg.supplier = spdx_consts.AlmaActor
+        pkg.originator = spdx_consts.AlmaActor
+        pkg.external_references += [
+            ExternalPackageRef(
+                ExternalPackageRefCategory.SECURITY,
+                'cpe23Type',
+                package.get_cpe23(),
+            ),
+            ExternalPackageRef(
+                ExternalPackageRefCategory.PACKAGE_MANAGER,
+                'purl',
+                package.get_purl(),
+            ),
+        ]
+    else:
+        _logger.warning(f'Package \"{package.get_doc_name()}\" is not AlmaLinux package.')
+        _logger.warning(f'So, This SBOM donsn\'t have following info:')
+        _logger.warning('\tcpe23Type, purl, supplier, originator')
 
 def _make_comment_from_property(prop: Property) -> str:
     return f'{prop.name}={prop.value}'

@@ -31,6 +31,9 @@ class Package:
     build_properties: BuildProperties = None
     sbom_properties: SBOMProperties = None
 
+    ### Package is from AlmaLinux?
+    alma_pkg: bool = False
+
     def get_doc_name(self) -> str:
         return self.package_nevra.get_NEVR()
 
@@ -50,6 +53,9 @@ class Package:
                (self.build_properties.to_properties() if self.build_properties is not None else []) + \
                (self.sbom_properties.to_properties() if self.sbom_properties is not None else [])
 
+    def is_alma_pkg(self) -> bool:
+        return self.alma_pkg
+
     #@classmethod
     def merge(self, pkg2: 'Package') -> 'Package':
         ### TODO:
@@ -65,6 +71,7 @@ class Package:
             package_properties = self.package_properties or pkg2.package_properties,
             build_properties = self.build_properties or pkg2.build_properties,
             sbom_properties = self.sbom_properties or pkg2.sbom_properties,
+            alma_pkg = self.alma_pkg or pkg2.alma_pkg,
         )
 
 NullPackage = Package()
