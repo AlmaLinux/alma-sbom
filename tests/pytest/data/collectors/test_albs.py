@@ -1,7 +1,7 @@
 import pytest
 
 from alma_sbom.data import Build
-from alma_sbom.data.attributes.property import BuildPropertiesForBuild as BuildProperties
+from alma_sbom.data.models import BuildPropertiesForBuild as BuildProperties
 from alma_sbom.data.collectors import AlbsCollector
 from alma_sbom.cli.config import CommonConfig
 

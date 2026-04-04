@@ -3,11 +3,12 @@ from enum import Enum
 from logging import getLogger
 
 from alma_sbom.type import Hash, PackageNevra, Licenses
-from alma_sbom.data.attributes.property import (
+from .common import (
     Property,
     PackageProperties,
     BuildPropertiesForPackage as BuildProperties,
     SBOMProperties,
+    DataSources,
 )
 
 _logger = getLogger(__name__)
@@ -20,6 +21,7 @@ class Package:
     ###TODO: need to rethink the 'type' of package_timestamp
     package_timestamp: int  = None
     hashs: list[Hash] = None
+    source_info: DataSources = DataSources()
 
     ### additional info (from package) as package componet of SBOM
     licenses: Licenses = None
@@ -59,6 +61,7 @@ class Package:
             source_rpm = self.source_rpm or pkg2.source_rpm,
             package_timestamp = self.package_timestamp or pkg2.package_timestamp,
             hashs = self.hashs or pkg2.hashs, ### need to rethink if there were multiple data in the future
+            source_info = self.source_info + pkg2.source_info,
             licenses = self.licenses or pkg2.licenses,
             summary = self.summary or pkg2.summary,
             description = self.description or pkg2.description,

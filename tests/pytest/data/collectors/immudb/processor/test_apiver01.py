@@ -2,13 +2,15 @@ import pytest
 
 from alma_sbom.type import Hash, Algorithms
 from alma_sbom.data import Package, PackageNevra
-from alma_sbom.data.attributes.property import (
+from alma_sbom.data.models import (
     PackageProperties,
     BuildSourceProperties,
     GitSourceProperties,
     SrpmSourceProperties,
     BuildPropertiesForPackage as BuildProperties,
     SBOMProperties,
+    DataSources,
+    SourceImmudb,
 )
 from alma_sbom.data.collectors.immudb.processor.apiver01 import DataProcessor01
 
@@ -52,6 +54,7 @@ EXPECTED_PACKAGE = Package(
     #     algorithm=Algorithms.SHA_256,
     # )],
     hashs=[None],
+    source_info=DataSources(sources=[SourceImmudb()]),
     licenses=None,
     summary=None,
     description=None,

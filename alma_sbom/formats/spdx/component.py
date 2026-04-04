@@ -68,6 +68,7 @@ def component_from_package(package: Package, pkgid: int) -> tuple[PackageCompone
     pkg.checksums = [_make_hash(h) for h in package.hashs]
     pkg.version = package.package_nevra.get_EVR()
     pkg.supplier = spdx_consts.AlmaActor
+    pkg.source_info = str(package.source_info)
     pkg.external_references += [
         ExternalPackageRef(
             ExternalPackageRefCategory.SECURITY,

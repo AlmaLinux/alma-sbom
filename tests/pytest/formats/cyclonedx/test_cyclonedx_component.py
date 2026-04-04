@@ -14,8 +14,7 @@ from alma_sbom.formats.cyclonedx.component import (
 )
 from alma_sbom.type import Hash, PackageNevra, Licenses, Algorithms, SbomFileFormatType
 from alma_sbom.data import Package, Build, Iso
-from alma_sbom.data.attributes.property import (
-    # Property,
+from alma_sbom.data.models import (
     PackageProperties,
     BuildPropertiesForPackage,# as BuildProperties,
     BuildPropertiesForBuild,# as BuildProperties,

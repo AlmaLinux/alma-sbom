@@ -6,7 +6,7 @@ import tempfile
 from pathlib import Path
 from typing import ClassVar, Iterator
 
-from alma_sbom.data import Iso
+from alma_sbom.data.models import Iso
 
 class IsoCollector:
     PATH_TO_TREEINFO: ClassVar[str] = Path('/.treeinfo')

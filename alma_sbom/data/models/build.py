@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from alma_sbom.data.attributes.property import (
+from .common import (
     Property,
     BuildPropertiesForBuild as BuildProperties,
 )

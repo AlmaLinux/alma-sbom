@@ -5,7 +5,12 @@ from pathlib import Path
 from typing import Union
 
 from alma_sbom.type import Hash, Licenses
-from alma_sbom.data.models import Package, PackageNevra
+from alma_sbom.data.models import (
+    Package,
+    PackageNevra,
+    DataSources,
+    SourceRPM,
+)
 
 class RpmCollector:
     ts: rpm.TransactionSet
@@ -38,6 +43,7 @@ class RpmCollector:
             package_nevra = package_nevra,
             source_rpm = hdr[rpm.RPMTAG_SOURCERPM],
             hashs = [Hash(value=hash_file(rpm_package))],
+            source_info = DataSources(sources=[SourceRPM(str(package_nevra))])
             ### NOTE:
             ##  There are little bit difference of buildtime between immudb_metadata & rpm_package.
             ##  So, now we don't set buildtime using rpm_package info.

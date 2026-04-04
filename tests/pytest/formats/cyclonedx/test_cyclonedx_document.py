@@ -6,7 +6,6 @@ from uuid import UUID
 
 from cyclonedx.builder.this import this_component as cdx_lib_component
 from cyclonedx.model import HashAlgorithm, HashType
-# from cyclonedx.factory.license import LicenseFactory, License
 from cyclonedx.factory.license import LicenseFactory
 from cyclonedx.model.bom import Bom, BomMetaData
 from cyclonedx.model.component import Property as CDXProperty
@@ -19,8 +18,7 @@ from alma_sbom import constants
 from alma_sbom.type import Hash, PackageNevra, Licenses, Algorithms, SbomFileFormatType
 from alma_sbom.formats.cyclonedx.document import CDXFormatter, CDXDocument
 from alma_sbom.data import Package, Build, Iso
-from alma_sbom.data.attributes.property import (
-    # Property,
+from alma_sbom.data.models import (
     PackageProperties,
     BuildPropertiesForPackage,# as BuildProperties,
     BuildPropertiesForBuild,# as BuildProperties,

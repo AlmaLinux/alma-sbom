@@ -1,7 +1,7 @@
 import pytest
 
 from alma_sbom.data.models import Package, NullPackage, Build
-from alma_sbom.data.attributes.property import (
+from alma_sbom.data.models.common.property import (
     Property,
     BuildPropertiesForBuild as BuildProperties,
 )

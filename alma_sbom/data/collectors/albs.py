@@ -2,8 +2,10 @@ import requests
 from logging import getLogger
 from typing import ClassVar, Iterator
 
-from alma_sbom.data import Build
-from alma_sbom.data.attributes.property import BuildPropertiesForBuild as BuildProperties
+from alma_sbom.data.models import (
+    Build,
+    BuildPropertiesForBuild as BuildProperties,
+)
 
 _logger = getLogger(__name__)
 

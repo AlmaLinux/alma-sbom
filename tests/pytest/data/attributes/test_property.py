@@ -2,7 +2,8 @@ from dataclasses import dataclass
 from typing import ClassVar
 import pytest
 
-from alma_sbom.data.attributes.property import Property, PropertyMixin
+from alma_sbom.data import Property
+from alma_sbom.data.models.common.property import PropertyMixin
 
 
 @dataclass

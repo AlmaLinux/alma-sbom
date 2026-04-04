@@ -3,7 +3,7 @@ from immudb_wrapper import ImmudbWrapper
 from logging import getLogger
 from pathlib import Path
 
-from alma_sbom.data import Package, PackageNevra
+from alma_sbom.data.models import Package, PackageNevra
 
 from .processor import DataProcessor, processor_factory
 
