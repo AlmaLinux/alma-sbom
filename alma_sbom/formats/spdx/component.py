@@ -83,10 +83,9 @@ def component_from_package(package: Package, pkgid: int) -> tuple[PackageCompone
     pkg.built_date = datetime.fromtimestamp(package.package_timestamp) if package.package_timestamp else None
     pkg.files_analyzed = False
 
-    if package.licenses:
+    if package.license_str:
         pkg.license_concluded = SpdxNoAssertion()
-        if package.licenses.expression:
-            pkg.license_comment = package.licenses.expression
+        pkg.license_comment = package.license_str
 
     ### NOTE
     ##  license_info_frpm_files needs file_analyzed = True.

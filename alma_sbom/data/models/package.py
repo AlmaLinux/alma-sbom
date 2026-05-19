@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from logging import getLogger
 
-from alma_sbom.type import Hash, PackageNevra, Licenses
+from alma_sbom.type import Hash, PackageNevra
 from alma_sbom.data.attributes.property import (
     Property,
     PackageProperties,
@@ -22,7 +22,7 @@ class Package:
     hashs: list[Hash] = None
 
     ### additional info (from package) as package componet of SBOM
-    licenses: Licenses = None
+    license_str: str = None
     summary: str = None
     description: str = None
 
@@ -59,7 +59,7 @@ class Package:
             source_rpm = self.source_rpm or pkg2.source_rpm,
             package_timestamp = self.package_timestamp or pkg2.package_timestamp,
             hashs = self.hashs or pkg2.hashs, ### need to rethink if there were multiple data in the future
-            licenses = self.licenses or pkg2.licenses,
+            license_str = self.license_str or pkg2.license_str,
             summary = self.summary or pkg2.summary,
             description = self.description or pkg2.description,
             package_properties = self.package_properties or pkg2.package_properties,

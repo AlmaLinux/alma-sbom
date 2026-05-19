@@ -224,8 +224,3 @@ class PackageNevra:
                 return int(match.group(1))
         return None
 
-@dataclass
-class Licenses:
-    ids: list[str]
-    expression: str
-

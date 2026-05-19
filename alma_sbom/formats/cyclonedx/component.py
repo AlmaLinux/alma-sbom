@@ -6,7 +6,7 @@ from cyclonedx.model.component import Component, ComponentType
 from packageurl import PackageURL
 
 from alma_sbom import constants
-from alma_sbom.type import Hash, Algorithms, Licenses
+from alma_sbom.type import Hash, Algorithms
 from alma_sbom.data import Package, Build, Iso, Property
 
 _logger = getLogger(__name__)
@@ -24,8 +24,8 @@ def component_from_package(package: Package) -> Component:
         properties=[
             _make_property(prop) for prop in package.get_properties()
         ],
-        licenses=_make_licenses(package.licenses)
-            if package.licenses else None ,
+        licenses=_make_licenses(package.license_str)
+            if package.license_str else None ,
         description=package.description
             if package.description else None ,
     )
@@ -57,11 +57,5 @@ def _make_property(prop: Property) -> CDXProperty:
     # https://cyclonedx.org/docs/1.4/json/#components_items_properties_items_value
     return CDXProperty(name=prop.name, value=f'{prop.value}')
 
-def _make_licenses(licenses: Licenses) -> list:
-    l = []
-    if licenses.ids:
-        for lid in licenses.ids:
-            l.append(lc_factory.make_from_string(lid))
-    elif licenses.expression:
-        l.append(lc_factory.make_from_string(licenses.expression))
-    return l
+def _make_licenses(license_str: str) -> list:
+    return [lc_factory.make_from_string(license_str)]
