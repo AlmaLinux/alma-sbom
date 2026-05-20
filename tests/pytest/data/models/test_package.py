@@ -1,6 +1,6 @@
 import pytest
 
-from alma_sbom.type import Hash, PackageNevra, Licenses, Algorithms
+from alma_sbom.type import Hash, PackageNevra, Algorithms
 from alma_sbom.data.models import Package, NullPackage
 from alma_sbom.data.attributes.property import (
     Property,
@@ -26,7 +26,7 @@ def package_instance() -> Package:
             value='05dc1b806bd5456d40e3d7f882ead037aaf480c596e83fbfb6ab86be74a2d8d1',
             algorithm=Algorithms.SHA_256,
         )],
-        licenses=Licenses(ids=[], expression='GPLv3+'),
+        license_str='GPLv3+',
         summary='The GNU Bourne Again shell',
         description='The GNU Bourne Again shell (Bash) is a shell or command language\ninterpreter that is compatible with the Bourne shell (sh). Bash\nincorporates useful features from the Korn shell (ksh) and the C shell\n(csh). Most sh scripts can be run by bash without modification.',
         package_properties=PackageProperties(
