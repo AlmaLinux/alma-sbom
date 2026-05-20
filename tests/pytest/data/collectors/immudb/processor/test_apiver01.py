@@ -52,7 +52,7 @@ EXPECTED_PACKAGE = Package(
     #     algorithm=Algorithms.SHA_256,
     # )],
     hashs=[None],
-    licenses=None,
+    license_str=None,
     summary=None,
     description=None,
     package_properties=PackageProperties(

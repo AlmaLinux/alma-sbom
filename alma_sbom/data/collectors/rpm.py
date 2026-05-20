@@ -4,7 +4,7 @@ from license_expression import get_spdx_licensing, ExpressionError
 from pathlib import Path
 from typing import Union
 
-from alma_sbom.type import Hash, Licenses
+from alma_sbom.type import Hash
 from alma_sbom.data.models import Package, PackageNevra
 
 class RpmCollector:
@@ -53,24 +53,11 @@ class RpmCollector:
             #sbom_properties = None,
         )
 
-        pkg.licenses = _proc_licenses(hdr[rpm.RPMTAG_LICENSE])
+        pkg.license_str = hdr[rpm.RPMTAG_LICENSE]
         pkg.summary = hdr[rpm.RPMTAG_SUMMARY]
         pkg.description = hdr[rpm.RPMTAG_DESCRIPTION]
 
         return pkg
-
-def _proc_licenses(licenses_str: str) -> Licenses:
-    licensing = get_spdx_licensing()
-    licenses = Licenses(ids=[], expression=licenses_str)
-    try:
-        parsed = licensing.parse(licenses_str, validate=True)
-    except ExpressionError as err:
-        pass
-    else:
-        symbols = licensing.license_symbols(parsed)
-        for sym in symbols:
-            licenses.ids.append(str(sym))
-    return licenses
 
 def hash_file(file_path: Union[str, Path], buff_size: int = 1048576) -> str:
     """
